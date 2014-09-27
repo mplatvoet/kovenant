@@ -1,0 +1,32 @@
+allprojects {
+    ext {
+        appVersion = '0.3'
+        appGroup = 'nl.mplatvoet.kotlin.komponents.promises'
+    }
+}
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.8.11'
+    }
+}
+repositories { mavenCentral() }
+
+apply plugin: 'kotlin'
+
+dependencies {
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.8.11'
+}
+
+task release() {
+    dependsOn build
+}
+
+gradle.taskGraph.whenReady {
+    allprojects*.version = it.hasTask(release) ? appVersion : appVersion + '-SNAPSHOT'
+    allprojects*.group = appGroup
+}
+
+defaultTasks 'clean', 'release'
+
+
