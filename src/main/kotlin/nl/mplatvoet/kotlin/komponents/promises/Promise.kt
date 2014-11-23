@@ -9,17 +9,32 @@ import kotlin.InlineOption.ONLY_LOCAL_RETURN
  * Created by mplatvoet on 22-4-2014.
  */
 
-public fun Promises.defer<T>(config: Configuration = Promises.configuration, body: () -> T): Promise<T> {
-    val obligation = WaitFreeObligation<T>(config)
+public trait Deferred<in V, in E> {
+    fun resolve(value: V)
+    fun reject(error: E)
+    val promise: Promise<V, E>
+}
+
+
+public trait Promise<V, E> {
+    fun success(callback: (value: V) -> Unit): Promise<V, E>
+    fun fail(callback: (error: E) -> Unit): Promise<V, E>
+    fun always(callback: () -> Unit): Promise<V, E>
+}
+
+public fun Promises.newDeferred<V, E>(config: Configuration = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
+
+public fun Promises.async<V>(config: Configuration = Promises.configuration, body: () -> V): Promise<V, Exception> {
+    val deferred = DeferredPromise<V, Exception>(config)
     config.tryExecute {
         try {
             val result = body()
-            obligation.fulfil(result)
+            deferred.resolve(result)
         } catch(e: Exception) {
-            obligation.cancel(e)
+            deferred.reject(e)
         }
     }
-    return obligation.promise
+    return deferred
 }
 
 private inline fun Configuration.tryExecute(inlineOptions(ONLY_LOCAL_RETURN) body: () -> Unit) {
@@ -40,55 +55,38 @@ private inline fun Configuration.tryExecute(inlineOptions(ONLY_LOCAL_RETURN) bod
     }
 }
 
-public fun <T, R> Promise<T>.then(config: Configuration = Promises.configuration, fn: (T) -> R): Promise<R> {
-    val obligation = WaitFreeObligation<R>(config)
+public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
+    val deferred = DeferredPromise<R, Exception>(config)
     success {
         try {
-            obligation.fulfil(fn(it))
+            val result = bind(it)
+            deferred.resolve(result)
         } catch(e: Exception) {
-            obligation.cancel(e)
+            deferred.reject(e)
         }
     }
     fail {
-        obligation.cancel(it)
+        deferred.reject(it)
     }
-    return obligation.promise
+    return deferred
 }
 
 
 
-public trait Obligation<in T> {
-    fun fulfil(value: T)
-    fun cancel(e: Exception)
-    val promise: Promise<T>
-}
+private class DeferredPromise<out V, out E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
 
-
-public trait Promise<T> {
-    fun success(fn: (T) -> Unit): Promise<T>
-    fun fail(fn: (Exception) -> Unit): Promise<T>
-    fun always(fn: () -> Unit): Promise<T>
-}
-
-private class WaitFreeObligation<in T>(private val config: Configuration) : Obligation<T> {
-    private val mutablePromise = MutablePromise<T>(config)
-    override val promise: Promise<T> = mutablePromise
-
-    override fun fulfil(value: T) = mutablePromise.setResult(ValueResult(value))
-    override fun cancel(e: Exception) = mutablePromise.setResult(ExceptionResult(e))
-}
-
-
-
-private class MutablePromise<out T>(private val config: Configuration) : Promise<T>, ResultVisitor<T> {
-
-    private val keepers = AtomicReference<ValueNode<(T) -> Unit>>()
-    private val breakers = AtomicReference<ValueNode<(Exception) -> Unit>>()
+    private val keepers = AtomicReference<ValueNode<(V) -> Unit>>()
+    private val breakers = AtomicReference<ValueNode<(E) -> Unit>>()
     private val always = AtomicReference<ValueNode<() -> Unit>>()
 
-    private val resultRef = AtomicReference<Result<T>>()
+    private val resultRef = AtomicReference<Result<V, E>>()
 
-    public fun setResult(result: Result<T>) {
+    override fun resolve(value: V) = setResult(ValueResult(value))
+    override fun reject(error: E) = setResult(ErrorResult(error))
+
+    override val promise: Promise<V, E> = this
+
+    private fun setResult(result: Result<V, E>) {
         if (this.resultRef.compareAndSet(null, result)) {
             result.accept(this)
             fire (always)
@@ -97,15 +95,15 @@ private class MutablePromise<out T>(private val config: Configuration) : Promise
         }
     }
 
-    override fun visitValue(value: T) = fire(keepers, value)
-    override fun visitException(e: Exception) = fire(breakers, e)
+    override fun visitValue(value: V) = fire(keepers, value)
+    override fun visitError(error: E) = fire(breakers, error)
 
-    override fun success(fn: (T) -> Unit): Promise<T> {
+    override fun success(callback: (value: V) -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            if (result is ValueResult) config.tryExecute { fn(result.value) }
+            if (result is ValueResult) config.tryExecute { callback(result.value) }
         } else {
-            keepers.add(fn)
+            keepers.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
@@ -116,28 +114,28 @@ private class MutablePromise<out T>(private val config: Configuration) : Promise
         return this
     }
 
-    override fun fail(fn: (Exception) -> Unit): Promise<T> {
+    override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            if (result is ExceptionResult) config.tryExecute { fn(result.e) }
+            if (result is ErrorResult) config.tryExecute { callback(result.error) }
         } else {
-            breakers.add(fn)
+            breakers.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
             val result2 = resultRef.get()
-            if (result2 != null && result2 is ExceptionResult) fire (breakers, result2.e)
+            if (result2 != null && result2 is ErrorResult) fire (breakers, result2.error)
         }
 
         return this
     }
 
-    override fun always(fn: () -> Unit): Promise<T> {
+    override fun always(callback: () -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            config.tryExecute { fn() }
+            config.tryExecute { callback() }
         } else {
-            always.add(fn)
+            always.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.

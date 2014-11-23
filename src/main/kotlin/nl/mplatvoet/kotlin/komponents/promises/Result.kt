@@ -3,22 +3,22 @@ package nl.mplatvoet.kotlin.komponents.promises
 /**
  * Created by mplatvoet on 30-5-2014.
  */
-private trait ResultVisitor<T> {
-    fun visitValue(value: T)
-    fun visitException(e: Exception)
+private trait ResultVisitor<V, E> {
+    fun visitValue(value: V)
+    fun visitError(error: E)
 }
 
-private trait Result<T> {
-    fun accept(visitor: ResultVisitor<T>)
+private trait Result<V, E> {
+    fun accept(visitor: ResultVisitor<V, E>)
 }
-private class ValueResult<T>(val value: T) : Result<T> {
-    override fun accept(visitor: ResultVisitor<T>) {
+private class ValueResult<V, E>(val value: V) : Result<V, E> {
+    override fun accept(visitor: ResultVisitor<V, E>) {
         visitor.visitValue(value)
     }
 
 }
-private class ExceptionResult<T>(val e: Exception) : Result<T> {
-    override fun accept(visitor: ResultVisitor<T>) {
-        visitor.visitException(e)
+private class ErrorResult<V, E>(val error: E) : Result<V, E> {
+    override fun accept(visitor: ResultVisitor<V, E>) {
+        visitor.visitError(error)
     }
 }

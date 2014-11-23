@@ -5,10 +5,10 @@ package nl.mplatvoet.kotlin.komponents.promises
  */
 
 fun main(args: Array<String>) {
-    val promises = Array<Promise<*>>(10) {
+    val promises = Array<Promise<*, *>>(10) {
 
 
-        Promises.defer {
+        Promises.async {
             it
         }.then {
             val sleep = (Math.random() * 1000).toLong()
