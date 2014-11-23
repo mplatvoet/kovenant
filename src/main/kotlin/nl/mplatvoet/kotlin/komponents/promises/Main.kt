@@ -24,3 +24,4 @@ fun main(args: Array<String>) {
 
     Promises.await(*promises)
 }
+

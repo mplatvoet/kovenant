@@ -3,6 +3,7 @@ package nl.mplatvoet.kotlin.komponents.promises
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.RejectedExecutionException
+import kotlin.InlineOption.ONLY_LOCAL_RETURN
 
 /**
  * Created by mplatvoet on 22-4-2014.
@@ -21,7 +22,7 @@ public fun Promises.defer<T>(config: Configuration = Promises.configuration, bod
     return obligation.promise
 }
 
-private inline fun Configuration.tryExecute(body: () -> Unit) {
+private inline fun Configuration.tryExecute(inlineOptions(ONLY_LOCAL_RETURN) body: () -> Unit) {
     try {
         executor.execute { body() }
     } catch (e: RejectedExecutionException) {
