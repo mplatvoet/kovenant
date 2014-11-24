@@ -43,6 +43,11 @@ public object Promises {
         }
         override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
 
+        private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
+            {(curVal:Any, newVal:Any)-> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
+        }
+        override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit by multipleCompletionDelegate
+
 
         private val executorDelegate: ThreadSafeLazyVar<Executor> = ThreadSafeLazyVar {
             val count = AtomicInteger(0)
@@ -66,6 +71,7 @@ public object Promises {
             copy.fallbackOnCurrentThread = fallbackOnCurrentThread
             if (executionErrorsDelegate.initialized) copy.executionErrors = executionErrors
             if (executorDelegate.initialized) copy.executor = executor
+            if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
     }
@@ -79,6 +85,9 @@ public object Promises {
 
         private val executionErrorsDelegate = TrackChangesVar { currentConfig.executionErrors }
         override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
+
+        private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
+        override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableConfiguration) {
             if (fallbackOnCurrentThreadDelegate.written)
@@ -97,10 +106,12 @@ public trait Configuration {
     val fallbackOnCurrentThread: Boolean
     val executor: Executor
     val executionErrors: (Exception) -> Unit
+    val multipleCompletion: (curVal:Any, newVal:Any) -> Unit
 }
 
 public trait MutableConfiguration : Configuration {
     override var fallbackOnCurrentThread: Boolean
     override var executor: Executor
     override var executionErrors: (Exception) -> Unit
+    override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit
 }

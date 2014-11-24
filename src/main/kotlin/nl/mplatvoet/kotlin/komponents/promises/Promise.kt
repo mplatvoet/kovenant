@@ -89,7 +89,7 @@ private class DeferredPromise<out V, out E>(private val config: Configuration) :
             result.accept(this)
             fire (alwaysCallbacks)
         } else {
-            throw IllegalStateException("result can only be set once")
+            config.multipleCompletion(resultRef.get(), result.rawValue)
         }
     }
 
