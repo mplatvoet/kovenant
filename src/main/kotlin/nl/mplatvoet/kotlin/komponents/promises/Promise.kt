@@ -73,9 +73,9 @@ public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.co
 
 
 private class DeferredPromise<out V, out E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
-    private val keepers = AtomicReference<ValueNode<(V) -> Unit>>()
-    private val breakers = AtomicReference<ValueNode<(E) -> Unit>>()
-    private val always = AtomicReference<ValueNode<() -> Unit>>()
+    private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
+    private val failCallbacks = AtomicReference<ValueNode<(E) -> Unit>>()
+    private val alwaysCallbacks = AtomicReference<ValueNode<() -> Unit>>()
 
     private val resultRef = AtomicReference<Result<V, E>>()
 
@@ -87,26 +87,26 @@ private class DeferredPromise<out V, out E>(private val config: Configuration) :
     private fun setResult(result: Result<V, E>) {
         if (this.resultRef.compareAndSet(null, result)) {
             result.accept(this)
-            fire (always)
+            fire (alwaysCallbacks)
         } else {
             throw IllegalStateException("result can only be set once")
         }
     }
 
-    override fun visitValue(value: V) = fire(keepers, value)
-    override fun visitError(error: E) = fire(breakers, error)
+    override fun visitValue(value: V) = fire(successCallbacks, value)
+    override fun visitError(error: E) = fire(failCallbacks, error)
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
             if (result is ValueResult) config.tryExecute { callback(result.value) }
         } else {
-            keepers.add(callback)
+            successCallbacks.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
             val result2 = resultRef.get()
-            if (result2 != null && result2 is ValueResult) fire (keepers, result2.value)
+            if (result2 != null && result2 is ValueResult) fire (successCallbacks, result2.value)
         }
 
         return this
@@ -117,12 +117,12 @@ private class DeferredPromise<out V, out E>(private val config: Configuration) :
         if (result != null) {
             if (result is ErrorResult) config.tryExecute { callback(result.error) }
         } else {
-            breakers.add(callback)
+            failCallbacks.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
             val result2 = resultRef.get()
-            if (result2 != null && result2 is ErrorResult) fire (breakers, result2.error)
+            if (result2 != null && result2 is ErrorResult) fire (failCallbacks, result2.error)
         }
 
         return this
@@ -133,12 +133,12 @@ private class DeferredPromise<out V, out E>(private val config: Configuration) :
         if (result != null) {
             config.tryExecute { callback() }
         } else {
-            always.add(callback)
+            alwaysCallbacks.add(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
             val result2 = resultRef.get()
-            if (result2 != null) fire (always)
+            if (result2 != null) fire (alwaysCallbacks)
         }
 
         return this

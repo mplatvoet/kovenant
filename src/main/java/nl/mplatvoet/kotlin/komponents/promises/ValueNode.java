@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
  *
  * There are no guards against circular references and there won't be for performance reasons.
  */
-public class ValueNode<T> {
+public class ValueNode<V> {
     private static final Unsafe UNSAFE = retrieveUnsafe();
     private static final long nextOffset;
     private static final long doneOffset;
@@ -26,18 +26,18 @@ public class ValueNode<T> {
         }
     }
 
-    private final T _value;
-    private volatile ValueNode<T> next = null;
+    private final V _value;
+    private volatile ValueNode<V> next = null;
     private volatile int done = 0;
 
-    ValueNode(T value) {
+    ValueNode(V value) {
         if (value == null) {
             throw new IllegalArgumentException();
         }
         this._value = value;
     }
 
-    T getValue() {
+    V getValue() {
         return _value;
     }
 
@@ -46,7 +46,7 @@ public class ValueNode<T> {
     }
 
 
-    ValueNode<T> getNext() {
+    ValueNode<V> getNext() {
         return next;
     }
 
@@ -58,7 +58,7 @@ public class ValueNode<T> {
      * @return the given node if successful, otherwise the actual next node. Never null.
      */
 
-    private ValueNode<T> trySetNext(ValueNode<T> node) {
+    private ValueNode<V> trySetNext(ValueNode<V> node) {
         if (next != null) {
             return next;
         }
@@ -73,11 +73,11 @@ public class ValueNode<T> {
         return UNSAFE.compareAndSwapInt(this, doneOffset, 0, 1);
     }
 
-    void append(ValueNode<T> node) {
+    void append(ValueNode<V> node) {
         if (node == null) {
             throw new IllegalArgumentException();
         }
-        ValueNode<T> tail = this;
+        ValueNode<V> tail = this;
         //noinspection StatementWithEmptyBody
         while ((tail = tail.trySetNext(node)) != node);
     }
