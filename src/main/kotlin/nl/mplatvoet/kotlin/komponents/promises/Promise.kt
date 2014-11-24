@@ -72,9 +72,7 @@ public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.co
 }
 
 
-
 private class DeferredPromise<out V, out E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
-
     private val keepers = AtomicReference<ValueNode<(V) -> Unit>>()
     private val breakers = AtomicReference<ValueNode<(E) -> Unit>>()
     private val always = AtomicReference<ValueNode<() -> Unit>>()
