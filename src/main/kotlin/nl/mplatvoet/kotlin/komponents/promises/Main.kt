@@ -5,7 +5,7 @@ package nl.mplatvoet.kotlin.komponents.promises
  */
 
 fun main(args: Array<String>) {
-    val promises = Array<Promise<*, *>>(10) {
+    val promises = Array(10) {
 
 
         Promises.async {

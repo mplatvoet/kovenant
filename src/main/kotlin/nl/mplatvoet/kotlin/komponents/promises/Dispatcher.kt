@@ -52,6 +52,7 @@ private class FixedPoolDispatcher(val numberOfThreads: Int = Runtime.getRuntime(
 
 }
 
+[suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
 private class ThreadContext(monitor: Any,
                             private val threadName: String,
                             private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>) {

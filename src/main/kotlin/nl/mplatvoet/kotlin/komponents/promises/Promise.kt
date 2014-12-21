@@ -9,7 +9,7 @@ import kotlin.InlineOption.ONLY_LOCAL_RETURN
  * Created by mplatvoet on 22-4-2014.
  */
 
-public trait Deferred<in V, in E> {
+public trait Deferred<V, E> {
     fun resolve(value: V)
     fun reject(error: E)
     val promise: Promise<V, E>
@@ -72,7 +72,7 @@ public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.co
 }
 
 
-private class DeferredPromise<out V, out E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
+private class DeferredPromise<V, E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
     private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
     private val failCallbacks = AtomicReference<ValueNode<(E) -> Unit>>()
     private val alwaysCallbacks = AtomicReference<ValueNode<() -> Unit>>()
