@@ -22,11 +22,11 @@ public trait Promise<V, E> {
     fun always(callback: () -> Unit): Promise<V, E>
 }
 
-public fun Promises.newDeferred<V, E>(config: Configuration = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
+public fun Promises.newDeferred<V, E>(config: Context = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
 
-public fun Promises.async<V>(config: Configuration = Promises.configuration, body: () -> V): Promise<V, Exception> {
+public fun Promises.async<V>(config: Context = Promises.configuration, body: () -> V): Promise<V, Exception> {
     val deferred = DeferredPromise<V, Exception>(config)
-    config.tryExecute {
+    config.tryDispatch {
         try {
             val result = body()
             deferred.resolve(result)
@@ -37,9 +37,9 @@ public fun Promises.async<V>(config: Configuration = Promises.configuration, bod
     return deferred
 }
 
-private inline fun Configuration.tryExecute(inlineOptions(ONLY_LOCAL_RETURN) body: () -> Unit) {
+private inline fun Context.tryDispatch(inlineOptions(ONLY_LOCAL_RETURN) body: () -> Unit) {
     try {
-        executor.execute { body() }
+        dispatchExecutor.execute { body() }
     } catch (e: RejectedExecutionException) {
         if (fallbackOnCurrentThread) {
             try {
@@ -55,11 +55,12 @@ private inline fun Configuration.tryExecute(inlineOptions(ONLY_LOCAL_RETURN) bod
     }
 }
 
-public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
+
+public fun <V, R> Promise<V, Exception>.then(config: Context = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
     val deferred = DeferredPromise<R, Exception>(config)
     success {
         try {
-            val result = bind(it)
+            val result = bind(it)//TODO Execute this on the work executor
             deferred.resolve(result)
         } catch(e: Exception) {
             deferred.reject(e)
@@ -72,7 +73,7 @@ public fun <V, R> Promise<V, Exception>.then(config: Configuration = Promises.co
 }
 
 
-private class DeferredPromise<V, E>(private val config: Configuration) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
+private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
     private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
     private val failCallbacks = AtomicReference<ValueNode<(E) -> Unit>>()
     private val alwaysCallbacks = AtomicReference<ValueNode<() -> Unit>>()
@@ -99,7 +100,7 @@ private class DeferredPromise<V, E>(private val config: Configuration) : Promise
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            if (result is ValueResult) config.tryExecute { callback(result.value) }
+            if (result is ValueResult) config.tryDispatch { callback(result.value) }
         } else {
             successCallbacks.add(callback)
 
@@ -115,7 +116,7 @@ private class DeferredPromise<V, E>(private val config: Configuration) : Promise
     override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            if (result is ErrorResult) config.tryExecute { callback(result.error) }
+            if (result is ErrorResult) config.tryDispatch { callback(result.error) }
         } else {
             failCallbacks.add(callback)
 
@@ -131,7 +132,7 @@ private class DeferredPromise<V, E>(private val config: Configuration) : Promise
     override fun always(callback: () -> Unit): Promise<V, E> {
         val result = resultRef.get()
         if (result != null) {
-            config.tryExecute { callback() }
+            config.tryDispatch { callback() }
         } else {
             alwaysCallbacks.add(callback)
 
@@ -148,7 +149,7 @@ private class DeferredPromise<V, E>(private val config: Configuration) : Promise
         ref.iterate {
             if (!it.done && it.trySetDone()) {
                 val function = it.value
-                config.tryExecute { function(value) }
+                config.tryDispatch { function(value) }
             }
         }
     }
@@ -157,7 +158,7 @@ private class DeferredPromise<V, E>(private val config: Configuration) : Promise
         ref.iterate {
             if (!it.done && it.trySetDone()) {
                 val function = it.value
-                config.tryExecute { function() }
+                config.tryDispatch { function() }
             }
         }
     }

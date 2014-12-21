@@ -16,26 +16,26 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 public object Promises {
-    val configuration: Configuration
-        get() = mutableConfiguration.get()!!
+    val configuration: Context
+        get() = mutableContext.get()!!
 
-    private var mutableConfiguration = AtomicReference(ThreadSafeConfiguration())
+    private var mutableContext = AtomicReference(ThreadSafeContext())
 
-    public fun configure(body: MutableConfiguration.() -> Unit) {
+    public fun configure(body: MutableContext.() -> Unit) {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
-        val trackingConfiguration = TrackingConfiguration(mutableConfiguration.get()!!)
-        trackingConfiguration.body()
+        val trackingContext = TrackingContext(mutableContext.get()!!)
+        trackingContext.body()
 
         do {
-            val current = mutableConfiguration.get()!!
+            val current = mutableContext.get()!!
             val newConfig = current.copy()
-            trackingConfiguration.applyChanged(newConfig)
-        } while (!mutableConfiguration.compareAndSet(current, newConfig))
+            trackingContext.applyChanged(newConfig)
+        } while (!mutableContext.compareAndSet(current, newConfig))
     }
 
-    private class ThreadSafeConfiguration() : MutableConfiguration {
+    private class ThreadSafeContext() : MutableContext {
         override var fallbackOnCurrentThread: Boolean = true
 
         private val executionErrorsDelegate = ThreadSafeLazyVar {
@@ -64,24 +64,28 @@ public object Promises {
             })
             executorService
         }
-        override var executor: Executor by executorDelegate
+        //TODO Make these distinct
+        override var dispatchExecutor: Executor by executorDelegate
+        override var workExecutor: Executor by executorDelegate
 
-        fun copy(): ThreadSafeConfiguration {
-            val copy = ThreadSafeConfiguration()
+        fun copy(): ThreadSafeContext {
+            val copy = ThreadSafeContext()
             copy.fallbackOnCurrentThread = fallbackOnCurrentThread
             if (executionErrorsDelegate.initialized) copy.executionErrors = executionErrors
-            if (executorDelegate.initialized) copy.executor = executor
+            if (executorDelegate.initialized) copy.dispatchExecutor = dispatchExecutor
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
     }
 
-    private class TrackingConfiguration(private val currentConfig: Configuration) : MutableConfiguration {
+    private class TrackingContext(private val currentConfig: Context) : MutableContext {
         private val fallbackOnCurrentThreadDelegate = TrackChangesVar { currentConfig.fallbackOnCurrentThread }
         override var fallbackOnCurrentThread: Boolean by fallbackOnCurrentThreadDelegate
 
-        private val executorDelegate = TrackChangesVar { currentConfig.executor }
-        override var executor: Executor by executorDelegate
+        private val executorDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
+        //TODO make these distinct
+        override var dispatchExecutor: Executor by executorDelegate
+        override var workExecutor: Executor by executorDelegate
 
         private val executionErrorsDelegate = TrackChangesVar { currentConfig.executionErrors }
         override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
@@ -89,12 +93,12 @@ public object Promises {
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
         override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit by multipleCompletionDelegate
 
-        fun applyChanged(config: MutableConfiguration) {
+        fun applyChanged(config: MutableContext) {
             if (fallbackOnCurrentThreadDelegate.written)
                 config.fallbackOnCurrentThread = fallbackOnCurrentThread
 
             if (executorDelegate.written)
-                config.executor = executor
+                config.dispatchExecutor = dispatchExecutor
 
             if (executionErrorsDelegate.written)
                 config.executionErrors = executionErrors
@@ -102,16 +106,18 @@ public object Promises {
     }
 }
 
-public trait Configuration {
+public trait Context {
     val fallbackOnCurrentThread: Boolean
-    val executor: Executor
+    val dispatchExecutor: Executor
+    val workExecutor: Executor
     val executionErrors: (Exception) -> Unit
     val multipleCompletion: (curVal:Any, newVal:Any) -> Unit
 }
 
-public trait MutableConfiguration : Configuration {
+public trait MutableContext : Context {
     override var fallbackOnCurrentThread: Boolean
-    override var executor: Executor
+    override var dispatchExecutor: Executor
+    override var workExecutor: Executor
     override var executionErrors: (Exception) -> Unit
     override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit
 }
