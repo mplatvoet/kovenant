@@ -14,12 +14,18 @@ repositories { mavenCentral() }
 
 apply plugin: 'kotlin'
 
+compileJava {
+    options.compilerArgs << '-XDignore.symbol.file'
+    options.fork = true
+    options.forkOptions.executable = 'javac'
+}
+
 dependencies {
     compile 'org.jetbrains.kotlin:kotlin-stdlib:0.10.4'
 }
 
 task release() {
-    dependsOn build
+    dependsOn jar
 }
 
 gradle.taskGraph.whenReady {
