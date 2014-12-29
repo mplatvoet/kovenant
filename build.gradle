@@ -7,7 +7,7 @@ allprojects {
 buildscript {
     repositories { mavenCentral() }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.10.4'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.10.195'
     }
 }
 repositories { mavenCentral() }
@@ -21,7 +21,7 @@ compileJava {
 }
 
 dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.10.4'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.10.195'
 }
 
 task release() {
