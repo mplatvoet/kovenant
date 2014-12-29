@@ -1,3 +1,5 @@
+[![Circle CI](https://circleci.com/gh/mplatvoet/promises.svg?style=svg)](https://circleci.com/gh/mplatvoet/promises)
+
 #Promises 0.3
 A Promises implementation written in [Kotlin](http://kotlinlang.org) inspired by various Promises implementations.
 
