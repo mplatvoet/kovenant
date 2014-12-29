@@ -26,15 +26,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
-
-/**
- * Created by mplatvoet on 30-5-2014.
- */
-
-
-
 
 
 public object Promises {
@@ -66,12 +58,12 @@ public object Promises {
         override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
-            {(curVal:Any, newVal:Any)-> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
+            {(curVal: Any, newVal: Any) -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
         }
-        override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit by multipleCompletionDelegate
+        override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
 
-        private val executorDelegate: ThreadSafeLazyVar<Executor> = ThreadSafeLazyVar {
+        private val executorDelegate: ThreadSafeLazyVar<(() -> Unit) -> Unit> = ThreadSafeLazyVar {
             val count = AtomicInteger(0)
             val executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), {
                 val thread = Thread(it)
@@ -83,12 +75,12 @@ public object Promises {
             Runtime.getRuntime().addShutdownHook(Thread() {
                 executorService.shutdown()
                 executorService.awaitTermination(60, TimeUnit.SECONDS)
-            })
-            executorService
+            });
+            { (func: () -> Unit) -> executorService.execute { func() } }
         }
         //TODO Make these distinct
-        override var dispatchExecutor: Executor by executorDelegate
-        override var workExecutor: Executor by executorDelegate
+        override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
+        override var workExecutor: (() -> Unit) -> Unit by executorDelegate
 
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
@@ -106,14 +98,14 @@ public object Promises {
 
         private val executorDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
         //TODO make these distinct
-        override var dispatchExecutor: Executor by executorDelegate
-        override var workExecutor: Executor by executorDelegate
+        override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
+        override var workExecutor: (() -> Unit) -> Unit by executorDelegate
 
         private val executionErrorsDelegate = TrackChangesVar { currentConfig.executionErrors }
         override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
 
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
-        override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit by multipleCompletionDelegate
+        override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableContext) {
             if (fallbackOnCurrentThreadDelegate.written)
@@ -130,16 +122,16 @@ public object Promises {
 
 public trait Context {
     val fallbackOnCurrentThread: Boolean
-    val dispatchExecutor: Executor
-    val workExecutor: Executor
+    val dispatchExecutor: (() -> Unit) -> Unit
+    val workExecutor: (() -> Unit) -> Unit
     val executionErrors: (Exception) -> Unit
-    val multipleCompletion: (curVal:Any, newVal:Any) -> Unit
+    val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
 
 public trait MutableContext : Context {
     override var fallbackOnCurrentThread: Boolean
-    override var dispatchExecutor: Executor
-    override var workExecutor: Executor
+    override var dispatchExecutor: (() -> Unit) -> Unit
+    override var workExecutor: (() -> Unit) -> Unit
     override var executionErrors: (Exception) -> Unit
-    override var multipleCompletion: (curVal:Any, newVal:Any) -> Unit
+    override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }

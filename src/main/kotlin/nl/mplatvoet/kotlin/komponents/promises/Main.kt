@@ -30,6 +30,7 @@ fun main(args: Array<String>) {
     val promises = Array(10) {
 
 
+
         Promises.async {
             it
         }.then {

@@ -25,8 +25,8 @@ package nl.mplatvoet.kotlin.komponents.promises
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.CountDownLatch
 
-/**
- * Created by mark on 27/09/14.
+/*
+ * TODO, remove this and provide alternate API which can also be implemented in JS
  */
 public fun Promises.await(vararg promises: Promise<*, *>): Unit = latchFor(*promises).await()
 

@@ -19,49 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 package nl.mplatvoet.kotlin.komponents.promises
 
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.RejectedExecutionException
 import kotlin.InlineOption.ONLY_LOCAL_RETURN
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.atomic.AtomicReference
 
-/**
- * Created by mplatvoet on 22-4-2014.
- */
-
-public trait Deferred<V, E> {
-    fun resolve(value: V)
-    fun reject(error: E)
-    val promise: Promise<V, E>
-}
-
-
-public trait Promise<V, E> {
-    fun success(callback: (value: V) -> Unit): Promise<V, E>
-    fun fail(callback: (error: E) -> Unit): Promise<V, E>
-    fun always(callback: () -> Unit): Promise<V, E>
-}
-
-public fun Promises.newDeferred<V, E>(config: Context = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
-
-public fun Promises.async<V>(config: Context = Promises.configuration, body: () -> V): Promise<V, Exception> {
-    val deferred = DeferredPromise<V, Exception>(config)
-    config.tryDispatch {
-        try {
-            val result = body()
-            deferred.resolve(result)
-        } catch(e: Exception) {
-            deferred.reject(e)
-        }
-    }
-    return deferred
-}
-
-private inline fun Context.tryDispatch(inlineOptions(ONLY_LOCAL_RETURN) body: () -> Unit) {
+private fun Context.tryDispatch(body: () -> Unit) {
     try {
-        dispatchExecutor.execute { body() }
+        dispatchExecutor( body )
     } catch (e: RejectedExecutionException) {
         if (fallbackOnCurrentThread) {
             try {
@@ -76,24 +42,6 @@ private inline fun Context.tryDispatch(inlineOptions(ONLY_LOCAL_RETURN) body: ()
         executionErrors(e)
     }
 }
-
-
-public fun <V, R> Promise<V, Exception>.then(config: Context = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
-    val deferred = DeferredPromise<R, Exception>(config)
-    success {
-        try {
-            val result = bind(it)//TODO Execute this on the work executor
-            deferred.resolve(result)
-        } catch(e: Exception) {
-            deferred.reject(e)
-        }
-    }
-    fail {
-        deferred.reject(it)
-    }
-    return deferred
-}
-
 
 private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
     private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
@@ -185,13 +133,5 @@ private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>
         }
     }
 }
-
-
-
-
-
-
-
-
 
 
