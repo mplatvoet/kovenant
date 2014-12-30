@@ -21,10 +21,6 @@
  */
 package nl.mplatvoet.kotlin.komponents.promises
 
-import kotlin.InlineOption.ONLY_LOCAL_RETURN
-import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.atomic.AtomicReference
-
 private fun Context.tryDispatch(body: () -> Unit) {
     try {
         dispatchExecutor(body)
@@ -33,12 +29,8 @@ private fun Context.tryDispatch(body: () -> Unit) {
     }
 }
 
-private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E> {
-    private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
-    private val failCallbacks = AtomicReference<ValueNode<(E) -> Unit>>()
-    private val alwaysCallbacks = AtomicReference<ValueNode<() -> Unit>>()
+private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSupport<V, E>(), Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E> {
 
-    private val resultRef = AtomicReference<Result<V, E>>()
 
     override fun resolve(value: V) = setResult(ValueResult(value))
     override fun reject(error: E) = setResult(ErrorResult(error))
@@ -46,66 +38,65 @@ private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>
     override val promise: Promise<V, E> = this
 
     private fun setResult(result: Result<V, E>) {
-        if (this.resultRef.compareAndSet(null, result)) {
+        if (trySetResult(result)) {
             result.accept(this)
-            fire (alwaysCallbacks)
+            fire (alwaysCbs)
         } else {
-            config.multipleCompletion(resultRef.get(), result.rawValue)
+            config.multipleCompletion(this.result.rawValue, result.rawValue)
         }
     }
 
-    override fun visitValue(value: V) = fire(successCallbacks, value)
-    override fun visitError(error: E) = fire(failCallbacks, error)
+    override fun visitValue(value: V) = fire(successCbs, value)
+    override fun visitError(error: E) = fire(failCbs, error)
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
-        val result = resultRef.get()
-        if (result != null) {
-            if (result is ValueResult) config.tryDispatch { callback(result.value) }
+        val res = result
+        if (res != null) {
+            if (res is ValueResult) config.tryDispatch { callback(res.value) }
         } else {
-            successCallbacks.add(callback)
+            addSuccessCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            val result2 = resultRef.get()
-            if (result2 != null && result2 is ValueResult) fire (successCallbacks, result2.value)
+            val res2 = result
+            if (res2 != null && res2 is ValueResult) fire (successCbs, res2.value)
         }
 
         return this
     }
 
     override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
-        val result = resultRef.get()
-        if (result != null) {
-            if (result is ErrorResult) config.tryDispatch { callback(result.error) }
+        val res = result
+        if (res != null) {
+            if (res is ErrorResult) config.tryDispatch { callback(res.error) }
         } else {
-            failCallbacks.add(callback)
+            addFailCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            val result2 = resultRef.get()
-            if (result2 != null && result2 is ErrorResult) fire (failCallbacks, result2.error)
+            val res2 = result
+            if (res2 != null && res2 is ErrorResult) fire (failCbs, res2.error)
         }
 
         return this
     }
 
     override fun always(callback: () -> Unit): Promise<V, E> {
-        val result = resultRef.get()
+
         if (result != null) {
             config.tryDispatch { callback() }
         } else {
-            alwaysCallbacks.add(callback)
+            addAlwaysCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            val result2 = resultRef.get()
-            if (result2 != null) fire (alwaysCallbacks)
+            if (result != null) fire (alwaysCbs)
         }
 
         return this
     }
 
-    private fun fire<T>(ref: AtomicReference<ValueNode<(T) -> Unit>>, value: T) {
+    private fun fire<T>(ref: ValueNode<(T) -> Unit>?, value: T) {
         ref.iterate {
             if (!it.done && it.trySetDone()) {
                 val function = it.value
@@ -114,7 +105,7 @@ private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>
         }
     }
 
-    private fun fire(ref: AtomicReference<ValueNode<() -> Unit>>) {
+    private fun fire(ref: ValueNode<() -> Unit>?) {
         ref.iterate {
             if (!it.done && it.trySetDone()) {
                 val function = it.value
@@ -123,5 +114,18 @@ private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>
         }
     }
 }
+
+private inline fun <T> ValueNode<T>?.iterate(cb: (ValueNode<T>) -> Unit) {
+    var node = this
+    while (node != null) {
+        val n = node as ValueNode<T>
+        cb(n)
+        node = n.next
+    }
+}
+
+private val <T : Any> ValueNode<T>.next: ValueNode<T>? get() = this.getNext()
+private val <T : Any> ValueNode<T>.done: Boolean get() = this.isDone()
+private val <T : Any> ValueNode<T>.value: T get() = this.getValue()
 
 
