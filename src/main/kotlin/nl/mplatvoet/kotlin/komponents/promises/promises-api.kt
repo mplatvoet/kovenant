@@ -55,9 +55,9 @@ private fun Context.tryDispatch(body: () -> Unit) {
     }
 }
 
-private fun Context.tryWork(body: () -> Unit) {
+private fun Context.tryWork(runnable: () -> Unit) {
     try {
-        workExecutor(body)
+        workExecutor(runnable)
     } catch (e: Exception) {
         dispatchingError(e)
     }

@@ -22,7 +22,6 @@
 
 package nl.mplatvoet.kotlin.komponents.promises
 
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.TimeUnit
@@ -51,8 +50,8 @@ public object Promises {
 
     private class ThreadSafeContext() : MutableContext {
 
-        private val dispatchingErrorDelegate = ThreadSafeLazyVar {
-            {(e: Exception) -> e.printStackTrace() }
+        private val dispatchingErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
+            {(e: Exception) -> throw e }
         }
         override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
 
@@ -75,7 +74,7 @@ public object Promises {
                 executorService.shutdown()
                 executorService.awaitTermination(60, TimeUnit.SECONDS)
             });
-            { (func: () -> Unit) -> executorService.execute { func() } }
+            {(func: () -> Unit) -> executorService.execute { func() } }
         }
         //TODO Make these distinct
         override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
