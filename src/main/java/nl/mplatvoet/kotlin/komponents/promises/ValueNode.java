@@ -31,22 +31,14 @@ import java.lang.reflect.Field;
  * Created by mark on 27/09/14.
  * Specialized Node class to create a non blocking link list. Created with the sole purpose of reducing the memory footprint and being optimized for performance.
  * Can't do this in Kotlin for now (or I don't know how) since we can't access fields directly as needed for the sun.misc.Unsafe
- *
+ * <p/>
  * There are no guards against circular references and there won't be for performance reasons.
  */
 public class ValueNode<V> {
-    private static final Unsafe UNSAFE = retrieveUnsafe();
-    private static final long nextOffset;
-    private static final long doneOffset;
 
-    static {
-        try {
-            nextOffset = UNSAFE.objectFieldOffset(ValueNode.class.getDeclaredField("next"));
-            doneOffset = UNSAFE.objectFieldOffset(ValueNode.class.getDeclaredField("done"));
-        } catch (Exception e) {
-            throw new Error(e);
-        }
-    }
+    private static final long nextOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "next");
+    private static final long doneOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "done");
+
 
     private final V _value;
     private volatile ValueNode<V> next = null;
@@ -85,14 +77,14 @@ public class ValueNode<V> {
             return next;
         }
 
-        return UNSAFE.compareAndSwapObject(this, nextOffset, null, node) ? node : next;
+        return UnsafeAccess.compareAndSwapObject(this, nextOffset, null, node) ? node : next;
     }
 
     /**
      * @return true if this operation changed the flag, false otherwise
      */
     boolean trySetDone() {
-        return UNSAFE.compareAndSwapInt(this, doneOffset, 0, 1);
+        return UnsafeAccess.compareAndSwapInt(this, doneOffset, 0, 1);
     }
 
     void append(ValueNode<V> node) {
@@ -101,23 +93,46 @@ public class ValueNode<V> {
         }
         ValueNode<V> tail = this;
         //noinspection StatementWithEmptyBody
-        while ((tail = tail.trySetNext(node)) != node);
+        while ((tail = tail.trySetNext(node)) != node) ;
     }
 
 
-    @SuppressWarnings("restriction")
-    private static Unsafe retrieveUnsafe() {
-        try {
-            Field field = Unsafe.class.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            return (Unsafe) field.get(null);
-        } catch (Exception e) {
-            throw new Error(e);
+
+    private static final class UnsafeAccess {
+        private static final Unsafe UNSAFE = retrieveUnsafe();
+
+        private UnsafeAccess() {}
+
+        @SuppressWarnings("restriction")
+        private static Unsafe retrieveUnsafe() {
+            try {
+                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                field.setAccessible(true);
+                return (Unsafe) field.get(null);
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
+
+        static <T> long objectFieldOffset(Class<T> clazz, String fieldName) {
+            try {
+                return  UNSAFE.objectFieldOffset(clazz.getDeclaredField(fieldName));
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
+
+        static boolean compareAndSwapObject(Object obj, long fieldOffset, Object expected, Object newValue) {
+            return UNSAFE.compareAndSwapObject(obj, fieldOffset, expected, newValue);
+        }
+
+        static boolean compareAndSwapInt(Object obj, long fieldOffset, int expected, int newValue) {
+            return UNSAFE.compareAndSwapInt(obj, fieldOffset, expected, newValue);
         }
     }
-
-
 }
+
+
 
 
 

@@ -27,23 +27,13 @@ import java.util.concurrent.atomic.AtomicReference
 
 private fun Context.tryDispatch(body: () -> Unit) {
     try {
-        dispatchExecutor( body )
-    } catch (e: RejectedExecutionException) {
-        if (fallbackOnCurrentThread) {
-            try {
-                body()
-            } catch(e: Exception) {
-                executionErrors(e)
-            }
-        } else {
-            executionErrors(e)
-        }
+        dispatchExecutor(body)
     } catch (e: Exception) {
-        executionErrors(e)
+        dispatchingError(e)
     }
 }
 
-private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E>  {
+private class DeferredPromise<V, E>(private val config: Context) : Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E> {
     private val successCallbacks = AtomicReference<ValueNode<(V) -> Unit>>()
     private val failCallbacks = AtomicReference<ValueNode<(E) -> Unit>>()
     private val alwaysCallbacks = AtomicReference<ValueNode<() -> Unit>>()

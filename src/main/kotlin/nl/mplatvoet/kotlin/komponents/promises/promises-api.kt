@@ -51,7 +51,6 @@ public fun Promises.async<V>(config: Context = Promises.configuration, body: () 
     val deferred = DeferredPromise<V, Exception>(config)
     config.tryDispatch {
         try {
-
             val result = body()
             deferred.resolve(result)
         } catch(e: Exception) {

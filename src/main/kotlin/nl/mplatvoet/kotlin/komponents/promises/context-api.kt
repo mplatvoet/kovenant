@@ -50,12 +50,11 @@ public object Promises {
     }
 
     private class ThreadSafeContext() : MutableContext {
-        override var fallbackOnCurrentThread: Boolean = true
 
-        private val executionErrorsDelegate = ThreadSafeLazyVar {
+        private val dispatchingErrorDelegate = ThreadSafeLazyVar {
             {(e: Exception) -> e.printStackTrace() }
         }
-        override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
+        override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             {(curVal: Any, newVal: Any) -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
@@ -84,8 +83,7 @@ public object Promises {
 
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
-            copy.fallbackOnCurrentThread = fallbackOnCurrentThread
-            if (executionErrorsDelegate.initialized) copy.executionErrors = executionErrors
+            if (dispatchingErrorDelegate.initialized) copy.dispatchingError = dispatchingError
             if (executorDelegate.initialized) copy.dispatchExecutor = dispatchExecutor
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
@@ -93,45 +91,37 @@ public object Promises {
     }
 
     private class TrackingContext(private val currentConfig: Context) : MutableContext {
-        private val fallbackOnCurrentThreadDelegate = TrackChangesVar { currentConfig.fallbackOnCurrentThread }
-        override var fallbackOnCurrentThread: Boolean by fallbackOnCurrentThreadDelegate
-
         private val executorDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
         //TODO make these distinct
         override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
         override var workExecutor: (() -> Unit) -> Unit by executorDelegate
 
-        private val executionErrorsDelegate = TrackChangesVar { currentConfig.executionErrors }
-        override var executionErrors: (Exception) -> Unit by executionErrorsDelegate
+        private val dispatchingErrorDelegate = TrackChangesVar { currentConfig.dispatchingError }
+        override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
 
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableContext) {
-            if (fallbackOnCurrentThreadDelegate.written)
-                config.fallbackOnCurrentThread = fallbackOnCurrentThread
-
             if (executorDelegate.written)
                 config.dispatchExecutor = dispatchExecutor
 
-            if (executionErrorsDelegate.written)
-                config.executionErrors = executionErrors
+            if (dispatchingErrorDelegate.written)
+                config.dispatchingError = dispatchingError
         }
     }
 }
 
 public trait Context {
-    val fallbackOnCurrentThread: Boolean
     val dispatchExecutor: (() -> Unit) -> Unit
     val workExecutor: (() -> Unit) -> Unit
-    val executionErrors: (Exception) -> Unit
+    val dispatchingError: (Exception) -> Unit
     val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
 
 public trait MutableContext : Context {
-    override var fallbackOnCurrentThread: Boolean
     override var dispatchExecutor: (() -> Unit) -> Unit
     override var workExecutor: (() -> Unit) -> Unit
-    override var executionErrors: (Exception) -> Unit
+    override var dispatchingError: (Exception) -> Unit
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
