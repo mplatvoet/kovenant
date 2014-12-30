@@ -21,14 +21,6 @@
  */
 package nl.mplatvoet.kotlin.komponents.promises
 
-private fun Context.tryDispatch(body: () -> Unit) {
-    try {
-        dispatchExecutor(body)
-    } catch (e: Exception) {
-        dispatchingError(e)
-    }
-}
-
 private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSupport<V, E>(), Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E> {
 
 

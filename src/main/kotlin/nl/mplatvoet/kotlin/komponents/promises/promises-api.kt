@@ -47,9 +47,25 @@ public trait Promise<V, E> {
 public fun Promises.newDeferred<V, E>(config: Context = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
 
 
-public fun Promises.async<V>(config: Context = Promises.configuration, body: () -> V): Promise<V, Exception> {
-    val deferred = DeferredPromise<V, Exception>(config)
-    config.tryDispatch {
+private fun Context.tryDispatch(body: () -> Unit) {
+    try {
+        dispatchExecutor(body)
+    } catch (e: Exception) {
+        dispatchingError(e)
+    }
+}
+
+private fun Context.tryWork(body: () -> Unit) {
+    try {
+        workExecutor(body)
+    } catch (e: Exception) {
+        dispatchingError(e)
+    }
+}
+
+public fun Promises.async<V>(context: Context = Promises.configuration, body: () -> V): Promise<V, Exception> {
+    val deferred = DeferredPromise<V, Exception>(context)
+    context.tryWork {
         try {
             val result = body()
             deferred.resolve(result)
@@ -60,14 +76,16 @@ public fun Promises.async<V>(config: Context = Promises.configuration, body: () 
     return deferred
 }
 
-public fun <V, R> Promise<V, Exception>.then(config: Context = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
-    val deferred = DeferredPromise<R, Exception>(config)
+public fun <V, R> Promise<V, Exception>.then(context: Context = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
+    val deferred = DeferredPromise<R, Exception>(context)
     success {
-        try {
-            val result = bind(it)//TODO Execute this on the work executor
-            deferred.resolve(result)
-        } catch(e: Exception) {
-            deferred.reject(e)
+        context.tryWork {
+            try {
+                val result = bind(it)
+                deferred.resolve(result)
+            } catch(e: Exception) {
+                deferred.reject(e)
+            }
         }
     }
     fail {
