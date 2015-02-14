@@ -21,53 +21,54 @@
  */
 package nl.mplatvoet.kotlin.komponents.promises
 
-private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSupport<V, E>(), Promise<V, E>, ResultVisitor<V, E>, Deferred<V, E> {
+private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSupport<V, E>(), Promise<V, E>, Deferred<V, E> {
 
 
-    override fun resolve(value: V) = setResult(ValueResult(value))
-    override fun reject(error: E) = setResult(ErrorResult(error))
-
-    override val promise: Promise<V, E> = this
-
-    private fun setResult(result: Result<V, E>) {
-        if (trySetResult(result)) {
-            result.accept(this)
-            fire (alwaysCbs)
+    override fun resolve(value: V) {
+        if (trySetSuccessResult(value)) {
+            fire(successCbs, value)
+            fire(alwaysCbs)
         } else {
-            config.multipleCompletion(this.result.rawValue, result.rawValue)
+            throw IllegalStateException("Promise allready resolved")
         }
     }
 
-    override fun visitValue(value: V) = fire(successCbs, value)
-    override fun visitError(error: E) = fire(failCbs, error)
+    override fun reject(error: E) {
+        if (trySetFailResult(error)) {
+            fire(failCbs, error)
+            fire(alwaysCbs)
+        } else {
+            throw IllegalStateException("Promise allready resolved")
+        }
+    }
+
+    override val promise: Promise<V, E> = this
+
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
-        val res = result
-        if (res != null) {
-            if (res is ValueResult) config.tryDispatch { callback(res.value) }
+
+        if (isSuccessResult()) {
+            config.tryDispatch { callback(getAsValueResult()) }
         } else {
             addSuccessCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            val res2 = result
-            if (res2 != null && res2 is ValueResult) fire (successCbs, res2.value)
+            if (isSuccessResult()) fire (successCbs, getAsValueResult())
         }
 
         return this
     }
 
     override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
-        val res = result
-        if (res != null) {
-            if (res is ErrorResult) config.tryDispatch { callback(res.error) }
+        if (isFailResult()) {
+            config.tryDispatch { callback(getAsFailResult()) }
         } else {
             addFailCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            val res2 = result
-            if (res2 != null && res2 is ErrorResult) fire (failCbs, res2.error)
+            if (isFailResult()) fire (failCbs, getAsFailResult())
         }
 
         return this
@@ -75,14 +76,14 @@ private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSu
 
     override fun always(callback: () -> Unit): Promise<V, E> {
 
-        if (result != null) {
+        if (isCompleted()) {
             config.tryDispatch { callback() }
         } else {
             addAlwaysCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            if (result != null) fire (alwaysCbs)
+            if (isCompleted()) fire (alwaysCbs)
         }
 
         return this
