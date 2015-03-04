@@ -1,7 +1,7 @@
 allprojects {
     ext {
         appVersion = '0.3'
-        appGroup = 'nl.mplatvoet.kotlin.komponents.promises'
+        appGroup = 'nl.mplatvoet.komponents.kovenant'
     }
 }
 buildscript {

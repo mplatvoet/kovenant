@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.kotlin.komponents.promises
+package nl.mplatvoet.komponents.kovenant
 
 /**
  * Created by mplatvoet on 30-5-2014.

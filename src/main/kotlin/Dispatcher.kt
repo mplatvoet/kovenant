@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.kotlin.komponents.promises
+package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentLinkedQueue

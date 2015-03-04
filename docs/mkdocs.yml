@@ -1,0 +1,8 @@
+site_name: Kovenant
+
+pages:
+- [index.md, Home]
+- [goals.md, Goals]
+- [examples.md, Examples]
+
+theme: yeti

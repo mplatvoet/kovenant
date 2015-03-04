@@ -1,4 +1,4 @@
-package nl.mplatvoet.kotlin.komponents.promises;
+package nl.mplatvoet.komponents.kovenant;
 
 import sun.misc.Unsafe;
 
