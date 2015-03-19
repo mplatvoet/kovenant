@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 
 
 trait Dispatcher {
-    class object {
+    companion object {
         fun fromExecutor(executor: Executor): Dispatcher = ExecutorDispatcher(executor)
     }
     /*

@@ -1,13 +1,13 @@
 allprojects {
     ext {
-        appVersion = '0.3'
+        appVersion = '0.4.0'
         appGroup = 'nl.mplatvoet.komponents.kovenant'
     }
 }
 buildscript {
     repositories { mavenCentral() }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.10.195'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
     }
 }
 repositories { mavenCentral() }
@@ -21,7 +21,7 @@ compileJava {
 }
 
 dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.10.195'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
 }
 
 task release() {

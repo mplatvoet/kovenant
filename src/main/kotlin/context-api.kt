@@ -51,12 +51,12 @@ public object Promises {
     private class ThreadSafeContext() : MutableContext {
 
         private val dispatchingErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
-            {(e: Exception) -> throw e }
+            {e: Exception -> throw e }
         }
         override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
-            {(curVal: Any, newVal: Any) -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
+            {curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
         }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
@@ -74,7 +74,7 @@ public object Promises {
                 executorService.shutdown()
                 executorService.awaitTermination(60, TimeUnit.SECONDS)
             });
-            {(func: () -> Unit) -> executorService.execute { func() } }
+            {func: () -> Unit -> executorService.execute { func() } }
         }
         //TODO Make these distinct
         override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
