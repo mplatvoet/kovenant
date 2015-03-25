@@ -57,7 +57,7 @@ private class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
 }
 
 private class FixedPoolDispatcher(val numberOfThreads: Int = Runtime.getRuntime().availableProcessors()) : Dispatcher {
-    {
+    init {
         if (numberOfThreads < 1) throw IllegalArgumentException("numberOfThreads must be atleast 1 but was $numberOfThreads")
     }
 
@@ -82,7 +82,7 @@ private class ThreadContext(monitor: Any,
 
     private val thread = Thread() { run() };
 
-    {
+    init {
         thread.setName(threadName)
         thread.setDaemon(true)
         thread.start()
