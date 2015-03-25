@@ -27,8 +27,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-public object Kovenant {
-    val configuration: Context
+class ConcreteKovenant {
+    val context: Context
         get() = mutableContext.get()!!
 
     private var mutableContext = AtomicReference(ThreadSafeContext())

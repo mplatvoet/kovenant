@@ -22,12 +22,14 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 
+public object Kovenant {
+    private val concrete = ConcreteKovenant()
 
+    val context: Context = concrete.context
+
+    public fun configure(body: MutableContext.() -> Unit) : Unit = concrete.configure(body)
+}
 
 public trait Context {
     val dispatchExecutor: (() -> Unit) -> Unit
