@@ -25,10 +25,6 @@ package nl.mplatvoet.komponents.kovenant
 import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentLinkedQueue
 
-/**
- * Created by mark on 29/11/14.
- */
-
 
 trait Dispatcher {
     companion object {
