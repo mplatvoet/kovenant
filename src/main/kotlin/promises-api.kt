@@ -40,7 +40,7 @@ public trait Promise<V, E> {
     fun always(callback: () -> Unit): Promise<V, E>
 }
 
-public fun Promises.newDeferred<V, E>(config: Context = Promises.configuration) : Deferred<V, E> = DeferredPromise(config)
+public fun Kovenant.newDeferred<V, E>(config: Context = Kovenant.configuration) : Deferred<V, E> = DeferredPromise(config)
 
 
 private fun Context.tryDispatch(body: () -> Unit) {
@@ -59,7 +59,7 @@ private fun Context.tryWork(runnable: () -> Unit) {
     }
 }
 
-public fun Promises.async<V>(context: Context = Promises.configuration, body: () -> V): Promise<V, Exception> {
+public fun Kovenant.async<V>(context: Context = Kovenant.configuration, body: () -> V): Promise<V, Exception> {
     val deferred = DeferredPromise<V, Exception>(context)
     context.tryWork {
         try {
@@ -72,7 +72,7 @@ public fun Promises.async<V>(context: Context = Promises.configuration, body: ()
     return deferred
 }
 
-public fun <V, R> Promise<V, Exception>.then(context: Context = Promises.configuration, bind: (V) -> R): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.then(context: Context = Kovenant.configuration, bind: (V) -> R): Promise<R, Exception> {
     val deferred = DeferredPromise<R, Exception>(context)
     success {
         context.tryWork {

@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.CountDownLatch
 
 
-public fun Promises.await(vararg promises: Promise<*, *>): Unit = latchFor(*promises).await()
+public fun Kovenant.await(vararg promises: Promise<*, *>): Unit = latchFor(*promises).await()
 
-public fun Promises.await(timeout: Long, unit: TimeUnit, vararg promises: Promise<*, *>): Boolean = latchFor(*promises).await(timeout, unit)
+public fun Kovenant.await(timeout: Long, unit: TimeUnit, vararg promises: Promise<*, *>): Boolean = latchFor(*promises).await(timeout, unit)
 
 private fun latchFor(vararg promises: Promise<*, *>): CountDownLatch {
     val latch = CountDownLatch(promises.size())

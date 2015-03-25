@@ -27,7 +27,7 @@ import nl.mplatvoet.komponents.kovenant.*
 fun main(args: Array<String>) {
     val promises = Array(10) {
 
-        Promises.async {
+        Kovenant.async {
             it
         }.then {
             val sleep = (Math.random() * 1000).toLong()
@@ -39,6 +39,6 @@ fun main(args: Array<String>) {
         }
     }
 
-    Promises.await(*promises)
+    Kovenant.await(*promises)
 }
 
