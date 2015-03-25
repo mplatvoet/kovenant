@@ -67,3 +67,6 @@ private class TrackChangesVar<T>(private val source: () -> T) : ReadWritePropert
     val written: Boolean get() = value != null
 }
 
+private val NULL_VALUE: Any = Any()
+private fun mask(value: Any?): Any = value ?: NULL_VALUE
+private fun unmask(value: Any?): Any? = if (value == NULL_VALUE) null else value

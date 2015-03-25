@@ -19,9 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package nl.mplatvoet.komponents.kovenant
 
-private class DeferredPromise<V, E>(private val config: Context) : JvmCallbackSupport<V, E>(), Promise<V, E>, Deferred<V, E> {
+private class DeferredPromise<V, E>(private val config: Context) : AbstractPromise<V, E>(), Promise<V, E>, Deferred<V, E> {
 
 
     override fun resolve(value: V) {

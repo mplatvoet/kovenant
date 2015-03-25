@@ -25,13 +25,13 @@ package nl.mplatvoet.komponents.kovenant;
 import kotlin.Function1;
 import kotlin.Unit;
 
-class JvmCallbackSupport<V, E> {
+abstract class AbstractPromise<V, E> {
     private enum State {PENDING, MUTATING, SUCCESS, FAIL}
-    private static final long successCbsOffset = UnsafeAccess.objectFieldOffset(JvmCallbackSupport.class, "successCbs");
-    private static final long failCbsOffset = UnsafeAccess.objectFieldOffset(JvmCallbackSupport.class, "failCbs");
-    private static final long alwaysCbsOffset = UnsafeAccess.objectFieldOffset(JvmCallbackSupport.class, "alwaysCbs");
+    private static final long successCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "successCbs");
+    private static final long failCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "failCbs");
+    private static final long alwaysCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "alwaysCbs");
 
-    private static final long stateOffset = UnsafeAccess.objectFieldOffset(JvmCallbackSupport.class, "state");
+    private static final long stateOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "state");
 
     protected volatile ValueNode<kotlin.Function1<V, kotlin.Unit>> successCbs = null;
     protected volatile ValueNode<kotlin.Function1<E, kotlin.Unit>> failCbs = null;

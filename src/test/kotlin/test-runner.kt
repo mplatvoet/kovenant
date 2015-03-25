@@ -20,13 +20,12 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package test
 
+import nl.mplatvoet.komponents.kovenant.*
 
 fun main(args: Array<String>) {
     val promises = Array(10) {
-
-
 
         Promises.async {
             it
@@ -38,8 +37,6 @@ fun main(args: Array<String>) {
         }.success {
             println("Thread[${Thread.currentThread().getName()}] $it, done.")
         }
-
-
     }
 
     Promises.await(*promises)

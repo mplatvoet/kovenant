@@ -22,7 +22,17 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+trait Dispatcher {
+    /*
+        submit a task to be executed
+     */
+    fun submit(task: () -> Unit)
 
-private val NULL_VALUE: Any = Any()
-private fun mask(value: Any?): Any = value ?: NULL_VALUE
-private fun unmask(value: Any?): Any? = if (value == NULL_VALUE) null else value
+    /*
+        offer to help out this dispatcher by doing some work
+        return true if more help is wanted, false otherwise
+     */
+    fun offerHelp(): Boolean
+}
+
+

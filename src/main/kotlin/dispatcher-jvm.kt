@@ -26,21 +26,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentLinkedQueue
 
 
-trait Dispatcher {
-    companion object {
-        fun fromExecutor(executor: Executor): Dispatcher = ExecutorDispatcher(executor)
-    }
-    /*
-        submit a task to be executed
-     */
-    fun submit(task: () -> Unit)
 
-    /*
-        offer to help out this dispatcher by doing some work
-        return true if more help is wanted, false otherwise
-     */
-    fun offerHelp(): Boolean
-}
 
 
 private class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
@@ -54,7 +40,10 @@ private class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
 
 private class FixedPoolDispatcher(val numberOfThreads: Int = Runtime.getRuntime().availableProcessors()) : Dispatcher {
     init {
-        if (numberOfThreads < 1) throw IllegalArgumentException("numberOfThreads must be atleast 1 but was $numberOfThreads")
+        if (numberOfThreads < 1) {
+            throw IllegalArgumentException("numberOfThreads must be atleast 1 but was $numberOfThreads")
+        }
+
     }
 
     private val queue = ConcurrentLinkedQueue<() -> Unit>()
@@ -107,19 +96,3 @@ private class ThreadContext(monitor: Any,
 }
 
 
-//
-//private val executorDelegate: ThreadSafeLazyVar<Executor> = ThreadSafeLazyVar {
-//    val count = AtomicInteger(0)
-//    val executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), {
-//        val thread = Thread(it)
-//        thread.setDaemon(true)
-//        thread.setName("komponents-promises-${count.incrementAndGet()}")
-//        thread
-//    })
-//
-//    Runtime.getRuntime().addShutdownHook(Thread() {
-//        executorService.shutdown()
-//        executorService.awaitTermination(60, TimeUnit.SECONDS)
-//    })
-//    executorService
-//}
