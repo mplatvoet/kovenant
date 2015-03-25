@@ -22,9 +22,6 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-/**
- * Created by mplatvoet on 30-5-2014.
- */
 
 fun main(args: Array<String>) {
     val promises = Array(10) {

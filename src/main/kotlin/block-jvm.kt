@@ -25,9 +25,7 @@ package nl.mplatvoet.komponents.kovenant
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.CountDownLatch
 
-/*
- * TODO, remove this and provide alternate API which can also be implemented in JS
- */
+
 public fun Promises.await(vararg promises: Promise<*, *>): Unit = latchFor(*promises).await()
 
 public fun Promises.await(timeout: Long, unit: TimeUnit, vararg promises: Promise<*, *>): Boolean = latchFor(*promises).await(timeout, unit)

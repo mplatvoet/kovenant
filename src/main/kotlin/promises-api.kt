@@ -27,10 +27,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.RejectedExecutionException
 import kotlin.InlineOption.ONLY_LOCAL_RETURN
 
-/**
- * Created by mplatvoet on 22-4-2014.
- */
-
 public trait Deferred<V, E> {
     fun resolve(value: V)
     fun reject(error: E)

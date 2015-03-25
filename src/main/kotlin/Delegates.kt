@@ -26,10 +26,6 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.properties.ReadOnlyProperty
 import java.util.concurrent.atomic.AtomicReference
 
-/**
- * Created by mplatvoet on 30-5-2014.
- */
-
 
 
 [suppress("UNCHECKED_CAST")]
