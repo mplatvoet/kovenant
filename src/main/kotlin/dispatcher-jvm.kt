@@ -24,75 +24,176 @@ package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 
 
+private class PoolDispatcher(val numberOfThreads: Int = availableProcessors, val name: String) : Dispatcher {
 
-
-
-private class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
-    override fun submit(task: () -> Unit) {
-        executor.execute(task)
-    }
-
-    override fun offerHelp(): Boolean = false
-
-}
-
-private class FixedPoolDispatcher(val numberOfThreads: Int = Runtime.getRuntime().availableProcessors()) : Dispatcher {
     init {
         if (numberOfThreads < 1) {
-            throw IllegalArgumentException("numberOfThreads must be atleast 1 but was $numberOfThreads")
+            throw IllegalArgumentException("numberOfThreads must be at least 1 but was $numberOfThreads")
         }
-
     }
+    private volatile var running = false
+    private val threadCount = AtomicInteger(0)
 
-    private val queue = ConcurrentLinkedQueue<() -> Unit>()
+    private val threadContexts = ConcurrentLinkedQueue<ThreadContext>()
+    private val workQueue = ConcurrentLinkedQueue<() -> Unit>()
+
 
 
     override fun submit(task: () -> Unit) {
-        throw UnsupportedOperationException()
+        workQueue.offer(task)
+        val threadSize = threadContexts.size()
+        if (threadSize < numberOfThreads) {
+            val workSize = workQueue.size()
+            if (numberOfThreads * 2 < workSize) {
+                //only build a new thread context if we guess it's significant
+                ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadCount.incrementAndGet()}")
+            }
+        }
     }
 
     override fun offerHelp(): Boolean {
-        throw UnsupportedOperationException()
+        //TODO implement
+        return false;
     }
+
+
+    internal fun deRegisterRequest(context: ThreadContext, force : Boolean = false) : Boolean {
+        threadContexts.remove(context)
+        if(!force && threadContexts.isEmpty() && workQueue.isNotEmpty() && running) {
+            //that, hopefully rare, state where all threadContexts thought they had nothing to do
+            //but the queue isn't empty. Reinstate anyone that notes this.
+            threadContexts.add(context)
+            return false
+        }
+        return true
+    }
+
+    public fun shutdown() {
+        running = false
+        threadContexts.forEach { it.interrupt() }
+    }
+
+    private fun createWaitStrategy() : WaitStrategy {
+        return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
+    }
+
 
 }
 
-[suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
-private class ThreadContext(monitor: Any,
-                            private val threadName: String,
-                            private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>) {
-    private val _monitor = monitor as Object
+private trait WaitStrategy {
+    /*
+    Waits for any amount of time determined by the strategy used
+    Returns true if thread should expect more work, false if it can be shutdown
+     */
+    fun waitAndReturnAlive() : Boolean
+}
 
-    private val thread = Thread() { run() };
+private class ChainWaitStrategy(private vararg val strategies: WaitStrategy) : WaitStrategy {
+    override fun waitAndReturnAlive(): Boolean {
+        strategies.forEach {
+            if (it.waitAndReturnAlive()) return true
+        }
+        return false
+    }
+}
+
+private class BusyPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
+                               private val attempts: Int = 1000) : WaitStrategy {
+    override fun waitAndReturnAlive(): Boolean {
+        for(i in 0..attempts) {
+            if (queue.isNotEmpty()) return true
+            Thread.yield()
+        }
+        return false
+    }
+}
+
+private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
+                                   private val attempts: Int = 100,
+                                    private val sleepTimeNanos: Int = 10) : WaitStrategy {
+    override fun waitAndReturnAlive(): Boolean {
+        for(i in 0..attempts) {
+            if (queue.isNotEmpty()) return true
+            Thread.sleep(0, sleepTimeNanos)
+        }
+        return false
+    }
+}
+
+
+[suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
+private class ThreadContext(private val poolDispatcher: PoolDispatcher,
+                            private val waitStrategy : WaitStrategy,
+                            private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>,
+                            val threadName: String
+                            ) {
+    private val thread = Thread() { run() }
+    private volatile var running = true
 
     init {
         thread.setName(threadName)
-        thread.setDaemon(true)
+        thread.setDaemon(false)
         thread.start()
     }
 
 
     private fun run() {
-        while (!Thread.currentThread().isInterrupted()) {
-            val fn = sharedQueue.poll()
+        while (running) {
+
+            val fn = sharedQueue.poll() // can this throw an InterruptedException?
             if (fn != null) {
-                fn()
+                try {
+                    fn()
+                } catch(e: InterruptedException) {
+                    if (!running) {
+                        //only set the interrupted flag again if thread is interrupted via this context.
+                        //otherwise user code has interrupted the thread, we can ignore that.
+                        thread.interrupt()
+                    }
+                } catch(e : Exception) {
+                    //this is pure evil, ignoring exceptions for now. Should use some global logger so this
+                    //doesn't get lost.
+                    //TODO: handle exception
+                } catch(t:Throwable) {
+                    //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
+                    //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
+                    poolDispatcher.deRegisterRequest(this, force = true)
+
+                    throw t
+                }
+
             } else {
-                synchronized(_monitor) {
-                    //need some nap time
-                    try {
-                        while (sharedQueue.isEmpty()) _monitor.wait()
-                    } catch (ie: InterruptedException) {
-                        Thread.currentThread().interrupt() // set the interrupted flag again
+                try {
+                    if (!waitStrategy.waitAndReturnAlive()) {
+                        //waited and not alive. Who are we to ignore that kind of advice. Let's die.
+                        if (poolDispatcher.deRegisterRequest(this)) {
+                            //de register succeeded, shutdown this context.
+                            interrupt()
+                        }
+                    }
+                } catch (e: InterruptedException) {
+                    if (!running) {
+                        //only set the interrupted flag again if thread is interrupted via this context.
+                        //otherwise user code has interrupted the thread, we can ignore that.
+                        thread.interrupt()
                     }
                 }
+
             }
         }
     }
 
-    fun interrupt() = thread.interrupt()
+    fun interrupt() {
+        running = false
+        thread.interrupt()
+    }
 }
+
+
+private val availableProcessors: Int
+        get() = Runtime.getRuntime().availableProcessors()
 
 
