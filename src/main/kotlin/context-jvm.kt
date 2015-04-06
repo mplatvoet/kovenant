@@ -22,6 +22,7 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+import sun.rmi.server
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
@@ -60,39 +61,31 @@ class ConcreteKovenant {
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
 
-        private val executorDelegate: ThreadSafeLazyVar<(() -> Unit) -> Unit> = ThreadSafeLazyVar {
-            val count = AtomicInteger(0)
-            val executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), {
-                val thread = Thread(it)
-                thread.setDaemon(true)
-                thread.setName("komponents-kovenant-${count.incrementAndGet()}")
-                thread
-            })
-
-            Runtime.getRuntime().addShutdownHook(Thread() {
-                executorService.shutdown()
-                executorService.awaitTermination(60, TimeUnit.SECONDS)
-            });
-            {func: () -> Unit -> executorService.execute { func() } }
+        private val dispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+            PoolDispatcher("kovenant-dispatch", 1)
         }
-        //TODO Make these distinct
-        override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
-        override var workExecutor: (() -> Unit) -> Unit by executorDelegate
+        private val workDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+            PoolDispatcher("kovenant-work")
+        }
+        override var dispatchExecutor: Dispatcher by dispatcherDelegate
+        override var workExecutor: Dispatcher by workDelegate
 
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
             if (dispatchingErrorDelegate.initialized) copy.dispatchingError = dispatchingError
-            if (executorDelegate.initialized) copy.dispatchExecutor = dispatchExecutor
+            if (dispatcherDelegate.initialized) copy.dispatchExecutor = dispatchExecutor
+            if (workDelegate.initialized) copy.workExecutor = workExecutor
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
     }
 
     private class TrackingContext(private val currentConfig: Context) : MutableContext {
-        private val executorDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
+        private val dispatchDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
+        private val workDelegate = TrackChangesVar { currentConfig.workExecutor }
         //TODO make these distinct
-        override var dispatchExecutor: (() -> Unit) -> Unit by executorDelegate
-        override var workExecutor: (() -> Unit) -> Unit by executorDelegate
+        override var dispatchExecutor: Dispatcher by dispatchDelegate
+        override var workExecutor: Dispatcher by workDelegate
 
         private val dispatchingErrorDelegate = TrackChangesVar { currentConfig.dispatchingError }
         override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
@@ -101,8 +94,11 @@ class ConcreteKovenant {
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableContext) {
-            if (executorDelegate.written)
+            if (dispatchDelegate.written)
                 config.dispatchExecutor = dispatchExecutor
+
+            if (workDelegate.written)
+                config.workExecutor = workExecutor
 
             if (dispatchingErrorDelegate.written)
                 config.dispatchingError = dispatchingError

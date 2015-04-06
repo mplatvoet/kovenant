@@ -22,34 +22,36 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import java.util.concurrent.Executor
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
 
-private class PoolDispatcher(val numberOfThreads: Int = availableProcessors, val name: String) : Dispatcher {
+private class PoolDispatcher(val name: String, val numberOfThreads: Int = availableProcessors) : Dispatcher {
 
     init {
         if (numberOfThreads < 1) {
             throw IllegalArgumentException("numberOfThreads must be at least 1 but was $numberOfThreads")
         }
     }
+
     private volatile var running = false
-    private val threadCount = AtomicInteger(0)
+    private val threadId = AtomicInteger(0)
+    private val contextCount = AtomicInteger(0)
 
     private val threadContexts = ConcurrentLinkedQueue<ThreadContext>()
     private val workQueue = ConcurrentLinkedQueue<() -> Unit>()
 
 
-
     override fun submit(task: () -> Unit) {
         workQueue.offer(task)
-        val threadSize = threadContexts.size()
+        val threadSize = contextCount.get()
         if (threadSize < numberOfThreads) {
-            val workSize = workQueue.size()
-            if (numberOfThreads * 2 < workSize) {
-                //only build a new thread context if we guess it's significant
-                ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadCount.incrementAndGet()}")
+            val threadNumber = contextCount.incrementAndGet()
+            if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
+                threadContexts.offer(ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadId.incrementAndGet()}"))
+
+            } else {
+                contextCount.decrementAndGet()
             }
         }
     }
@@ -60,14 +62,16 @@ private class PoolDispatcher(val numberOfThreads: Int = availableProcessors, val
     }
 
 
-    internal fun deRegisterRequest(context: ThreadContext, force : Boolean = false) : Boolean {
+    internal fun deRegisterRequest(context: ThreadContext, force: Boolean = false): Boolean {
+
         threadContexts.remove(context)
-        if(!force && threadContexts.isEmpty() && workQueue.isNotEmpty() && running) {
+        if (!force && threadContexts.isEmpty() && workQueue.isNotEmpty() && running) {
             //that, hopefully rare, state where all threadContexts thought they had nothing to do
             //but the queue isn't empty. Reinstate anyone that notes this.
             threadContexts.add(context)
             return false
         }
+        contextCount.decrementAndGet()
         return true
     }
 
@@ -76,7 +80,7 @@ private class PoolDispatcher(val numberOfThreads: Int = availableProcessors, val
         threadContexts.forEach { it.interrupt() }
     }
 
-    private fun createWaitStrategy() : WaitStrategy {
+    private fun createWaitStrategy(): WaitStrategy {
         return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
     }
 
@@ -88,7 +92,7 @@ private trait WaitStrategy {
     Waits for any amount of time determined by the strategy used
     Returns true if thread should expect more work, false if it can be shutdown
      */
-    fun waitAndReturnAlive() : Boolean
+    fun waitAndReturnAlive(): Boolean
 }
 
 private class ChainWaitStrategy(private vararg val strategies: WaitStrategy) : WaitStrategy {
@@ -101,9 +105,9 @@ private class ChainWaitStrategy(private vararg val strategies: WaitStrategy) : W
 }
 
 private class BusyPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
-                               private val attempts: Int = 1000) : WaitStrategy {
+                                   private val attempts: Int = 1000) : WaitStrategy {
     override fun waitAndReturnAlive(): Boolean {
-        for(i in 0..attempts) {
+        for (i in 0..attempts) {
             if (queue.isNotEmpty()) return true
             Thread.yield()
         }
@@ -112,12 +116,12 @@ private class BusyPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
 }
 
 private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
-                                   private val attempts: Int = 100,
-                                    private val sleepTimeNanos: Int = 10) : WaitStrategy {
+                                    private val attempts: Int = 100,
+                                    private val sleepTimeMs: Long = 10) : WaitStrategy {
     override fun waitAndReturnAlive(): Boolean {
-        for(i in 0..attempts) {
+        for (i in 0..attempts) {
             if (queue.isNotEmpty()) return true
-            Thread.sleep(0, sleepTimeNanos)
+            Thread.sleep(sleepTimeMs)
         }
         return false
     }
@@ -126,10 +130,10 @@ private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
 
 [suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
 private class ThreadContext(private val poolDispatcher: PoolDispatcher,
-                            private val waitStrategy : WaitStrategy,
+                            private val waitStrategy: WaitStrategy,
                             private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>,
                             val threadName: String
-                            ) {
+) {
     private val thread = Thread() { run() }
     private volatile var running = true
 
@@ -153,11 +157,11 @@ private class ThreadContext(private val poolDispatcher: PoolDispatcher,
                         //otherwise user code has interrupted the thread, we can ignore that.
                         thread.interrupt()
                     }
-                } catch(e : Exception) {
+                } catch(e: Exception) {
                     //this is pure evil, ignoring exceptions for now. Should use some global logger so this
                     //doesn't get lost.
                     //TODO: handle exception
-                } catch(t:Throwable) {
+                } catch(t: Throwable) {
                     //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
                     //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
                     poolDispatcher.deRegisterRequest(this, force = true)
@@ -194,6 +198,6 @@ private class ThreadContext(private val poolDispatcher: PoolDispatcher,
 
 
 private val availableProcessors: Int
-        get() = Runtime.getRuntime().availableProcessors()
+    get() = Runtime.getRuntime().availableProcessors()
 
 
