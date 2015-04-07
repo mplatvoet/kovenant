@@ -35,4 +35,6 @@ trait Dispatcher {
     fun submit(task: () -> Unit)
 }
 
+public class RejectedException(msg:String, val task: () -> Unit) : Throwable(msg)
+
 

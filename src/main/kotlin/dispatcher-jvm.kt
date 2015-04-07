@@ -36,7 +36,10 @@ private data class ExecutorDispatcher(private val executor: Executor) : Dispatch
     override fun submit(task: () -> Unit) = executor.execute(task)
 }
 
-private class PoolDispatcher(val name: String, val numberOfThreads: Int = availableProcessors) : Dispatcher {
+private class PoolDispatcher(val name: String,
+                             val numberOfThreads: Int = availableProcessors,
+                             private val exceptionHandler : (Throwable) -> Unit = {e -> e.printStackTrace(System.err)},
+                             private val errorHandler: (Throwable) -> Unit = {t -> t.printStackTrace(System.err)}) : Dispatcher {
 
     init {
         if (numberOfThreads < 1) {
@@ -59,15 +62,25 @@ private class PoolDispatcher(val name: String, val numberOfThreads: Int = availa
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
                 if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
-                    threadContexts.offer(ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadId.incrementAndGet()}"))
+                    threadContexts.offer(newThreadContext())
 
                 } else {
                     contextCount.decrementAndGet()
                 }
             }
         } else {
-            //TODO, how to handle rejections?
+            exceptionHandler(RejectedException("Dispatcher is shutting down", task))
         }
+    }
+
+    private fun newThreadContext(): ThreadContext {
+        return ThreadContext(
+                poolDispatcher = this,
+                waitStrategy = createWaitStrategy(),
+                sharedQueue = workQueue,
+                threadName = "${name}-${threadId.incrementAndGet()}",
+                errorHandler = errorHandler,
+                exceptionHandler = exceptionHandler)
     }
 
 
@@ -141,7 +154,9 @@ private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
 private class ThreadContext(private val poolDispatcher: PoolDispatcher,
                             private val waitStrategy: WaitStrategy,
                             private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>,
-                            val threadName: String
+                            val threadName: String,
+                            private val exceptionHandler : (Throwable) -> Unit,
+                            private val errorHandler: (Throwable) -> Unit
 ) {
     private val thread = Thread() { run() }
     private volatile var running = true
@@ -167,15 +182,13 @@ private class ThreadContext(private val poolDispatcher: PoolDispatcher,
                         thread.interrupt()
                     }
                 } catch(e: Exception) {
-                    //this is pure evil, ignoring exceptions for now. Should use some global logger so this
-                    //doesn't get lost.
-                    //TODO: handle exception
+                    exceptionHandler(e)
                 } catch(t: Throwable) {
                     //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
                     //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
                     poolDispatcher.deRegisterRequest(this, force = true)
 
-                    throw t
+                    errorHandler(t)
                 }
 
             } else {

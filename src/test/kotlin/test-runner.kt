@@ -28,7 +28,7 @@ import nl.mplatvoet.komponents.kovenant.async
 import nl.mplatvoet.komponents.kovenant.then
 
 fun main(args: Array<String>) {
-    val promises = Array(20) {
+    val promises = Array(10) {
         Kovenant.async { fib(it) }
     }
 
