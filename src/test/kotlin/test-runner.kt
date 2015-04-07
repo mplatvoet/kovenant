@@ -22,24 +22,31 @@
 
 package test
 
-import nl.mplatvoet.komponents.kovenant.*
+import nl.mplatvoet.komponents.kovenant.Kovenant
+import nl.mplatvoet.komponents.kovenant.all
+import nl.mplatvoet.komponents.kovenant.async
+import nl.mplatvoet.komponents.kovenant.then
 
 fun main(args: Array<String>) {
-    val promises = Array(10) {
-        Kovenant.async {
-            it
-        }.then {
-            val sleep = (Math.random() * 1000).toLong()
-            Thread.sleep(sleep)
-            println("Thread[${Thread.currentThread().getName()}] $it, sleep[$sleep ms]")
-            it
-        }.success {
-            println("Thread[${Thread.currentThread().getName()}] $it, done.")
-        }
+    val promises = Array(20) {
+        Kovenant.async { fib(it) }
     }
 
     Kovenant.all(*promises).success {
-        println("All done")
+        it.forEach { println(it) }
+    } .always {
+        println("done.")
+    }
+    println("Calculating fibonacci")
+}
+
+
+//a very naive fibonacci implementation
+fun fib(n: Int): Int {
+    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
+    return when(n) {
+        0,1 -> 1
+        else -> fib(n-1) + fib(n-2)
     }
 }
 

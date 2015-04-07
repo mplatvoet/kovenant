@@ -128,7 +128,6 @@ private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
 }
 
 
-[suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
 private class ThreadContext(private val poolDispatcher: PoolDispatcher,
                             private val waitStrategy: WaitStrategy,
                             private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>,
