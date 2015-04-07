@@ -50,10 +50,10 @@ class ConcreteKovenant {
 
     private class ThreadSafeContext() : MutableContext {
 
-        private val dispatchingErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
+        private val callbackErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
             {e: Exception -> throw e }
         }
-        override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
+        override var callbackError: (Exception) -> Unit by callbackErrorDelegate
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             {curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
@@ -61,47 +61,48 @@ class ConcreteKovenant {
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
 
-        private val dispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
-            PoolDispatcher("kovenant-dispatch", 1)
+        private val callbackDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+            PoolDispatcher("kovenant-callback", 1)
         }
-        private val workDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
-            PoolDispatcher("kovenant-work")
+        private val workerDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+            PoolDispatcher("kovenant-worker")
         }
-        override var dispatchExecutor: Dispatcher by dispatcherDelegate
-        override var workExecutor: Dispatcher by workDelegate
+        override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
+        override var workerDispatcher: Dispatcher by workerDispatcherDelegate
 
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
-            if (dispatchingErrorDelegate.initialized) copy.dispatchingError = dispatchingError
-            if (dispatcherDelegate.initialized) copy.dispatchExecutor = dispatchExecutor
-            if (workDelegate.initialized) copy.workExecutor = workExecutor
+            if (callbackErrorDelegate.initialized) copy.callbackError = callbackError
+            if (callbackDispatcherDelegate.initialized) copy.callbackDispatcher = callbackDispatcher
+            if (workerDispatcherDelegate.initialized) copy.workerDispatcher = workerDispatcher
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
     }
 
     private class TrackingContext(private val currentConfig: Context) : MutableContext {
-        private val dispatchDelegate = TrackChangesVar { currentConfig.dispatchExecutor }
-        private val workDelegate = TrackChangesVar { currentConfig.workExecutor }
-        //TODO make these distinct
-        override var dispatchExecutor: Dispatcher by dispatchDelegate
-        override var workExecutor: Dispatcher by workDelegate
+        private val callbackDispatcherDelegate = TrackChangesVar { currentConfig.callbackDispatcher }
+        private val workerDispatcherDelegate = TrackChangesVar { currentConfig.workerDispatcher }
 
-        private val dispatchingErrorDelegate = TrackChangesVar { currentConfig.dispatchingError }
-        override var dispatchingError: (Exception) -> Unit by dispatchingErrorDelegate
+
+        override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
+        override var workerDispatcher: Dispatcher by workerDispatcherDelegate
+
+        private val callbackErrorDelegate = TrackChangesVar { currentConfig.callbackError }
+        override var callbackError: (Exception) -> Unit by callbackErrorDelegate
 
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableContext) {
-            if (dispatchDelegate.written)
-                config.dispatchExecutor = dispatchExecutor
+            if (callbackDispatcherDelegate.written)
+                config.callbackDispatcher = callbackDispatcher
 
-            if (workDelegate.written)
-                config.workExecutor = workExecutor
+            if (workerDispatcherDelegate.written)
+                config.workerDispatcher = workerDispatcher
 
-            if (dispatchingErrorDelegate.written)
-                config.dispatchingError = dispatchingError
+            if (callbackErrorDelegate.written)
+                config.callbackError = callbackError
         }
     }
 }

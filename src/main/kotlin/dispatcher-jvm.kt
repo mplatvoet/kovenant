@@ -23,8 +23,18 @@
 package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
+
+/**
+ * Convenience method to convert an Executor to an Dispatcher
+ */
+public fun Executor.asDispatcher(): Dispatcher = ExecutorDispatcher(this)
+
+private data class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
+    override fun submit(task: () -> Unit) = executor.execute(task)
+}
 
 private class PoolDispatcher(val name: String, val numberOfThreads: Int = availableProcessors) : Dispatcher {
 
@@ -43,22 +53,21 @@ private class PoolDispatcher(val name: String, val numberOfThreads: Int = availa
 
 
     override fun submit(task: () -> Unit) {
-        workQueue.offer(task)
-        val threadSize = contextCount.get()
-        if (threadSize < numberOfThreads) {
-            val threadNumber = contextCount.incrementAndGet()
-            if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
-                threadContexts.offer(ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadId.incrementAndGet()}"))
+        if (running) {
+            workQueue.offer(task)
+            val threadSize = contextCount.get()
+            if (threadSize < numberOfThreads) {
+                val threadNumber = contextCount.incrementAndGet()
+                if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
+                    threadContexts.offer(ThreadContext(this, createWaitStrategy(), workQueue, "${name}-${threadId.incrementAndGet()}"))
 
-            } else {
-                contextCount.decrementAndGet()
+                } else {
+                    contextCount.decrementAndGet()
+                }
             }
+        } else {
+            //TODO, how to handle rejections?
         }
-    }
-
-    override fun offerHelp(): Boolean {
-        //TODO implement
-        return false;
     }
 
 

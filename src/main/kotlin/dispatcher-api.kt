@@ -22,17 +22,17 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+
+/**
+ * a Dispatcher 'executes' a task somewhere in the future. Yes, I'd rather called this an Executor but
+ * that is way to similar to java's Executors. This way it's more obvious to distinct the two types. The reason why
+ * I don't use java's Executor directly is because it pollutes the API, I want to keep this platform agnostic.
+ */
 trait Dispatcher {
     /*
         submit a task to be executed
      */
     fun submit(task: () -> Unit)
-
-    /*
-        offer to help out this dispatcher by doing some work
-        return true if more help is wanted, false otherwise
-     */
-    fun offerHelp(): Boolean
 }
 
 

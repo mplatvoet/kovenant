@@ -22,38 +22,4 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import java.util.concurrent.atomic.AtomicInteger
-
-private val nullObject = Any()
-
-private fun concreteAll(context: Context, vararg promises: Promise<*, *>): Promise<Array<Any>, Any> {
-    val results = Array(promises.size()) { nullObject }
-    val deferred = Kovenant.newDeferred<Array<Any>, Any>(context)
-    val successCount = AtomicInteger(promises.size())
-    val failCount = AtomicInteger(0)
-    promises.forEachIndexed {
-        i, promise ->
-            promise.success {
-                results[i] = it as Any
-                if (successCount.decrementAndGet() == 0) {
-                    deferred.resolve(results)
-                }
-            }
-            promise.fail {
-                if(failCount.incrementAndGet() == 1) {
-                    deferred.reject(it as Any)
-                }
-            }
-
-    }
-
-    return deferred.promise
-}
-
-
-
-
-
-
-
-
+public fun Kovenant.all(context: Context = Kovenant.context, vararg promises: Promise<*, *>): Promise<Array<Any>, Any> = concreteAll(context, *promises)

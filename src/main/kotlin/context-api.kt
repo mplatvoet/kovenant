@@ -32,15 +32,15 @@ public object Kovenant {
 }
 
 public trait Context {
-    val dispatchExecutor: Dispatcher
-    val workExecutor: Dispatcher
-    val dispatchingError: (Exception) -> Unit
+    val callbackDispatcher: Dispatcher
+    val workerDispatcher: Dispatcher
+    val callbackError: (Exception) -> Unit
     val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
 
 public trait MutableContext : Context {
-    override var dispatchExecutor: Dispatcher
-    override var workExecutor: Dispatcher
-    override var dispatchingError: (Exception) -> Unit
+    override var callbackDispatcher: Dispatcher
+    override var workerDispatcher: Dispatcher
+    override var callbackError: (Exception) -> Unit
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
