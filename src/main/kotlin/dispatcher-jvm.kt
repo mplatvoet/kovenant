@@ -44,7 +44,7 @@ private class PoolDispatcher(val name: String, val numberOfThreads: Int = availa
         }
     }
 
-    private volatile var running = false
+    private volatile var running = true
     private val threadId = AtomicInteger(0)
     private val contextCount = AtomicInteger(0)
 
@@ -85,6 +85,7 @@ private class PoolDispatcher(val name: String, val numberOfThreads: Int = availa
     }
 
     public fun shutdown() {
+        //TODO doesn't prevent from threads being created during shutdown and thus missed
         running = false
         threadContexts.forEach { it.interrupt() }
     }
