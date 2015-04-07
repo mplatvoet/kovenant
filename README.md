@@ -15,12 +15,12 @@ Developed with the following goals in mind.
 ##Code samples
 
 ### Basic example
-Running some code asynchronously is fairly simple. Just call `Promises.async {..}` with some code to execute and you get a Promise in return. 
+Running some code asynchronously is fairly simple. Just call `Kovenant.async {..}` with some code to execute and you'll get a `Promise` in return. 
 If the operation is successful, meaning if no exception is thrown, the promise is considered successful. Otherwise the promise has failed. You can use `always` to get notified when to promise has been competed, no matter what the result is.
 *Note that the order of calling `success`, `failed` and `always` is undefined.*
 
 ```kotlin
-val promise = Promises.async {
+val promise = Kovenant.async {
 	//some (long running) operation, or just:
 	1 + 1
 }
@@ -29,32 +29,31 @@ promise.success {
 	//called when no exceptions have occurred
 	println("result: $it")	
 }
-
-promise.failed {
-	//called when an exceptions has occurred
-	println("that's weird ${it.message}") 
-}
-
-promise.always {
-	//no matter what result we get, this is always called once.
-}
 ```
 
-###Chaining
+###And `then`...
 Naturally, the previous example can be written without those intermediate variables
 
 ```kotlin
-Promises.async {
+Kovenant.async {
 	//some (long running) operation, or just:
 	1 + 1
 } .success {
 	//called when no exceptions have occurred
 	println("result: $it")	
-} .failed {
-	//called when an exceptions has occurred
-	println("that's weird ${it.message}") 
-} .always {
-	//no matter what result we get, this is always called once.
+} 
+```
+
+Kovenant also provides a `then` function in order to chain units of work 
+
+```kotlin
+Kovenant.async {
+	//some (long running) operation, or just:
+	1 + 1
+} .then { i ->
+	"result: $i"	
+} .success { msg ->
+	println(msg)
 }
 ```
 
@@ -63,7 +62,7 @@ Promises.async {
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `failed` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
 
 ```kotlin
-Promises.async {
+Kovenant.async {
 	1 + 1
 } .success {
 	println("1")	
@@ -74,10 +73,17 @@ Promises.async {
 }
 ```
 
-###Wait for it
-Behind the scenes the default configuration creates a thread pool on which all operations are executed. This pool consists of solely non daemon threads, meaning the pool will shutdown when all other daemon threads are shutdown. *Therefor when the JVM shuts down, not all operations are guaranteed to complete!* More on this in the configuration section. 
+##Concurrency (JVM)
+Although Kovenant hides a lot of implementation details it's important to know what is happening behind the scenes. 
+Kovenant uses two thread pools, a worker pool and a dispatcher pool. `success`, `fail` and `always` are executed by the
+dispatcher pool. `async` and `then` are executed on the worker pool.
 
-There is a simple way to wait for completion, namely `Promises.await(vararg p:Promise<*>)`
+The default pool shuts down threads when there isn't any work left in their queues. So normally you don't have to worry 
+about shutting down any pools since they will do that themselves. It is important to realize though that because of this
+behaviour short spurts of work on the promises will spawn new threads and shut them down constantly. 
+This behaviour can be avoided in the config section, though you need to shutdown the pools manually.   
+
+
 
 ##Configuring
 
@@ -85,7 +91,7 @@ There is a simple way to wait for completion, namely `Promises.await(vararg p:Pr
 ###Executing
 The default configuration leverages a thread pool with a number of threads equal to the number of processors. This pool consists of non daemon threads and shuts down when all other daemon threads are finished. So you might want to take matters in your own hand and take control over the executor. This can be achieved like this:
 ```kotlin
-Promises.config {
+Kovenant.config {
 	executor = MyExecutor() // 
 }
 ```
