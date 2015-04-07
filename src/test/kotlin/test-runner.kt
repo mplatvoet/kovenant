@@ -25,8 +25,7 @@ package test
 import nl.mplatvoet.komponents.kovenant.*
 
 fun main(args: Array<String>) {
-    Array(10) {
-
+    val promises = Array(10) {
         Kovenant.async {
             it
         }.then {
@@ -39,6 +38,8 @@ fun main(args: Array<String>) {
         }
     }
 
-
+    Kovenant.all(*promises).success {
+        println("All done")
+    }
 }
 
