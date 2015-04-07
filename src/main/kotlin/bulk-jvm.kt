@@ -26,9 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger
 
 private val nullObject = Any()
 
-private fun concreteAll(context: Context, vararg promises: Promise<*, *>): Promise<Array<Any>, Any> {
+private fun concreteAll(vararg promises: Promise<*, *>): Promise<Array<Any>, Any> {
     val results = Array(promises.size()) { nullObject }
-    val deferred = Kovenant.newDeferred<Array<Any>, Any>(context)
+    val deferred = Kovenant.newDeferred<Array<Any>, Any>()
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
     promises.forEachIndexed {

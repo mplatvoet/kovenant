@@ -22,4 +22,4 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-public fun Kovenant.all(context: Context = Kovenant.context, vararg promises: Promise<*, *>): Promise<Array<Any>, Any> = concreteAll(context, *promises)
+public fun Kovenant.all(vararg promises: Promise<*, *>): Promise<Array<Any>, Any> = concreteAll(*promises)
