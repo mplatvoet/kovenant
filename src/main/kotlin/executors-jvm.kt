@@ -109,28 +109,27 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
     }
 
-    //TODO: Not fully implemented
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>, timeout: Long, unit: TimeUnit): MutableList<Future<T>> {
         if (tasks.isEmpty()) return ArrayList()
 
-        //Use a allFutures because if the provided list is modified (in size) this can become a deadlock
-        val allFutures = tasks map { task ->
-            FutureFunction(task) {
+        //Use a copy because if the provided list is modified (in size) this can become a deadlock
+        val copy = ArrayList(tasks)
 
-            }
-        }
-        val latch = CountDownLatch(allFutures.size())
+        val latch = CountDownLatch(copy.size())
 
         //Create a new list for completed finishedFutures and initialize with null.
         //Retaining order of the original list. This is no prerequisite of the interface
         //but is what might be expected.
-        val finishedFutures = CopyOnWriteArrayList<Future<T>?>()
-        finishedFutures.addAll(Array<Future<T>?>(allFutures.size()) { null })
+        val finishedFutures = ConcurrentHashMap<Int, Future<T>?>()
 
-        allFutures mapIndexed {
-            idx, future ->
+        val allFutures = tasks mapIndexed { idx, task ->
+            val function = FutureFunction(task) {
+                self ->
+                finishedFutures.put(idx, self)
+            }
+            dispatcher.submit(function)
+            function
         }
-
 
         try {
             if (timeout <= 0L) latch.await() else latch.await(timeout, unit)
@@ -139,7 +138,9 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             allFutures forEach { future -> future.cancel(false) }
             throw e
         }
-        return ArrayList(finishedFutures.filterNotNull())
+
+        val finished = finishedFutures.entrySet() sortBy { entry -> entry.key } map { entry -> entry.value }
+        return ArrayList(finished)
 
     }
 
