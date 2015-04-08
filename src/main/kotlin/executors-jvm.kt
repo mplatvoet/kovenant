@@ -22,6 +22,7 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+import java.util.ArrayList
 import java.util.concurrent.*
 
 
@@ -105,10 +106,41 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>> {
         throw UnsupportedOperationException()
+
     }
 
+    //TODO: Not fully implemented
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>, timeout: Long, unit: TimeUnit): MutableList<Future<T>> {
-        throw UnsupportedOperationException()
+        if (tasks.isEmpty()) return ArrayList()
+
+        //Use a allFutures because if the provided list is modified (in size) this can become a deadlock
+        val allFutures = tasks map { task ->
+            FutureFunction(task) {
+
+            }
+        }
+        val latch = CountDownLatch(allFutures.size())
+
+        //Create a new list for completed finishedFutures and initialize with null.
+        //Retaining order of the original list. This is no prerequisite of the interface
+        //but is what might be expected.
+        val finishedFutures = CopyOnWriteArrayList<Future<T>?>()
+        finishedFutures.addAll(Array<Future<T>?>(allFutures.size()) { null })
+
+        allFutures mapIndexed {
+            idx, future ->
+        }
+
+
+        try {
+            if (timeout <= 0L) latch.await() else latch.await(timeout, unit)
+        } catch(e: InterruptedException) {
+            //cancel all futures that haven't started
+            allFutures forEach { future -> future.cancel(false) }
+            throw e
+        }
+        return ArrayList(finishedFutures.filterNotNull())
+
     }
 
     override fun shutdown() {
@@ -117,8 +149,9 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
 }
 
-private class FutureFunction<V>(private val callable: Callable<V>) : Function0<Unit>, Future<V> {
-    enum class State {PENDING DONE ERROR }
+private class FutureFunction<V>(private val callable: Callable<V>,
+                                private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
+    enum class State {PENDING SUCCESS ERROR }
 
     private volatile var state = State.PENDING
     private volatile var result: Any? = null
@@ -137,7 +170,7 @@ private class FutureFunction<V>(private val callable: Callable<V>) : Function0<U
         do {
             [suppress("UNCHECKED_CAST")]
             when (state) {
-                State.DONE -> return result as V
+                State.SUCCESS -> return result as V
                 State.ERROR -> throw result as Exception
             }
 
@@ -152,15 +185,15 @@ private class FutureFunction<V>(private val callable: Callable<V>) : Function0<U
         } while (true)
     }
 
-    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = throw UnsupportedOperationException()
+    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = false
 
-    override fun isDone(): Boolean = state == State.DONE || state == State.ERROR
+    override fun isDone(): Boolean = state == State.SUCCESS || state == State.ERROR
 
 
     override fun isCancelled(): Boolean = false
 
     override fun invoke() = try {
-        setResult(callable.call(), State.DONE)
+        setResult(callable.call(), State.SUCCESS)
     } catch (e: Exception) {
         setResult(e, State.ERROR)
     }
@@ -172,6 +205,11 @@ private class FutureFunction<V>(private val callable: Callable<V>) : Function0<U
             synchronized(mutex) {
                 mutex.notifyAll()
             }
+        }
+        try {
+            doneFn(this)
+        } catch(e: Exception) {
+            //ignore, yes, ignore
         }
     }
 

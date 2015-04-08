@@ -22,26 +22,27 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
-private val nullObject = Any()
 
-private fun concreteAll(vararg promises: Promise<*, *>): Promise<Array<Any>, Any> {
-    val results = Array(promises.size()) { nullObject }
-    val deferred = Kovenant.newDeferred<Array<Any>, Any>()
+private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E>{
+    val results = ArrayList<V>(promises.size())
+    (0..promises.size()-1).forEach { results.add(null as V) }
+    val deferred = Kovenant.newDeferred<List<V>, E>()
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
     promises.forEachIndexed {
         i, promise ->
-            promise.success {
-                results[i] = it as Any
+            promise.success { v ->
+                results[i] = v
                 if (successCount.decrementAndGet() == 0) {
                     deferred.resolve(results)
                 }
             }
-            promise.fail {
+            promise.fail { e ->
                 if(failCount.incrementAndGet() == 1) {
-                    deferred.reject(it as Any)
+                    deferred.reject(e)
                 }
             }
 

@@ -34,30 +34,28 @@ fun main(args: Array<String>) {
 }
 
 fun fibonacci() {
-
-
-    val promises = Array(10) {
-        Kovenant.async { fib(it) }
+    val promises = Array(10) { n ->
+        Kovenant.async {
+            Pair(n, fib(n))
+        } success {
+            pair -> println("fib(${pair.first}) = ${pair.second}")
+        }
     }
 
-    Kovenant.all(*promises).success {
-        it.forEach { println(it) }
-    } .always {
-        println("done.")
+    Kovenant.all(*promises) always {
+        println("All promises are done.")
     }
-    println("Calculating fibonacci")
 }
 
 private class FibCallable(private val n: Int) :Callable<Int> {
     override fun call(): Int = fib(n)
-
 }
 
 fun executorService() {
     val executorService = Kovenant.context.workerDispatcher.asExecutorService()
     val future = executorService.submit(FibCallable(20))
-    println("Waiting for the future")
-    println("There it is: ${future.get()}")
+
+    println("Future: fib(20) = ${future.get()}")
 }
 
 
