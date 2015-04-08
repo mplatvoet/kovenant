@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 private class PoolDispatcher(val name: String,
                              val numberOfThreads: Int = availableProcessors,
-                             private val exceptionHandler : (Throwable) -> Unit = {e -> e.printStackTrace(System.err)},
+                             private val exceptionHandler : (Exception) -> Unit = {e -> e.printStackTrace(System.err)},
                              private val errorHandler: (Throwable) -> Unit = {t -> t.printStackTrace(System.err)}) : Dispatcher {
 
     init {

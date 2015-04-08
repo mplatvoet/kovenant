@@ -37,6 +37,6 @@ trait Dispatcher {
     fun shutdown()
 }
 
-public class RejectedException(msg:String, val task: () -> Unit) : Throwable(msg)
+public class RejectedException(msg:String, val task: () -> Unit) : Exception(msg)
 
 
