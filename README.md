@@ -91,8 +91,9 @@ This behaviour can be avoided in the config section, though you need to shutdown
 ###Executing
 The default configuration leverages a thread pool with a number of threads equal to the number of processors. This pool consists of non daemon threads and shuts down when all other daemon threads are finished. So you might want to take matters in your own hand and take control over the executor. This can be achieved like this:
 ```kotlin
-Kovenant.config {
-	executor = MyExecutor() // 
+Kovenant.configure { 
+	callbackDispatcher = MyDispatcher()
+	workerDispatcher = MyDispatcher()
 }
 ```
 *the default pool is lazy loaded, so no threads were wasted during config*

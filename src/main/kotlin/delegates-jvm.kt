@@ -35,6 +35,7 @@ public class ThreadSafeLazyVar<T>(private val initializer: () -> T) : ReadWriteP
 
     public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
         val curVal = value
+
         return if (curVal != null) {
             unmask(curVal) as T
         } else synchronized(lock) {

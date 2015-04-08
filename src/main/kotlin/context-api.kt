@@ -26,7 +26,8 @@ package nl.mplatvoet.komponents.kovenant
 public object Kovenant {
     private val concrete = ConcreteKovenant()
 
-    val context: Context = concrete.context
+    val context: Context
+        get() = concrete.context
 
     public fun configure(body: MutableContext.() -> Unit) : Unit = concrete.configure(body)
 }

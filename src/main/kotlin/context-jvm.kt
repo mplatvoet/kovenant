@@ -22,23 +22,19 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import sun.rmi.server
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 class ConcreteKovenant {
     val context: Context
-        get() = mutableContext.get()!!
+        get() = mutableContext.get()
 
-    private var mutableContext = AtomicReference(ThreadSafeContext())
+    private val mutableContext = AtomicReference(ThreadSafeContext())
 
     public fun configure(body: MutableContext.() -> Unit) {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
-        val trackingContext = TrackingContext(mutableContext.get()!!)
+        val trackingContext = TrackingContext(mutableContext.get())
         trackingContext.body()
 
         do {
@@ -46,17 +42,18 @@ class ConcreteKovenant {
             val newConfig = current.copy()
             trackingContext.applyChanged(newConfig)
         } while (!mutableContext.compareAndSet(current, newConfig))
+
     }
 
     private class ThreadSafeContext() : MutableContext {
 
         private val callbackErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
-            {e: Exception -> throw e }
+            { e: Exception -> throw e }
         }
         override var callbackError: (Exception) -> Unit by callbackErrorDelegate
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
-            {curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
+            { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
         }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
@@ -95,14 +92,10 @@ class ConcreteKovenant {
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
         fun applyChanged(config: MutableContext) {
-            if (callbackDispatcherDelegate.written)
-                config.callbackDispatcher = callbackDispatcher
-
-            if (workerDispatcherDelegate.written)
-                config.workerDispatcher = workerDispatcher
-
-            if (callbackErrorDelegate.written)
-                config.callbackError = callbackError
+            if (callbackDispatcherDelegate.written) config.callbackDispatcher = callbackDispatcher
+            if (workerDispatcherDelegate.written) config.workerDispatcher = workerDispatcher
+            if (callbackErrorDelegate.written) config.callbackError = callbackError
+            if (multipleCompletionDelegate.written) config.multipleCompletion = multipleCompletion
         }
     }
 }
