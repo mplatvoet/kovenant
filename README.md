@@ -19,7 +19,7 @@ Running some code asynchronously is fairly simple. Just call `Kovenant.async {..
 If the operation is successful, meaning if no exception is thrown, the promise is considered successful. Otherwise the promise has failed. You can use `always` to get notified when to promise has been competed, no matter what the result is.
 *Note that the order of calling `success`, `failed` and `always` is undefined.*
 
-```kotlin
+```kt
 val promise = Kovenant.async {
 	//some (long running) operation, or just:
 	1 + 1
@@ -34,7 +34,7 @@ promise.success {
 ###And `then`...
 Naturally, the previous example can be written without those intermediate variables
 
-```kotlin
+```kt
 Kovenant.async {
 	//some (long running) operation, or just:
 	1 + 1
@@ -46,7 +46,7 @@ Kovenant.async {
 
 Kovenant also provides a `then` function in order to chain units of work 
 
-```kotlin
+```kt
 Kovenant.async {
 	//some (long running) operation, or just:
 	1 + 1
@@ -61,7 +61,7 @@ Kovenant.async {
 ###Multiple Success stories
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `failed` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
 
-```kotlin
+```kt
 Kovenant.async {
 	1 + 1
 } .success {
@@ -90,7 +90,7 @@ This behaviour can be avoided in the config section, though you need to shutdown
 
 ###Executing
 The default configuration leverages a thread pool with a number of threads equal to the number of processors. This pool consists of non daemon threads and shuts down when all other daemon threads are finished. So you might want to take matters in your own hand and take control over the executor. This can be achieved like this:
-```kotlin
+```kt
 Kovenant.configure { 
 	callbackDispatcher = MyDispatcher()
 	workerDispatcher = MyDispatcher()
