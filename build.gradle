@@ -22,7 +22,6 @@ compileJava {
 
 dependencies {
     compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
-    testCompile 'junit:junit:4.12'
 }
 
 task release() {
