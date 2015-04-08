@@ -20,32 +20,39 @@
  * THE SOFTWARE.
  */
 
-package test
+package nl.mplatvoet.komponents.kovenant
 
-import nl.mplatvoet.komponents.kovenant.*
-import java.util.concurrent.Executors
+import java.util.concurrent.*
 
-fun main(args: Array<String>) {
 
-    val promises = Array(10) {
-        Kovenant.async { fib(it) }
+/**
+ * Convenience method to convert an Executor to an Dispatcher
+ */
+public fun Executor.asDispatcher(): Dispatcher = when (this) {
+    is Dispatcher -> this
+    is ExecutorService -> ExecutorServiceDispatcher(this)
+    else -> ExecutorDispatcher(this)
+}
+
+public fun Dispatcher.asExecutor(): Executor = when (this) {
+    is Executor -> this
+    else -> DispatcherExecutor(this)
+}
+
+private data open class ExecutorDispatcher(private val executor: Executor) : Dispatcher, Executor by executor {
+    override fun shutdown() {
+        /*no op*/
     }
 
-    Kovenant.all(*promises).success {
-        it.forEach { println(it) }
-    } .always {
-        println("done.")
-    }
-    println("Calculating fibonacci")
+    override fun submit(task: () -> Unit) = executor.execute(task)
+}
+
+private data class ExecutorServiceDispatcher(private val executor: ExecutorService) :
+        ExecutorDispatcher(executor), ExecutorService by executor
+
+private data open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
+    override fun execute(command: Runnable) = dispatcher.submit { command.run() }
 }
 
 
-//a very naive fibonacci implementation
-fun fib(n: Int): Int {
-    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
-    return when(n) {
-        0,1 -> 1
-        else -> fib(n-1) + fib(n-2)
-    }
-}
 

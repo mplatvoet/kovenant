@@ -27,14 +27,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
 
-/**
- * Convenience method to convert an Executor to an Dispatcher
- */
-public fun Executor.asDispatcher(): Dispatcher = ExecutorDispatcher(this)
-
-private data class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
-    override fun submit(task: () -> Unit) = executor.execute(task)
-}
 
 private class PoolDispatcher(val name: String,
                              val numberOfThreads: Int = availableProcessors,
@@ -62,7 +54,13 @@ private class PoolDispatcher(val name: String,
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
                 if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
-                    threadContexts.offer(newThreadContext())
+                    val newThreadContext = newThreadContext()
+                    threadContexts.offer(newThreadContext)
+                    if (!running) {
+                        //it can be the case that during initialization of the pool has been shutdown
+                        //and this newly created thread is missed. So request shutdown again.
+                        newThreadContext.interrupt()
+                    }
 
                 } else {
                     contextCount.decrementAndGet()
@@ -97,8 +95,7 @@ private class PoolDispatcher(val name: String,
         return true
     }
 
-    public fun shutdown() {
-        //TODO doesn't prevent from threads being created during shutdown and thus missed
+    public override fun shutdown() {
         running = false
         threadContexts.forEach { it.interrupt() }
     }
@@ -215,6 +212,7 @@ private class ThreadContext(private val poolDispatcher: PoolDispatcher,
     fun interrupt() {
         running = false
         thread.interrupt()
+        poolDispatcher.deRegisterRequest(this)
     }
 }
 
