@@ -22,31 +22,52 @@
 
 package test
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.then
+import nl.mplatvoet.komponents.kovenant.*
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 
 fun main(args: Array<String>) {
-    val promises = Array(10) {
-        Kovenant.async { fib(it) }
+
+    fibonacci()
+    executorService()
+
+}
+
+fun fibonacci() {
+    val promises = Array(10) { n ->
+        Kovenant.async {
+            Pair(n, fib(n))
+        } success {
+            pair -> println("fib(${pair.first}) = ${pair.second}")
+        }
     }
 
-    Kovenant.all(*promises).success {
-        it.forEach { println(it) }
-    } .always {
-        println("done.")
+    Kovenant.all(*promises) always {
+        println("All promises are done.")
     }
-    println("Calculating fibonacci")
+}
+
+private class FibCallable(private val n: Int) :Callable<Int> {
+    override fun call(): Int = fib(n)
+}
+
+fun executorService() {
+    val executorService = Kovenant.context.workerDispatcher.asExecutorService()
+    val future = executorService.submit(FibCallable(20))
+
+    println("Future: fib(20) = ${future.get()}")
 }
 
 
 //a very naive fibonacci implementation
 fun fib(n: Int): Int {
     if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
-    return when(n) {
-        0,1 -> 1
-        else -> fib(n-1) + fib(n-2)
+    return when (n) {
+        0, 1 -> 1
+        else -> fib(n - 1) + fib(n - 2)
     }
 }
+
+
+
 

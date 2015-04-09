@@ -27,18 +27,9 @@ import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
 
-/**
- * Convenience method to convert an Executor to an Dispatcher
- */
-public fun Executor.asDispatcher(): Dispatcher = ExecutorDispatcher(this)
-
-private data class ExecutorDispatcher(private val executor: Executor) : Dispatcher {
-    override fun submit(task: () -> Unit) = executor.execute(task)
-}
-
 private class PoolDispatcher(val name: String,
                              val numberOfThreads: Int = availableProcessors,
-                             private val exceptionHandler : (Throwable) -> Unit = {e -> e.printStackTrace(System.err)},
+                             private val exceptionHandler : (Exception) -> Unit = {e -> e.printStackTrace(System.err)},
                              private val errorHandler: (Throwable) -> Unit = {t -> t.printStackTrace(System.err)}) : Dispatcher {
 
     init {
@@ -62,7 +53,13 @@ private class PoolDispatcher(val name: String,
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
                 if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
-                    threadContexts.offer(newThreadContext())
+                    val newThreadContext = newThreadContext()
+                    threadContexts.offer(newThreadContext)
+                    if (!running) {
+                        //it can be the case that during initialization of the pool has been shutdown
+                        //and this newly created thread is missed. So request shutdown again.
+                        newThreadContext.interrupt()
+                    }
 
                 } else {
                     contextCount.decrementAndGet()
@@ -75,12 +72,8 @@ private class PoolDispatcher(val name: String,
 
     private fun newThreadContext(): ThreadContext {
         return ThreadContext(
-                poolDispatcher = this,
-                waitStrategy = createWaitStrategy(),
-                sharedQueue = workQueue,
                 threadName = "${name}-${threadId.incrementAndGet()}",
-                errorHandler = errorHandler,
-                exceptionHandler = exceptionHandler)
+                waitStrategy = createWaitStrategy())
     }
 
 
@@ -97,8 +90,7 @@ private class PoolDispatcher(val name: String,
         return true
     }
 
-    public fun shutdown() {
-        //TODO doesn't prevent from threads being created during shutdown and thus missed
+    public override fun shutdown() {
         running = false
         threadContexts.forEach { it.interrupt() }
     }
@@ -106,6 +98,70 @@ private class PoolDispatcher(val name: String,
     private fun createWaitStrategy(): WaitStrategy {
         return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
     }
+
+    private inner class ThreadContext(val threadName: String, private val waitStrategy :WaitStrategy) {
+
+        private val thread = Thread() { run() }
+        private volatile var running = true
+
+        init {
+            thread.setName(threadName)
+            thread.setDaemon(false)
+            thread.start()
+        }
+
+
+        private fun run() {
+            while (running) {
+
+                val fn = workQueue.poll() // can this throw an InterruptedException?
+                if (fn != null) {
+                    try {
+                        fn()
+                    } catch(e: InterruptedException) {
+                        if (!running) {
+                            //only set the interrupted flag again if thread is interrupted via this context.
+                            //otherwise user code has interrupted the thread, we can ignore that.
+                            thread.interrupt()
+                        }
+                    } catch(e: Exception) {
+                        exceptionHandler(e)
+                    } catch(t: Throwable) {
+                        //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
+                        //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
+                        deRegisterRequest(this, force = true)
+
+                        errorHandler(t)
+                    }
+
+                } else {
+                    try {
+                        if (!waitStrategy.waitAndReturnAlive()) {
+                            //waited and not alive. Who are we to ignore that kind of advice. Let's die.
+                            if (deRegisterRequest(this)) {
+                                //de register succeeded, shutdown this context.
+                                interrupt()
+                            }
+                        }
+                    } catch (e: InterruptedException) {
+                        if (!running) {
+                            //only set the interrupted flag again if thread is interrupted via this context.
+                            //otherwise user code has interrupted the thread, we can ignore that.
+                            thread.interrupt()
+                        }
+                    }
+
+                }
+            }
+        }
+
+        fun interrupt() {
+            running = false
+            thread.interrupt()
+            deRegisterRequest(this)
+        }
+    }
+
 
 
 }
@@ -151,72 +207,6 @@ private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
 }
 
 
-private class ThreadContext(private val poolDispatcher: PoolDispatcher,
-                            private val waitStrategy: WaitStrategy,
-                            private val sharedQueue: ConcurrentLinkedQueue<() -> Unit>,
-                            val threadName: String,
-                            private val exceptionHandler : (Throwable) -> Unit,
-                            private val errorHandler: (Throwable) -> Unit
-) {
-    private val thread = Thread() { run() }
-    private volatile var running = true
-
-    init {
-        thread.setName(threadName)
-        thread.setDaemon(false)
-        thread.start()
-    }
-
-
-    private fun run() {
-        while (running) {
-
-            val fn = sharedQueue.poll() // can this throw an InterruptedException?
-            if (fn != null) {
-                try {
-                    fn()
-                } catch(e: InterruptedException) {
-                    if (!running) {
-                        //only set the interrupted flag again if thread is interrupted via this context.
-                        //otherwise user code has interrupted the thread, we can ignore that.
-                        thread.interrupt()
-                    }
-                } catch(e: Exception) {
-                    exceptionHandler(e)
-                } catch(t: Throwable) {
-                    //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
-                    //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
-                    poolDispatcher.deRegisterRequest(this, force = true)
-
-                    errorHandler(t)
-                }
-
-            } else {
-                try {
-                    if (!waitStrategy.waitAndReturnAlive()) {
-                        //waited and not alive. Who are we to ignore that kind of advice. Let's die.
-                        if (poolDispatcher.deRegisterRequest(this)) {
-                            //de register succeeded, shutdown this context.
-                            interrupt()
-                        }
-                    }
-                } catch (e: InterruptedException) {
-                    if (!running) {
-                        //only set the interrupted flag again if thread is interrupted via this context.
-                        //otherwise user code has interrupted the thread, we can ignore that.
-                        thread.interrupt()
-                    }
-                }
-
-            }
-        }
-    }
-
-    fun interrupt() {
-        running = false
-        thread.interrupt()
-    }
-}
 
 
 private val availableProcessors: Int
