@@ -23,4 +23,3 @@
 package nl.mplatvoet.komponents.kovenant
 
 public fun Kovenant.all<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> = concreteAll(*promises)
-//public fun Kovenant.any()
