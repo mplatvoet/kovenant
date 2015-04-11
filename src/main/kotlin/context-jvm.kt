@@ -59,10 +59,15 @@ class ConcreteKovenant {
 
 
         private val callbackDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
-            PoolDispatcher("kovenant-callback", 1)
+            buildDispatcher {
+                name = "kovenant-callback"
+                numberOfThreads = 1
+            }
         }
         private val workerDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
-            PoolDispatcher("kovenant-worker")
+            buildDispatcher {
+                name = "kovenant-worker"
+            }
         }
         override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
         override var workerDispatcher: Dispatcher by workerDispatcherDelegate

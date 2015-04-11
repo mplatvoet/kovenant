@@ -28,10 +28,99 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-private class PoolDispatcher(val name: String,
-                             val numberOfThreads: Int = availableProcessors,
-                             private val exceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) },
-                             private val errorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }) : Dispatcher {
+public fun buildDispatcher(body: DispatcherBuilder.() -> Unit) : Dispatcher {
+    val builder = ConcreteDispatcherBuilder()
+    builder.body()
+    return builder.build()
+}
+
+trait DispatcherBuilder {
+    var name: String
+    var numberOfThreads: Int
+    var exceptionHandler: (Exception) -> Unit
+    var errorHandler: (Throwable) -> Unit
+    fun configureWaitStrategy(body: WaitStrategy.() -> Unit)
+}
+
+private class ConcreteDispatcherBuilder : DispatcherBuilder {
+    private var localName = "dispatcher"
+    private var localNumberOfThreads = availableProcessors
+    private var localExceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
+    private var localErrorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
+
+    private val workQueue = ConcurrentLinkedQueue<() -> Unit>()
+    private val waitStrategyBuilder = ConcreteWaitStrategyBuilder(workQueue)
+
+    override var name: String
+        get() = localName
+        set(value) {
+            localName = value
+        }
+
+
+    override var numberOfThreads: Int
+        get() = localNumberOfThreads
+        set(value) {
+            if (value < 1) {
+                throw IllegalArgumentException("numberOfThreads must be at least 1, but was $value")
+            }
+            localNumberOfThreads = value
+        }
+
+    override var exceptionHandler: (Exception) -> Unit
+        get() = localExceptionHandler
+        set(value) {
+            localExceptionHandler = value
+        }
+
+    override var errorHandler: (Throwable) -> Unit
+        get() = localErrorHandler
+        set(value) {
+            localErrorHandler = value
+        }
+
+
+    override fun configureWaitStrategy(body: WaitStrategy.() -> Unit) {
+
+    }
+
+    fun build(): Dispatcher {
+        return NonBlockingDispatcher(name = localName,
+                numberOfThreads = localNumberOfThreads,
+                exceptionHandler = localExceptionHandler,
+                errorHandler = localErrorHandler,
+                workQueue = workQueue,
+                waitStrategy = waitStrategyBuilder.build())
+    }
+
+
+}
+
+trait WaitStrategyBuilder {
+
+}
+
+class ConcreteWaitStrategyBuilder(private val workQueue: ConcurrentLinkedQueue<() -> Unit>) : WaitStrategyBuilder {
+    fun build(): WaitStrategy {
+        return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
+    }
+}
+
+trait WaitStrategy {
+    /*
+    Waits for any amount of time determined by the strategy used
+    Returns true if thread should expect more work, false if it can be shutdown
+     */
+    fun waitAndReturnAlive(): Boolean
+}
+
+
+private class NonBlockingDispatcher(val name: String,
+                                    val numberOfThreads: Int,
+                                    private val exceptionHandler: (Exception) -> Unit,
+                                    private val errorHandler: (Throwable) -> Unit,
+                                    private val workQueue: ConcurrentLinkedQueue<() -> Unit>,
+                                    private val waitStrategy: WaitStrategy) : Dispatcher {
 
     init {
         if (numberOfThreads < 1) {
@@ -44,7 +133,6 @@ private class PoolDispatcher(val name: String,
     private val contextCount = AtomicInteger(0)
 
     private val threadContexts = ConcurrentLinkedQueue<ThreadContext>()
-    private val workQueue = ConcurrentLinkedQueue<() -> Unit>()
 
 
     override fun submit(task: () -> Unit): Boolean {
@@ -127,7 +215,7 @@ private class PoolDispatcher(val name: String,
     private fun newThreadContext(): ThreadContext {
         return ThreadContext(
                 threadName = "${name}-${threadId.incrementAndGet()}",
-                waitStrategy = createWaitStrategy())
+                waitStrategy = waitStrategy)
     }
 
 
@@ -144,10 +232,6 @@ private class PoolDispatcher(val name: String,
         return true
     }
 
-
-    private fun createWaitStrategy(): WaitStrategy {
-        return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
-    }
 
     private inner class ThreadContext(val threadName: String, private val waitStrategy: WaitStrategy) {
 
@@ -173,7 +257,7 @@ private class PoolDispatcher(val name: String,
             while (state.compareAndSet(expect, update));
         }
 
-        private fun tryChangeState(expect: Int, update: Int) : Boolean = state.compareAndSet(expect, update)
+        private fun tryChangeState(expect: Int, update: Int): Boolean = state.compareAndSet(expect, update)
 
         private fun run() {
             while (alive) {
@@ -268,13 +352,6 @@ private class PoolDispatcher(val name: String,
 
 }
 
-private trait WaitStrategy {
-    /*
-    Waits for any amount of time determined by the strategy used
-    Returns true if thread should expect more work, false if it can be shutdown
-     */
-    fun waitAndReturnAlive(): Boolean
-}
 
 private class ChainWaitStrategy(private vararg val strategies: WaitStrategy) : WaitStrategy {
     override fun waitAndReturnAlive(): Boolean {
