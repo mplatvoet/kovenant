@@ -49,13 +49,13 @@ private class PoolDispatcher(val name: String,
 
     override fun submit(task: () -> Unit): Boolean {
         if (running.get()) {
-            workQueue.offer(task)
+            workQueue offer task
             val threadSize = contextCount.get()
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
                 if (threadNumber <= numberOfThreads && threadNumber < workQueue.size()) {
                     val newThreadContext = newThreadContext()
-                    threadContexts.offer(newThreadContext)
+                    threadContexts offer newThreadContext
                     if (!running.get()) {
                         //it can be the case that during initialization of the context the dispatcher has been shutdown
                         //and this newly created created is missed. So request shutdown again.
@@ -68,7 +68,6 @@ private class PoolDispatcher(val name: String,
             }
             return true
         }
-
         return false
     }
 

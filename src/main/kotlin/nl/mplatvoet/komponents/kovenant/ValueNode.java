@@ -33,12 +33,12 @@ package nl.mplatvoet.komponents.kovenant;
 public class ValueNode<V> {
 
     private static final long nextOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "next");
-    private static final long doneOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "done");
+    private static final long markedOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "marked");
 
 
     private final V _value;
     private volatile ValueNode<V> next = null;
-    private volatile int done = 0;
+    private volatile int marked = 0;
 
     ValueNode(V value) {
         if (value == null) {
@@ -51,8 +51,8 @@ public class ValueNode<V> {
         return _value;
     }
 
-    boolean isDone() {
-        return done != 0;
+    boolean isMarked() {
+        return marked != 0;
     }
 
 
@@ -79,8 +79,8 @@ public class ValueNode<V> {
     /**
      * @return true if this operation changed the flag, false otherwise
      */
-    boolean trySetDone() {
-        return UnsafeAccess.compareAndSwapInt(this, doneOffset, 0, 1);
+    boolean tryMark() {
+        return UnsafeAccess.compareAndSwapInt(this, markedOffset, 0, 1);
     }
 
     void append(ValueNode<V> node) {

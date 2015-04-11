@@ -30,7 +30,7 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
             fire(successCbs, value)
             fire(alwaysCbs)
         } else {
-            throw IllegalStateException("Promise allready resolved")
+            throw IllegalStateException("Promise already resolved")
         }
     }
 
@@ -39,7 +39,7 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
             fire(failCbs, error)
             fire(alwaysCbs)
         } else {
-            throw IllegalStateException("Promise allready resolved")
+            throw IllegalStateException("Promise already resolved")
         }
     }
 
@@ -47,15 +47,18 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
 
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
-
         if (isSuccessResult()) {
-            config.tryDispatch { callback(getAsValueResult()) }
+            val v = getAsValueResult()
+            config.tryDispatch { callback(v) }
         } else {
             addSuccessCb(callback)
 
             // we might have missed the result while adding to the list, therefor trigger
             // a (possible) second update.
-            if (isSuccessResult()) fire (successCbs, getAsValueResult())
+            if (isSuccessResult()) {
+                val v = getAsValueResult()
+                fire (successCbs, v)
+            }
         }
 
         return this
@@ -63,7 +66,8 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
 
     override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
         if (isFailResult()) {
-            config.tryDispatch { callback(getAsFailResult()) }
+            val e = getAsFailResult()
+            config.tryDispatch { callback(e) }
         } else {
             addFailCb(callback)
 
@@ -91,17 +95,21 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
     }
 
     private fun fire<T>(ref: ValueNode<(T) -> Unit>?, value: T) {
+
         ref.iterate {
-            if (!it.done && it.trySetDone()) {
+            if (!it.marked && it.tryMark()) {
+
                 val function = it.value
-                config.tryDispatch { function(value) }
+                config.tryDispatch {
+                    function(value)
+                }
             }
         }
     }
 
     private fun fire(ref: ValueNode<() -> Unit>?) {
         ref.iterate {
-            if (!it.done && it.trySetDone()) {
+            if (!it.marked && it.tryMark()) {
                 val function = it.value
                 config.tryDispatch { function() }
             }
@@ -119,7 +127,7 @@ private inline fun <T> ValueNode<T>?.iterate(cb: (ValueNode<T>) -> Unit) {
 }
 
 private val <T : Any> ValueNode<T>.next: ValueNode<T>? get() = this.getNext()
-private val <T : Any> ValueNode<T>.done: Boolean get() = this.isDone()
+private val <T : Any> ValueNode<T>.marked: Boolean get() = this.isMarked()
 private val <T : Any> ValueNode<T>.value: T get() = this.getValue()
 
 

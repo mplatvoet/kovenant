@@ -32,24 +32,26 @@ import java.util.concurrent.atomic.AtomicInteger
 fun main(args: Array<String>) {
 
     fibonacci()
-    executorService()
+    //executorService()
 
-    validate(10)
-    validate(100)
-    validate(1000)
+    //validate(10)
+    //validate(100)
+    //validate(1000)
 }
 
 fun fibonacci() {
+    val count = AtomicInteger(0)
     val promises = Array(10) { n ->
         Kovenant.async {
             Pair(n, fib(n))
         } success {
             pair -> println("fib(${pair.first}) = ${pair.second}")
+            count.incrementAndGet()
         }
     }
 
     Kovenant.all(*promises) always {
-        println("All promises are done.")
+        println("All [${promises.size()}/${count.get()}] promises are done.")
     }
 }
 
@@ -99,7 +101,3 @@ fun fib(n: Int): Int {
         else -> fib(n - 1) + fib(n - 2)
     }
 }
-
-
-
-
