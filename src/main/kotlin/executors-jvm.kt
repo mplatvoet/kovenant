@@ -22,6 +22,9 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+import sun.rmi.server
+import java.lang.ref.Reference
+import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.concurrent.*
 
@@ -81,20 +84,22 @@ private data open class DispatcherExecutor(private val dispatcher: Dispatcher) :
 
 
 private data class DispatcherExecutorService(private val dispatcher: Dispatcher) : DispatcherExecutor(dispatcher), ExecutorService {
+    private val cancelHandle = WeakRefCancelHandle(dispatcher)
+
     override fun <T> submit(task: Callable<T>): Future<T> {
-        val futureFunction = FutureFunction(task)
+        val futureFunction = FutureFunction(cancelHandle, task)
         dispatcher.submit(futureFunction)
         return futureFunction
     }
 
     override fun <T> submit(task: Runnable, result: T): Future<T> {
-        val futureFunction = FutureFunction(StaticResultCallable(task, result))
+        val futureFunction = FutureFunction(cancelHandle, StaticResultCallable(task, result))
         dispatcher.submit(futureFunction)
         return futureFunction
     }
 
     override fun submit(task: Runnable): Future<*> {
-        val futureFunction = FutureFunction(VoidCallable(task))
+        val futureFunction = FutureFunction(cancelHandle, VoidCallable(task))
         dispatcher.submit(futureFunction)
         return futureFunction
     }
@@ -152,13 +157,13 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
         val latch = CountDownLatch(copy.size())
 
-        //Create a new list for completed finishedFutures and initialize with null.
-        //Retaining order of the original list. This is no prerequisite of the interface
-        //but is what might be expected.
+        //Leveraging a concurrent HashMap for the finished tasks. Using the array index
+        //as a key. This way order ca be retained of the original list. It's no requirement but is
+        //what might be expected
         val finishedFutures = ConcurrentHashMap<Int, Future<T>?>()
 
         val allFutures = tasks mapIndexed { idx, task ->
-            val function = FutureFunction(task) {
+            val function = FutureFunction(cancelHandle, task) {
                 self ->
                 finishedFutures.put(idx, self)
             }
@@ -185,7 +190,28 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
 }
 
-private class FutureFunction<V>(val callable: Callable<V>,
+
+private trait CancelHandle {
+    fun <V> cancel(future: FutureFunction<V>): Boolean
+}
+
+//Using weak references avoids that futures that are retained
+//keeping a while dispatcher service alive.
+private class WeakRefCancelHandle(dispatcher:Dispatcher) : CancelHandle {
+    private val reference : Reference<Dispatcher>
+
+    init {
+        reference = WeakReference(dispatcher)
+    }
+
+    override fun <V> cancel(future: FutureFunction<V>): Boolean {
+        val dispatcher = reference.get()
+        return if (dispatcher ==  null) false else dispatcher.cancel(future)
+    }
+
+}
+
+private class FutureFunction<V>(private val cancelHandle: CancelHandle, val callable: Callable<V>,
                                 private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
     enum class State {PENDING SUCCESS ERROR }
 
@@ -221,7 +247,7 @@ private class FutureFunction<V>(val callable: Callable<V>,
         } while (true)
     }
 
-    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = false
+    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = cancelHandle.cancel(this)
 
     override fun isDone(): Boolean = state == State.SUCCESS || state == State.ERROR
 

@@ -29,7 +29,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-
     validate(10)
     validate(100)
     validate(1000)
@@ -39,7 +38,6 @@ fun main(args: Array<String>) {
     validate(100)
     validate(1000)
     validate(1000000)
-
 }
 
 fun fibonacci() {
