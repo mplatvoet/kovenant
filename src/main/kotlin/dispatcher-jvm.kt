@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public fun buildDispatcher(body: DispatcherBuilder.() -> Unit) : Dispatcher {
+public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
     builder.body()
     return builder.build()
@@ -39,7 +39,7 @@ trait DispatcherBuilder {
     var numberOfThreads: Int
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
-    fun configureWaitStrategy(body: WaitStrategy.() -> Unit)
+    fun configureWaitStrategy(body: WaitStrategyBuilder.() -> Unit)
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -80,8 +80,9 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
         }
 
 
-    override fun configureWaitStrategy(body: WaitStrategy.() -> Unit) {
-
+    override fun configureWaitStrategy(body: WaitStrategyBuilder.() -> Unit) {
+        waitStrategyBuilder.clear()
+        waitStrategyBuilder.body()
     }
 
     fun build(): Dispatcher {
@@ -97,12 +98,31 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 }
 
 trait WaitStrategyBuilder {
-
+    fun addBusyPoll(numberOfPolls: Int = 1000)
+    fun addSleepPoll(numberOfPolls: Int = 100, sleepTimeInMs: Long = 10)
 }
 
 class ConcreteWaitStrategyBuilder(private val workQueue: ConcurrentLinkedQueue<() -> Unit>) : WaitStrategyBuilder {
-    fun build(): WaitStrategy {
-        return ChainWaitStrategy(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue))
+    private val strategies = ArrayList<WaitStrategy>()
+
+    fun clear() = strategies.clear()
+
+    override fun addBusyPoll(numberOfPolls: Int) {
+        strategies add BusyPollWaitStrategy(queue = workQueue, attempts = numberOfPolls)
+    }
+
+    override fun addSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
+        strategies add SleepPollWaitStrategy(queue = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+    }
+
+    private fun buildDefaultStrategy() :WaitStrategy {
+        return ChainWaitStrategy(listOf(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue)))
+    }
+
+    fun build(): WaitStrategy = if (strategies.isEmpty()) {
+        buildDefaultStrategy()
+    } else {
+        ChainWaitStrategy(strategies)
     }
 }
 
@@ -353,7 +373,7 @@ private class NonBlockingDispatcher(val name: String,
 }
 
 
-private class ChainWaitStrategy(private vararg val strategies: WaitStrategy) : WaitStrategy {
+private class ChainWaitStrategy(private val strategies: List<WaitStrategy>) : WaitStrategy {
     override fun waitAndReturnAlive(): Boolean {
         strategies.forEach {
             if (it.waitAndReturnAlive()) return true

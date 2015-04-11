@@ -10,7 +10,8 @@ fun main (args: Array<String>) {
             name = "Bob the builder"
             numberOfThreads = 2
             configureWaitStrategy {
-                
+                addBusyPoll(1000)
+                addSleepPoll(10, 10)
             }
         }
         callbackDispatcher = buildDispatcher {
