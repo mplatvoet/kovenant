@@ -23,13 +23,22 @@
 package test
 
 import nl.mplatvoet.komponents.kovenant.*
+import java.util.Random
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
 
+    validate(10)
+    validate(100)
+    validate(1000)
     fibonacci()
     executorService()
+    validate(10)
+    validate(100)
+    validate(1000)
+    validate(1000000)
 
 }
 
@@ -56,6 +65,25 @@ fun executorService() {
     val future = executorService.submit(FibCallable(20))
 
     println("Future: fib(20) = ${future.get()}")
+}
+
+fun validate(n:Int) {
+    val count = AtomicInteger()
+    val successCount = AtomicInteger()
+    val promises = Array(n) { n ->
+        count.incrementAndGet()
+        Kovenant.async {
+            val i = Random().nextInt(10)
+            Pair(i, fib(i))
+        } success {
+            count.decrementAndGet()
+            successCount.incrementAndGet()
+        }
+    }
+
+    Kovenant.all(*promises) always {
+        println("validate with $n attempts, count: ${count.get()}, successCount: ${successCount.get()}")
+    }
 }
 
 

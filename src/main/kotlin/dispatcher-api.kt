@@ -29,14 +29,49 @@ package nl.mplatvoet.komponents.kovenant
  * I don't use java's Executor directly is because it pollutes the API, I want to keep this platform agnostic.
  */
 trait Dispatcher {
-    /*
-        submit a task to be executed
-     */
-    fun submit(task: () -> Unit)
 
-    fun shutdown()
+    /**
+     *
+     * @param task the task to be executed by this dispatcher
+     * @return true if the task was scheduled, false if this dispatcher has shutdown or is shutting down
+     */
+    fun submit(task: () -> Unit) : Boolean
+
+    /**
+     * Shuts down this dispatcher therefor stops accepting new tasks. This methods blocks and executes everything that
+     * is still queued unless force or timeOutMs is used. Thus by default this method returns an empty list.
+     * Any subsequent (concurrent) calls to this function will be ignored and just returns an empty list.
+     *
+     * @param force forces shutdown by cancelling all running tasks and killing threads as soon as possible
+     * @param timeOutMs for every timeOutMs > 0 the dispatcher tries to shutdown gracefully. Meaning flushing the queue
+     *                  until the timeOutMs is reached and then forcing shutdown.
+     * @param block blocks until done if true, returns with an empty list otherwise
+     *
+     * @return tasks that where not yet started, does not include cancelled tasks
+     */
+    fun shutdown(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit>
+
+    /**
+     * Cancels a previously scheduled task, Does, of course, not execute the provided task.
+     * Note that this method cancels tasks by means of equality, so be careful when using method
+     * references which effectively creates multiple Function instances and are there not equal.
+     *
+     * @return true if the task was cancelled, false otherwise
+     */
+    fun cancel(task: ()-> Unit) : Boolean
+
+
+    /**
+     * @return true if dispatcher is shutdown all threads have been shutdown, false otherwise
+     */
+    fun isTerminated() : Boolean
+
+    /**
+     * @return true if shutdown has been invoked, false otherwise.
+     */
+    fun isShutdown() : Boolean
 }
 
-public class RejectedException(msg:String, val task: () -> Unit) : Exception(msg)
+public class RejectedException(msg: String, val task: () -> Unit) : Exception(msg)
 
 

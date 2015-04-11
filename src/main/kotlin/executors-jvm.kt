@@ -46,18 +46,37 @@ public fun Dispatcher.asExecutorService(): ExecutorService = when (this) {
 }
 
 private data open class ExecutorDispatcher(private val executor: Executor) : Dispatcher, Executor by executor {
-    override fun shutdown() {
-        /*no op*/
+    override fun isTerminated(): Boolean {
+        throw UnsupportedOperationException("Don't know how to determine if $executor is terminated")
     }
 
-    override fun submit(task: () -> Unit) = executor.execute(task)
+    override fun isShutdown(): Boolean {
+        throw UnsupportedOperationException("Don't know how to determine if $executor is shutdown")
+    }
+
+    override fun shutdown(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+        throw UnsupportedOperationException("Don't know how to shutdown $executor")
+    }
+
+    override fun cancel(task: () -> Unit): Boolean = false
+
+    override fun submit(task: () -> Unit): Boolean {
+        try {
+            executor.execute(task)
+            return true
+        } catch(e: RejectedExecutionException) {
+            return false
+        }
+    }
 }
 
 private data class ExecutorServiceDispatcher(private val executor: ExecutorService) :
         ExecutorDispatcher(executor), ExecutorService by executor
 
 private data open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
-    override fun execute(command: Runnable) = dispatcher.submit { command.run() }
+    override fun execute(command: Runnable) {
+        dispatcher.submit { command.run() }
+    }
 }
 
 
@@ -93,7 +112,21 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
     }
 
     override fun shutdownNow(): MutableList<Runnable> {
-        throw UnsupportedOperationException()
+        val remains = dispatcher.shutdown(force = true)
+        //kotlin seems to struggle with type inference here, infers Any instead of Runnable.
+        val runnables = remains.map<() -> Unit, Runnable> { fn ->
+            when (fn) {
+                is Runnable -> fn
+                is FutureFunction<*> -> when (fn.callable) {
+                    is StaticResultCallable<*> -> fn.callable.task
+                    is VoidCallable -> fn.callable.task
+                    else -> FunctionRunnable(fn)
+                }
+                else -> FunctionRunnable(fn)
+            }
+
+        }
+        return runnables.toMutableList()
     }
 
     override fun isShutdown(): Boolean {
@@ -101,7 +134,9 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
     }
 
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
-        throw UnsupportedOperationException()
+        val timeOutMs = TimeUnit.MILLISECONDS.convert(timeout, unit)
+        val remains = dispatcher.shutdown(timeOutMs = timeOutMs)
+        return remains.isEmpty()
     }
 
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>> {
@@ -145,12 +180,12 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
     }
 
     override fun shutdown() {
-        dispatcher.shutdown()
+        dispatcher.shutdown(block = false)
     }
 
 }
 
-private class FutureFunction<V>(private val callable: Callable<V>,
+private class FutureFunction<V>(val callable: Callable<V>,
                                 private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
     enum class State {PENDING SUCCESS ERROR }
 
@@ -216,19 +251,37 @@ private class FutureFunction<V>(private val callable: Callable<V>,
 
 }
 
-private class VoidCallable(private val task: Runnable) : Callable<Unit?> {
+private class VoidCallable(val task: Runnable) : Callable<Unit?> {
     override fun call(): Unit? {
         task.run()
         return null
     }
 }
 
-private class StaticResultCallable<V>(private val task: Runnable, private val result: V) : Callable<V> {
+private class StaticResultCallable<V>(val task: Runnable, private val result: V) : Callable<V> {
     override fun call(): V {
         task.run()
         return result
     }
+}
 
+private class FunctionRunnable(val fn: () -> Unit) : Runnable {
+    override fun run() = fn()
+}
+
+
+private fun <T> Iterable<T>.toMutableList(): MutableList<T> {
+    when (this) {
+        is MutableList -> return this
+        is Collection<T> -> return ArrayList(this)
+    }
+    val result = ArrayList<T>()
+
+    this forEach {
+        e ->
+        result.add(e)
+    }
+    return result
 }
 
 
