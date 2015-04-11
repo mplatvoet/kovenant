@@ -22,11 +22,12 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import sun.rmi.server
 import java.lang.ref.Reference
 import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 
 /**
@@ -104,17 +105,68 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         return futureFunction
     }
 
-    override fun <T> invokeAny(tasks: MutableCollection<out Callable<T>>): T {
-        throw UnsupportedOperationException()
-    }
+    override fun <T> invokeAny(tasks: MutableCollection<out Callable<T>>): T = invokeAny(tasks, 0, TimeUnit.DAYS)
 
     override fun <T> invokeAny(tasks: MutableCollection<out Callable<T>>, timeout: Long, unit: TimeUnit): T {
-        throw UnsupportedOperationException()
+
+        //Use a copy because if the provided list is modified (in size) this can become a deadlock
+        val copy = ArrayList(tasks)
+        if (copy.isEmpty()) throw IllegalArgumentException("empty task list")
+
+        val taskCount = AtomicInteger(copy.size())
+        val singleLatch = CountDownLatch(1)
+
+
+
+        val result = AtomicReference<T>(null)
+        val error = AtomicReference<Exception>(null)
+        val allFutures = tasks mapIndexed { idx, task ->
+            val function = FutureFunction(cancelHandle, task) {
+                self ->
+                try {
+                    val value = self.get()
+                    if( result.compareAndSet(null, value)) {
+                        singleLatch.countDown()
+                    }
+                } catch (e:Exception) {
+                    error.compareAndSet(null, e)
+                } finally {
+                    taskCount.decrementAndGet()
+                }
+            }
+            if (!dispatcher.submit(function)) {
+                throw RejectedExecutionException(task.toString())
+            }
+            function
+        }
+
+        val start = System.currentTimeMillis()
+        val timeoutMs = TimeUnit.MILLISECONDS.convert(timeout, unit)
+        val interval = Math.min(10, timeoutMs)
+        fun keepWaiting() = timeoutMs < 1 || System.currentTimeMillis() - start < timeoutMs
+
+        while (singleLatch.getCount() > 0 && taskCount.get() > 0 && keepWaiting()) {
+            try {
+                singleLatch.await(interval, TimeUnit.MILLISECONDS)
+            } catch(e: InterruptedException) {
+                //cancel all futures that haven't started
+                allFutures forEach { future -> future.cancel(false) }
+                throw e
+            }
+        }
+
+        //Cancel all
+        allFutures forEach { future -> future.cancel(false) }
+
+        val value = result.get()
+        if (value != null) {
+            return value
+        }
+
+        throw ExecutionException("No task was successful", error.get())
     }
 
-    override fun isTerminated(): Boolean {
-        throw UnsupportedOperationException()
-    }
+    override fun isTerminated(): Boolean = dispatcher.isTerminated()
 
     override fun shutdownNow(): MutableList<Runnable> {
         val remains = dispatcher.shutdown(force = true)
@@ -134,9 +186,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         return runnables.toMutableList()
     }
 
-    override fun isShutdown(): Boolean {
-        throw UnsupportedOperationException()
-    }
+    override fun isShutdown(): Boolean = dispatcher.isShutdown()
 
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
         val timeOutMs = TimeUnit.MILLISECONDS.convert(timeout, unit)
@@ -144,10 +194,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         return remains.isEmpty()
     }
 
-    override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>> {
-        throw UnsupportedOperationException()
-
-    }
+    override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>> = invokeAll(tasks, 0, TimeUnit.DAYS)
 
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>, timeout: Long, unit: TimeUnit): MutableList<Future<T>> {
         if (tasks.isEmpty()) return ArrayList()
@@ -158,7 +205,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         val latch = CountDownLatch(copy.size())
 
         //Leveraging a concurrent HashMap for the finished tasks. Using the array index
-        //as a key. This way order ca be retained of the original list. It's no requirement but is
+        //as a key. This way order can be retained of the original list. It's no requirement but is
         //what might be expected
         val finishedFutures = ConcurrentHashMap<Int, Future<T>?>()
 
@@ -166,8 +213,12 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             val function = FutureFunction(cancelHandle, task) {
                 self ->
                 finishedFutures.put(idx, self)
+                latch.countDown()
             }
-            dispatcher.submit(function)
+            if (!dispatcher.submit(function)) {
+
+                throw RejectedExecutionException(task.toString())
+            }
             function
         }
 
@@ -180,6 +231,13 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         }
 
         val finished = finishedFutures.entrySet() sortBy { entry -> entry.key } map { entry -> entry.value }
+
+        //Can happen when we are using a timeout on the latch
+        if (finished.size() < allFutures.size()) {
+            val toCancel = allFutures subtract finished
+            toCancel.forEach { task -> task?.cancel(false) }
+        }
+
         return ArrayList(finished)
 
     }
@@ -196,9 +254,9 @@ private trait CancelHandle {
 }
 
 //Using weak references avoids that futures that are retained
-//keeping a while dispatcher service alive.
-private class WeakRefCancelHandle(dispatcher:Dispatcher) : CancelHandle {
-    private val reference : Reference<Dispatcher>
+//are accidentally keeping a whole dispatcher service alive.
+private class WeakRefCancelHandle(dispatcher: Dispatcher) : CancelHandle {
+    private val reference: Reference<Dispatcher>
 
     init {
         reference = WeakReference(dispatcher)
@@ -206,7 +264,7 @@ private class WeakRefCancelHandle(dispatcher:Dispatcher) : CancelHandle {
 
     override fun <V> cancel(future: FutureFunction<V>): Boolean {
         val dispatcher = reference.get()
-        return if (dispatcher ==  null) false else dispatcher.cancel(future)
+        return if (dispatcher == null) false else dispatcher.cancel(future)
     }
 
 }

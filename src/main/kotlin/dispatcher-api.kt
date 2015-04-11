@@ -72,6 +72,5 @@ trait Dispatcher {
     fun isShutdown() : Boolean
 }
 
-public class RejectedException(msg: String, val task: () -> Unit) : Exception(msg)
 
 

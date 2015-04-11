@@ -26,18 +26,17 @@ import nl.mplatvoet.komponents.kovenant.*
 import java.util.Random
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-    validate(10)
-    validate(100)
-    validate(1000)
+
     fibonacci()
     executorService()
+
     validate(10)
     validate(100)
     validate(1000)
-    validate(1000000)
 }
 
 fun fibonacci() {
@@ -60,9 +59,16 @@ private class FibCallable(private val n: Int) :Callable<Int> {
 
 fun executorService() {
     val executorService = Kovenant.context.workerDispatcher.asExecutorService()
-    val future = executorService.submit(FibCallable(20))
+    val arrayOfFibCallables = listOf( *(Array(20) {FibCallable(20)}) )
 
-    println("Future: fib(20) = ${future.get()}")
+
+    val result = executorService.invokeAny(arrayOfFibCallables)
+    println("invokeAny: fib(20) = ${result}")
+
+//    val results = executorService.invokeAll(arrayOfFibCallables)
+//    results forEach {
+//        println("invokeAll: fib(20) = ${result}")
+//    }
 }
 
 fun validate(n:Int) {
