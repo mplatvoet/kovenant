@@ -7,7 +7,7 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-/val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 
 
 val executorService = Executors.newFixedThreadPool(numberOfWorkerThreads)
