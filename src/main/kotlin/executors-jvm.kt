@@ -83,20 +83,29 @@ private data class ExecutorServiceDispatcher(private val executor: ExecutorServi
     override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
         if (force) {
             executor.shutdownNow()
-        } else if (timeOutMs < 0) {
-            executor.shutdown()
-        } else {
-            //TODO implement "block"
-            executor.awaitTermination(timeOutMs, TimeUnit.MILLISECONDS)
+            return listOf()
+        } else if (block) {
+            //I guess waiting a year is enough for peoples patience
+            executor.awaitTermination(356, TimeUnit.DAYS)
+            return listOf()
+        } else if (timeOutMs > 0){
+            if(executor.awaitTermination(timeOutMs, TimeUnit.MILLISECONDS)) {
+                return listOf()
+            } else {
+                return executor.shutdownNow().toFunctions()
+            }
         }
 
-        //TODO return actual remainders
-        return listOf()
+        return executor.shutdownNow().toFunctions()
     }
 
     override fun tryCancel(task: () -> Unit): Boolean = false
 
+
+    private fun List<Runnable>.toFunctions() : List<() -> Unit> = this map {{it.run()}}
 }
+
+
 
 private data open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
     override fun execute(command: Runnable) {
