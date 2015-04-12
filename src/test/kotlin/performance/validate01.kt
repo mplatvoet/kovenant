@@ -1,4 +1,4 @@
-package validating.validate01
+package performance.perf02
 
 import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.all

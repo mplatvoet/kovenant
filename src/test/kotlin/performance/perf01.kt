@@ -1,57 +1,65 @@
-package validating.validate03
+package performance.perf01
 
 import nl.mplatvoet.komponents.kovenant.*
 import java.text.DecimalFormat
 import java.util.ArrayList
-import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-
-val executorService = Executors.newFixedThreadPool(numberOfWorkerThreads)
+val excWorkDispatcher = Executors.newFixedThreadPool(8).asDispatcher()
+val excCallbackDispatcher = Executors.newSingleThreadExecutor().asDispatcher()
+val workDispatcher = buildDispatcher {}
+val callDispatcher = buildDispatcher { numberOfThreads = 1 }
 
 
 fun main(args: Array<String>) {
-    Kovenant.configure {
-        workerDispatcher = buildDispatcher {
-            numberOfThreads = numberOfWorkerThreads
-        }
-    }
-
     val attempts = 10
-    val warmupRounds = 100000
-    val performanceRounds = 3000000
-
     val factors = ArrayList<Double>(attempts)
     for (i in 1..10) {
-        validateFutures(warmupRounds)
+        configureExecutor()
+        validate(100000)
 
         val startExc = System.currentTimeMillis()
-        validateFutures(performanceRounds)
+        validate(3000000)
         val deltaExc = System.currentTimeMillis() - startExc
 
-        validatePromises(warmupRounds)
+        configureDispatcher()
+        validate(100000)
 
         val startDis = System.currentTimeMillis()
-        validatePromises(performanceRounds)
+        validate(3000000)
         val deltaDis = System.currentTimeMillis() - startDis
 
         val factor = deltaExc.toDouble() / deltaDis.toDouble()
         factors add factor
-        println("[$i/$attempts] Callables: ${deltaExc}ms, Promises: ${deltaDis}ms. " +
-                "Promises are a factor ${factor.format("##0.00")} ${fasterOrSlower(factor)}")
+        println("[$i/$attempts] Executor: ${deltaExc}ms, Dispatcher: ${deltaDis}ms. " +
+                "Dispatcher is a factor ${factor.format("##0.00")} ${fasterOrSlower(factor)}")
     }
 
     val averageFactor = factors.sum() / attempts.toDouble()
-    println("On average with ${attempts} attempts, " +
-            "Promises where a factor ${averageFactor.format("##0.00")} ${fasterOrSlower(averageFactor)}")
+    println("On average with ${attempts} attempts, "+
+            "Dispatcher was a factor ${averageFactor.format("##0.00")} ${fasterOrSlower(averageFactor)}")
 
-    executorService.shutdownNow()
+    excWorkDispatcher.shutdown(force = true)
+    excCallbackDispatcher.shutdown(force = true)
+}
+
+fun configureExecutor() {
+    Kovenant.configure {
+        workerDispatcher = excWorkDispatcher
+        callbackDispatcher = excCallbackDispatcher
+    }
+}
+
+fun configureDispatcher() {
+    Kovenant.configure {
+        workerDispatcher = workDispatcher
+        callbackDispatcher = callDispatcher
+    }
 }
 
 
-fun validatePromises(n: Int) {
+fun validate(n: Int) {
     val promises = Array(n) { n ->
         Kovenant.async {
             val i = 13
@@ -60,19 +68,6 @@ fun validatePromises(n: Int) {
     }
 
     await(*promises)
-}
-
-fun validateFutures(n: Int) {
-    val callables = ArrayList<Callable<Pair<Int, Int>>>(n)
-
-    (1..n).forEach {
-        n ->
-        callables add Callable {
-            val i = 13
-            Pair(i, fib(i))
-        }
-    }
-    executorService.invokeAll(callables)
 }
 
 
@@ -96,5 +91,4 @@ private fun await(vararg promises: Promise<*, *>) {
 
 private fun Double.format(pattern: String): String = DecimalFormat(pattern).format(this)
 
-private fun fasterOrSlower(value: Double) = if (value < 1.0) "slower" else "faster"
-
+private fun fasterOrSlower(value:Double) = if (value < 1.0) "slower" else "faster"
