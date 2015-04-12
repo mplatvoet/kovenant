@@ -7,7 +7,8 @@ import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+/val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+
 
 val executorService = Executors.newFixedThreadPool(numberOfWorkerThreads)
 
@@ -24,7 +25,7 @@ fun main(args: Array<String>) {
     val performanceRounds = 3000000
 
     val factors = ArrayList<Double>(attempts)
-    for (i in 1..10) {
+    for (i in 1..attempts) {
         validateFutures(warmupRounds)
 
         val startExc = System.currentTimeMillis()
