@@ -5,6 +5,8 @@
 .gradle
 classes
 build
+docs/site
+gh-pages
 
 # Compiled source #
 ###################
