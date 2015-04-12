@@ -45,7 +45,7 @@ public fun Kovenant.newDeferred<V, E>(context: Context = Kovenant.context) : Def
 
 private fun Context.tryDispatch(body: () -> Unit) {
     try {
-        callbackDispatcher.submit(body)
+        callbackDispatcher.offer(body)
     } catch (e: Exception) {
         callbackError(e)
     }
@@ -53,7 +53,7 @@ private fun Context.tryDispatch(body: () -> Unit) {
 
 private fun Context.tryWork(runnable: () -> Unit) {
     try {
-        workerDispatcher.submit(runnable)
+        workerDispatcher.offer(runnable)
     } catch (e: Exception) {
         callbackError(e)
     }

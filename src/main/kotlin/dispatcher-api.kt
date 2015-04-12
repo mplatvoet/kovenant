@@ -35,7 +35,7 @@ trait Dispatcher {
      * @param task the task to be executed by this dispatcher
      * @return true if the task was scheduled, false if this dispatcher has shutdown or is shutting down
      */
-    fun submit(task: () -> Unit) : Boolean
+    fun offer(task: () -> Unit) : Boolean
 
     /**
      * Shuts down this dispatcher therefor stops accepting new tasks. This methods blocks and executes everything that

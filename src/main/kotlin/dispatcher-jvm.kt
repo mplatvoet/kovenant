@@ -155,7 +155,7 @@ private class NonBlockingDispatcher(val name: String,
     private val threadContexts = ConcurrentLinkedQueue<ThreadContext>()
 
 
-    override fun submit(task: () -> Unit): Boolean {
+    override fun offer(task: () -> Unit): Boolean {
         if (running.get()) {
             workQueue offer task
             val threadSize = contextCount.get()
@@ -233,22 +233,26 @@ private class NonBlockingDispatcher(val name: String,
     override fun cancel(task: () -> Unit): Boolean = workQueue.remove(task)
 
     private fun newThreadContext(): ThreadContext {
+        val threadName = "${name}-${threadId.incrementAndGet()}"
+
         return ThreadContext(
-                threadName = "${name}-${threadId.incrementAndGet()}",
+                threadName = threadName,
                 waitStrategy = waitStrategy)
     }
 
 
     internal fun deRegisterRequest(context: ThreadContext, force: Boolean = false): Boolean {
 
-        threadContexts.remove(context)
-        if (!force && threadContexts.isEmpty() && workQueue.isNotEmpty() && running.get()) {
+        val succeeded = threadContexts.remove(context)
+        if (!force && succeeded && threadContexts.isEmpty() && workQueue.isNotEmpty() && running.get()) {
             //that, hopefully rare, state where all threadContexts thought they had nothing to do
             //but the queue isn't empty. Reinstate anyone that notes this.
             threadContexts.add(context)
             return false
         }
-        contextCount.decrementAndGet()
+        if (succeeded) {
+            contextCount.decrementAndGet()
+        }
         return true
     }
 

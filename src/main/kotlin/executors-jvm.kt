@@ -64,7 +64,7 @@ private data open class ExecutorDispatcher(private val executor: Executor) : Dis
 
     override fun cancel(task: () -> Unit): Boolean = false
 
-    override fun submit(task: () -> Unit): Boolean {
+    override fun offer(task: () -> Unit): Boolean {
         try {
             executor.execute(task)
             return true
@@ -75,11 +75,32 @@ private data open class ExecutorDispatcher(private val executor: Executor) : Dis
 }
 
 private data class ExecutorServiceDispatcher(private val executor: ExecutorService) :
-        ExecutorDispatcher(executor), ExecutorService by executor
+        ExecutorDispatcher(executor), ExecutorService by executor {
+    override fun isTerminated(): Boolean = executor.isTerminated()
+
+    override fun isShutdown(): Boolean = executor.isShutdown()
+
+    override fun shutdown(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+        if (force) {
+            executor.shutdownNow()
+        } else if (timeOutMs < 0) {
+            executor.shutdown()
+        } else {
+            //TODO implement "block"
+            executor.awaitTermination(timeOutMs, TimeUnit.MILLISECONDS)
+        }
+
+        //TODO return actual remainders
+        return listOf()
+    }
+
+    override fun cancel(task: () -> Unit): Boolean = false
+
+}
 
 private data open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
     override fun execute(command: Runnable) {
-        dispatcher.submit { command.run() }
+        dispatcher.offer { command.run() }
     }
 }
 
@@ -89,19 +110,19 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 
     override fun <T> submit(task: Callable<T>): Future<T> {
         val futureFunction = FutureFunction(cancelHandle, task)
-        dispatcher.submit(futureFunction)
+        dispatcher.offer(futureFunction)
         return futureFunction
     }
 
     override fun <T> submit(task: Runnable, result: T): Future<T> {
         val futureFunction = FutureFunction(cancelHandle, StaticResultCallable(task, result))
-        dispatcher.submit(futureFunction)
+        dispatcher.offer(futureFunction)
         return futureFunction
     }
 
     override fun submit(task: Runnable): Future<*> {
         val futureFunction = FutureFunction(cancelHandle, VoidCallable(task))
-        dispatcher.submit(futureFunction)
+        dispatcher.offer(futureFunction)
         return futureFunction
     }
 
@@ -134,7 +155,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
                     taskCount.decrementAndGet()
                 }
             }
-            if (!dispatcher.submit(function)) {
+            if (!dispatcher.offer(function)) {
                 throw RejectedExecutionException(task.toString())
             }
             function
@@ -215,7 +236,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
                 finishedFutures.put(idx, self)
                 latch.countDown()
             }
-            if (!dispatcher.submit(function)) {
+            if (!dispatcher.offer(function)) {
 
                 throw RejectedExecutionException(task.toString())
             }

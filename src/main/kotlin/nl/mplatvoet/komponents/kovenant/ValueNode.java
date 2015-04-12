@@ -27,7 +27,7 @@ package nl.mplatvoet.komponents.kovenant;
  * Created by mark on 27/09/14.
  * Specialized Node class to create a non blocking link list. Created with the sole purpose of reducing the memory footprint and being optimized for performance.
  * Can't do this in Kotlin for now (or I don't know how) since we can't access fields directly as needed for the sun.misc.Unsafe
- * <p/>
+ *
  * There are no guards against circular references and there won't be for performance reasons.
  */
 public class ValueNode<V> {
