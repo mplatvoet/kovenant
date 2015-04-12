@@ -1,5 +1,4 @@
 general:
   branches:
-    only:
-      - master
-      - /feature-.*/
+    ignore:
+      - gh-pages
