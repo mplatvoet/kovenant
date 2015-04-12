@@ -1,7 +1,8 @@
 allprojects {
     ext {
-        appVersion = '0.4.0'
-        appGroup = 'nl.mplatvoet.komponents.kovenant'
+        appVersion = '0.1.0'
+        appGroup = 'nl.mplatvoet.komponents'
+        archivesBaseName = "kovenant"
     }
 }
 buildscript {
@@ -13,6 +14,8 @@ buildscript {
 repositories { mavenCentral() }
 
 apply plugin: 'kotlin'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 compileJava {
     options.compilerArgs << '-XDignore.symbol.file'
@@ -28,9 +31,68 @@ task release() {
     dependsOn jar
 }
 
-gradle.taskGraph.whenReady {
-    allprojects*.version = it.hasTask(release) ? appVersion : appVersion + '-SNAPSHOT'
-    allprojects*.group = appGroup
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+//            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+//                authentication(userName: ossrhUsername, password: ossrhPassword)
+//            }
+//
+//            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+//                authentication(userName: ossrhUsername, password: ossrhPassword)
+//            }
+
+            pom.project {
+                name 'Kovenant'
+                packaging 'jar'
+                // optionally artifactId can be defined here
+                description 'Kovenant is a Promises library for Kotlin'
+                //pushing  its components to the Central Repository.
+                url 'http://kovenant.mplatvoet.nl'
+
+                scm {
+                    connection 'scm:git:https://github.com/mplatvoet/kovenant.git'
+                    developerConnection 'scm:git:https://github.com/mplatvoet/kovenant.git'
+                    url 'https://github.com/mplatvoet/kovenant'
+                }
+
+                licenses {
+                    license {
+                        name 'The MIT License (MIT)'
+                        url 'http://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mplatvoet'
+                        name 'Mark Platvoet'
+                        email 'mplatvoet@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }
 
 defaultTasks 'clean', 'release'
