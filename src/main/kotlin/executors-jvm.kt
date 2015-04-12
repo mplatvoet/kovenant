@@ -50,19 +50,19 @@ public fun Dispatcher.asExecutorService(): ExecutorService = when (this) {
 }
 
 private data open class ExecutorDispatcher(private val executor: Executor) : Dispatcher, Executor by executor {
-    override fun isTerminated(): Boolean {
+    override val terminated: Boolean get() {
         throw UnsupportedOperationException("Don't know how to determine if $executor is terminated")
     }
 
-    override fun isShutdown(): Boolean {
+    override val stopped: Boolean get() {
         throw UnsupportedOperationException("Don't know how to determine if $executor is shutdown")
     }
 
-    override fun shutdown(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
         throw UnsupportedOperationException("Don't know how to shutdown $executor")
     }
 
-    override fun cancel(task: () -> Unit): Boolean = false
+    override fun tryCancel(task: () -> Unit): Boolean = false
 
     override fun offer(task: () -> Unit): Boolean {
         try {
@@ -80,7 +80,7 @@ private data class ExecutorServiceDispatcher(private val executor: ExecutorServi
 
     override fun isShutdown(): Boolean = executor.isShutdown()
 
-    override fun shutdown(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
         if (force) {
             executor.shutdownNow()
         } else if (timeOutMs < 0) {
@@ -94,7 +94,7 @@ private data class ExecutorServiceDispatcher(private val executor: ExecutorServi
         return listOf()
     }
 
-    override fun cancel(task: () -> Unit): Boolean = false
+    override fun tryCancel(task: () -> Unit): Boolean = false
 
 }
 
@@ -187,10 +187,10 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         throw ExecutionException("No task was successful", error.get())
     }
 
-    override fun isTerminated(): Boolean = dispatcher.isTerminated()
+    override fun isTerminated(): Boolean = dispatcher.terminated
 
     override fun shutdownNow(): MutableList<Runnable> {
-        val remains = dispatcher.shutdown(force = true)
+        val remains = dispatcher.stop(force = true)
         //kotlin seems to struggle with type inference here, infers Any instead of Runnable.
         val runnables = remains.map<() -> Unit, Runnable> { fn ->
             when (fn) {
@@ -207,11 +207,11 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         return runnables.toMutableList()
     }
 
-    override fun isShutdown(): Boolean = dispatcher.isShutdown()
+    override fun isShutdown(): Boolean = dispatcher.stopped
 
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
         val timeOutMs = TimeUnit.MILLISECONDS.convert(timeout, unit)
-        val remains = dispatcher.shutdown(timeOutMs = timeOutMs)
+        val remains = dispatcher.stop(timeOutMs = timeOutMs)
         return remains.isEmpty()
     }
 
@@ -264,7 +264,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
     }
 
     override fun shutdown() {
-        dispatcher.shutdown(block = false)
+        dispatcher.stop(block = false)
     }
 
 }
@@ -285,7 +285,7 @@ private class WeakRefCancelHandle(dispatcher: Dispatcher) : CancelHandle {
 
     override fun <V> cancel(future: FutureFunction<V>): Boolean {
         val dispatcher = reference.get()
-        return if (dispatcher == null) false else dispatcher.cancel(future)
+        return if (dispatcher == null) false else dispatcher.tryCancel(future)
     }
 
 }

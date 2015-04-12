@@ -179,7 +179,7 @@ private class NonBlockingDispatcher(val name: String,
         return false
     }
 
-    override fun shutdown(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
         if (running.compareAndSet(true, false)) {
 
             //Notify all thread to simply die as soon as possible
@@ -216,9 +216,9 @@ private class NonBlockingDispatcher(val name: String,
         return ArrayList() //depleteQueue() also returns an ArrayList, returning this for consistency
     }
 
-    override fun isTerminated(): Boolean = isShutdown() && contextCount.get() < 0
+    override val terminated : Boolean get() = stopped && contextCount.get() < 0
 
-    override fun isShutdown(): Boolean = !running.get()
+    override val stopped: Boolean get() = !running.get()
 
     private fun depleteQueue(): List<() -> Unit> {
         val remains = ArrayList<() -> Unit>()
@@ -230,7 +230,7 @@ private class NonBlockingDispatcher(val name: String,
         throw IllegalStateException("unreachable")
     }
 
-    override fun cancel(task: () -> Unit): Boolean = workQueue.remove(task)
+    override fun tryCancel(task: () -> Unit): Boolean = workQueue.remove(task)
 
     private fun newThreadContext(): ThreadContext {
         val threadName = "${name}-${threadId.incrementAndGet()}"

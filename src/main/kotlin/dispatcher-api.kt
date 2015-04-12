@@ -38,7 +38,7 @@ trait Dispatcher {
     fun offer(task: () -> Unit) : Boolean
 
     /**
-     * Shuts down this dispatcher therefor stops accepting new tasks. This methods blocks and executes everything that
+     * Stops this dispatcher therefor stops accepting new tasks. This methods blocks and executes everything that
      * is still queued unless force or timeOutMs is used. Thus by default this method returns an empty list.
      * Any subsequent (concurrent) calls to this function will be ignored and just returns an empty list.
      *
@@ -49,7 +49,7 @@ trait Dispatcher {
      *
      * @return tasks that where not yet started, does not include cancelled tasks
      */
-    fun shutdown(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit>
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit>
 
     /**
      * Cancels a previously scheduled task, Does, of course, not execute the provided task.
@@ -58,18 +58,18 @@ trait Dispatcher {
      *
      * @return true if the task was cancelled, false otherwise
      */
-    fun cancel(task: ()-> Unit) : Boolean
+    fun tryCancel(task: ()-> Unit) : Boolean
 
 
     /**
      * @return true if dispatcher is shutdown all threads have been shutdown, false otherwise
      */
-    fun isTerminated() : Boolean
+    val terminated : Boolean
 
     /**
      * @return true if shutdown has been invoked, false otherwise.
      */
-    fun isShutdown() : Boolean
+    val stopped : Boolean
 }
 
 

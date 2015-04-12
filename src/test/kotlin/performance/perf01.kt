@@ -40,8 +40,8 @@ fun main(args: Array<String>) {
     println("On average with ${attempts} attempts, "+
             "Dispatcher was a factor ${averageFactor.format("##0.00")} ${fasterOrSlower(averageFactor)}")
 
-    excWorkDispatcher.shutdown(force = true)
-    excCallbackDispatcher.shutdown(force = true)
+    excWorkDispatcher.stop(force = true)
+    excCallbackDispatcher.stop(force = true)
 }
 
 fun configureExecutor() {
