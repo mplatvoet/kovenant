@@ -2,10 +2,10 @@
 Developed with the following goals in mind
 
 * [Easy to use](#easy-to-use)
-* [Runtime agnostic](#Runtime agnostic)
-* [Memory efficient](#Memory efficient)
-* [Non blocking](#Non blocking)
-* [Dependency free](#Dependency free)
+* [Runtime agnostic](#runtime-agnostic)
+* [Memory efficient](#memory-efficient)
+* [Non blocking](#non-blocking)
+* [Dependency free](#dependency-free)
 
 ##Easy to use 
 familiar API and sensible defaults. 
