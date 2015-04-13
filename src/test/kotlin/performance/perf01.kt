@@ -6,28 +6,40 @@ import java.util.ArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-val excWorkDispatcher = Executors.newFixedThreadPool(8).asDispatcher()
+
+val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+val excWorkDispatcher = Executors.newFixedThreadPool(numberOfWorkerThreads).asDispatcher()
 val excCallbackDispatcher = Executors.newSingleThreadExecutor().asDispatcher()
-val workDispatcher = buildDispatcher {}
+val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads}
 val callDispatcher = buildDispatcher { numberOfThreads = 1 }
 
+val attempts = 10
+val warmupRounds = 100000
+val timingRounds = 1000000
 
 fun main(args: Array<String>) {
-    val attempts = 10
+    println(
+            """Performance test
+- samples:      $attempts
+- warmupRounds: $warmupRounds
+- timingRounds: $timingRounds
+- workers:      $numberOfWorkerThreads""")
+
     val factors = ArrayList<Double>(attempts)
     for (i in 1..10) {
         configureExecutor()
-        validate(100000)
+        validate(warmupRounds)
 
         val startExc = System.currentTimeMillis()
-        validate(3000000)
+
+        validate(timingRounds)
         val deltaExc = System.currentTimeMillis() - startExc
 
         configureDispatcher()
-        validate(100000)
+        validate(warmupRounds)
 
         val startDis = System.currentTimeMillis()
-        validate(3000000)
+        validate(timingRounds)
         val deltaDis = System.currentTimeMillis() - startDis
 
         val factor = deltaExc.toDouble() / deltaDis.toDouble()

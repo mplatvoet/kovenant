@@ -6,23 +6,32 @@ import java.util.ArrayList
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-
-
 val executorService = Executors.newFixedThreadPool(numberOfWorkerThreads)
-
+val attempts = 10
+val warmupRounds = 100000
+val performanceRounds = 1000000
+val napTimeSeconds = 3L
+val fibN = 13
 
 fun main(args: Array<String>) {
+    println(
+            """Performance test
+- samples:      $attempts
+- warmupRounds: $warmupRounds
+- timingRounds: $performanceRounds
+- workers:      $numberOfWorkerThreads
+- sleep:        $napTimeSeconds seconds
+""")
+
     Kovenant.configure {
         workerDispatcher = buildDispatcher {
             numberOfThreads = numberOfWorkerThreads
         }
     }
 
-    val attempts = 10
-    val warmupRounds = 100000
-    val performanceRounds = 3000000
 
     val factors = ArrayList<Double>(attempts)
     for (i in 1..attempts) {
@@ -31,6 +40,7 @@ fun main(args: Array<String>) {
         val startExc = System.currentTimeMillis()
         validateFutures(performanceRounds)
         val deltaExc = System.currentTimeMillis() - startExc
+        napTime()
 
         validatePromises(warmupRounds)
 
@@ -42,6 +52,7 @@ fun main(args: Array<String>) {
         factors add factor
         println("[$i/$attempts] Callables: ${deltaExc}ms, Promises: ${deltaDis}ms. " +
                 "Promises are a factor ${factor.format("##0.00")} ${fasterOrSlower(factor)}")
+        napTime()
     }
 
     val averageFactor = factors.sum() / attempts.toDouble()
@@ -51,12 +62,16 @@ fun main(args: Array<String>) {
     executorService.shutdownNow()
 }
 
+private fun napTime() {
+    System.gc()
+    Thread.sleep(TimeUnit.MILLISECONDS.convert(napTimeSeconds, TimeUnit.SECONDS))
+}
+
 
 fun validatePromises(n: Int) {
     val promises = Array(n) { n ->
         Kovenant.async {
-            val i = 13
-            Pair(i, fib(i))
+            Pair(fibN, fib(fibN))
         }
     }
 
@@ -69,8 +84,8 @@ fun validateFutures(n: Int) {
     (1..n).forEach {
         n ->
         callables add Callable {
-            val i = 13
-            Pair(i, fib(i))
+
+            Pair(fibN, fib(fibN))
         }
     }
     executorService.invokeAll(callables)
