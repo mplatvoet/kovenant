@@ -22,10 +22,8 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import kotlin.properties.ReadWriteProperty
-import kotlin.properties.ReadOnlyProperty
-import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.properties.ReadWriteProperty
 
 
 [suppress("UNCHECKED_CAST")]
@@ -34,11 +32,10 @@ public class ThreadSafeLazyVar<T>(private val initializer: () -> T) : ReadWriteP
     private volatile var value: Any? = null
 
 
-
     public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
         if (value == null) {
-            lock.writeLock().lock()
             try {
+                lock.writeLock().lock()
                 if (value == null) {
                     value = mask(initializer())
                 }

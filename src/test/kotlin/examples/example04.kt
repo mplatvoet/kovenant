@@ -10,22 +10,8 @@ import java.util.concurrent.atomic.AtomicReference
 
 
 fun main(args: Array<String>) {
-
-    val promise = Kovenant.async {
-        Pair(13, fib(13))
-    }
-
-
-    Kovenant.async {
-        Pair(13, fib(13))
-    } success {
-        pair -> println("fib(${pair.first}) = ${pair.second}")
-    }
-
-    println(promise.get())
-
-
-
+    val (n, fib) = Kovenant.async { Pair(30, fib(30)) }.get()
+    println("fib($n) = $fib")
 }
 
 
