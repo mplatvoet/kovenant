@@ -28,5 +28,5 @@ echo cleaning build directory
 rm -rf gh-pages
 
 echo cleaning site directory
-rm -rf site
+rm -rf docs/site
 echo done

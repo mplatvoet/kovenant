@@ -2,7 +2,9 @@ site_name: Kovenant
 
 pages:
 - [index.md, Home]
-- [goals.md, Goals]
 - [examples.md, Examples]
+- [goals.md, Goals]
+- [performance.md, Performance]
+- [considerations.md, Considerations]
 
 theme: yeti

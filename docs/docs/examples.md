@@ -1,4 +1,4 @@
-#Code samples
+#Code samples (OUTDATED)
 
 ##The bare basics
 Running some code asynchronously is fairly simple. Just call `Promises.async {..}` with some code to execute and you get a Promise in return. 

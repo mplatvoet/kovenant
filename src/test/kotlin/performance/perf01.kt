@@ -96,7 +96,8 @@ private fun await(vararg promises: Promise<*, *>) {
     val latch = CountDownLatch(promises.size())
     promises forEach {
         p ->
-        p always { latch.countDown() }
+        p success  { latch.countDown() }
+        p fail {latch.countDown() }
     }
     latch.await()
 }
