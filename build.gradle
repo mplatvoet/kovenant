@@ -1,6 +1,6 @@
 allprojects {
     ext {
-        appVersion = '0.1.0'
+        appVersion = '0.1.0-kotlin.M11'
         appGroup = 'nl.mplatvoet.komponents'
         archivesBaseName = "kovenant"
     }
