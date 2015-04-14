@@ -37,11 +37,21 @@ So reason enough to not follow this spec.
 ##Non Blocking
 Most Promises implementations provide functions like `isDone() : Boolean` and blocking functions `get() : V` as an alternative for 
 working with callbacks. Though it's fairly easy to implement I haven't done so yet. I feel it's defying the purpose 
-of having a promises API. 
+of having a promises API. Though this might just one of this topics where I will change my mind, because Kovenant should 
+make it easier to work with async jobs, not harder. 
 
-Though this might just one of this topics where I will change my mind. Kovenant should make it easier to work with 
-async jobs, not harder. But one thing is for sure though, if I add it to the library it will be an extension function.
-If you need now, it looks something like this:
+If I decide to add additional functions for determining state and retrieval of values it will *not* be added to the
+[Promise interface](https://github.com/mplatvoet/kovenant/blob/master/src/main/kotlin/promises-api.kt). Instead, 
+I will implement it as [Extensions](http://kotlinlang.org/docs/reference/extensions.html) to the current interface. And
+maybe, as an optimization, I will introduce a second/extended interface `PromisePlus` which will define this methods to 
+which the extension function can delegate if the current promise is of the second/extended type. This will keep the 
+`Promise` interface lean. 
+
+###I need it now!
+Still, if you desperately need such functionality already it's easy to implement on the Jvm as shown by 
+[example04.kt](https://github.com/mplatvoet/kovenant/blob/master/src/test/kotlin/examples/example04.kt). It basically
+ comes down to this:
+
 ```kt
 fun <V:Any> Promise<V, Exception>.get() : V {
     val latch = CountDownLatch(1)
