@@ -18,6 +18,6 @@ and therefor all the CAS loops non-blocking algorithms introduce more overhead. 
 when more cores are used Kovenant Promises out perform Java Executors. 
 
 ##conclusion
-Again, I encourage you to test for yourself. And keep in mind that the number of physical cores in combination with number 
+Again, I encourage you to measure for yourself. And keep in mind that the number of physical cores in combination with number 
 of threads can have serious effect on performance. So the results you see on your local machine may differ greatly 
 from the results on a production server.

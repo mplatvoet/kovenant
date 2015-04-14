@@ -1,5 +1,5 @@
 #Considerations
-Some thoughts and considerations that lead to design decisions.
+Some thoughts and considerations that led to design decisions.
 
 ##Promise specs
 There are quite a few [implementations](http://en.wikipedia.org/wiki/Futures_and_promises#List_of_implementations) out there. 
