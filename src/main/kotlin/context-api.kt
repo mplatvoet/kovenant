@@ -29,7 +29,8 @@ public object Kovenant {
     val context: Context
         get() = concrete.context
 
-    public fun configure(body: MutableContext.() -> Unit) : Unit = concrete.configure(body)
+    public fun configure(body: MutableContext.() -> Unit): Unit = concrete.configure(body)
+
 }
 
 public trait Context {
