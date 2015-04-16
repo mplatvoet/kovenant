@@ -1,10 +1,23 @@
-site_name: Kovenant
+site_name: 'Kovenant'
+site_url: 'http://kovenant.mplatvoet.nl'
+site_description: 'Kovenant documentation. Promises for Kotlin.'
+site_author: 'Mark Platvoet'
+copyright: '2015'
+
+repo_url: https://github.com/mplatvoet/kovenant
+repo_name: 'GitHub'
 
 pages:
-- [index.md, Home]
-- [examples.md, Examples]
-- [goals.md, Goals]
-- [performance.md, Performance]
-- [considerations.md, Considerations]
+- ['index.md', 'Home']
+- ['examples.md', 'Examples']
+- ['api/async.md', 'API Documentation', 'Async']
+- ['api/deferred.md', 'API Documentation', 'Deferred']
+- ['api/callbacks.md', 'API Documentation', 'Callbacks']
+- ['api/then.md', 'API Documentation', 'Then']
+- ['api/configuration.md', 'API Documentation', 'Configuration']
+- ['api/context.md', 'API Documentation', 'Context']
+- ['goals.md', 'Goals']
+- ['performance.md', 'Performance']
+- ['considerations.md', 'Considerations']
 
 theme: yeti

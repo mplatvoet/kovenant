@@ -1,8 +1,13 @@
-#Code samples (OUTDATED)
+#Callbacks
 
 ##The bare basics
-Running some code asynchronously is fairly simple. Just call `Promises.async {..}` with some code to execute and you get a Promise in return. 
-If the operation is successful, meaning if no exception is thrown, the promise is considered successful. Otherwise the promise has failed. You can use `always` to get notified when to promise has been competed, no matter what the result is.
+A `Promise<V, E>` allows you to add try types of callbacks:
+
+* `success` of type `(V) -> Unit`
+* `fail` of type `(E) -> Unit`
+* `always` of type `() -> Unit`
+
+
 *Note that the order of calling `success`, `failed` and `always` is undefined.*
 
 ```kt
@@ -16,7 +21,7 @@ promise.success {
 	println("result: $it")	
 }
 
-promise.failed {
+promise.fail {
 	//called when an exceptions has occurred
 	println("that's weird ${it.message}") 
 }
@@ -36,7 +41,7 @@ Kovenant.async {
 } success {
 	//called when no exceptions have occurred
 	println("result: $it")	
-} failed {
+} fail {
 	//called when an exceptions has occurred
 	println("that's weird ${it.message}") 
 } always {
@@ -46,7 +51,7 @@ Kovenant.async {
 
 
 ##Multiple Success stories
-You don't have to limit yourself to registering just one callback. You can add multiple `success`, `failed` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
+You don't have to limit yourself to registering just one callback. You can add multiple `success`, `fail` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
 
 ```kt
 Promises.async {

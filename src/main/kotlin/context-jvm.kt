@@ -45,6 +45,12 @@ class ConcreteKovenant {
 
     }
 
+    fun createContext(body: MutableContext.() -> Unit): Context {
+        val context = ThreadSafeContext()
+        context.body()
+        return context
+    }
+
     private class ThreadSafeContext() : MutableContext {
 
         private val callbackErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
@@ -103,4 +109,6 @@ class ConcreteKovenant {
             if (multipleCompletionDelegate.written) config.multipleCompletion = multipleCompletion
         }
     }
+
+
 }
