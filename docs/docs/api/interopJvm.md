@@ -13,8 +13,7 @@ functionality.
 fun main(args: Array<String>) {
     val executorService = Kovenant.context.workerDispatcher.asExecutorService()
 
-    val random = Random()
-    val tasks = listOf(*(Array(5) { FibCallable(random.nextInt(25)) }))
+    val tasks = listOf(*(Array(5) { FibCallable(25 - it) }))
 
 
     val (n, fib) = executorService.invokeAny(tasks)
