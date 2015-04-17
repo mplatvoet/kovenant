@@ -4,12 +4,12 @@
 A Promises implementation written in [Kotlin](http://kotlinlang.org) inspired by various Promises implementations.
 
 ```kt
-val promise = Kovenant.async {
+val promise = async {
 	//some (long running) operation, or just:
 	1 + 1
 }
 
-promise.success {
+promise success {
 	//called when no exceptions have occurred
 	println("result: $it")	
 }
