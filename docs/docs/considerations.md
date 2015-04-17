@@ -72,3 +72,19 @@ fun <V:Any> Promise<V, Exception>.get() : V {
 }
 ```
 
+##Top level functions
+One important consideration is the use of top level functions versus `class` or 
+[`object`](http://kotlinlang.org/docs/reference/object-declarations.html#object-declarations) bound functions. To
+illustrate:
+```kt
+async {
+    foo()
+}
+//versus
+Kovenant.async {
+    foo()
+}
+```
+the latter has the advantage that it doesn't interfere with other frameworks that introduces such methods. But on the other
+hand who many frameworks bringing async functionality does a project really need? So I decided to stick with top level
+functions, which need to be imported explicitly anyway, to keep things simple. 
