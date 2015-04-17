@@ -20,4 +20,5 @@ pages:
 - ['performance.md', 'Performance']
 - ['considerations.md', 'Considerations']
 
-theme: yeti
+#theme: bootstrap
+theme_dir: theme/yeti
