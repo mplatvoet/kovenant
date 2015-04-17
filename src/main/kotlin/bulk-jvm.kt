@@ -22,23 +22,26 @@
 
 package nl.mplatvoet.komponents.kovenant
 
+import java.util.ArrayList
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicIntegerArray
+import java.util.concurrent.atomic.AtomicReferenceArray
 
 
 private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> {
     val deferred = deferred<List<V>, E>()
 
-    val results = ConcurrentLinkedQueue<Pair<Int, V>>()
+    val results = AtomicReferenceArray<V>(promises.size())
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
     promises.forEachIndexed {
         i, promise ->
         promise.success { v ->
-            results add Pair(i, v)
+            results[i] = v
             if (successCount.decrementAndGet() == 0) {
-                val resolvable = results sortBy { it.first } map { it.second }
-                deferred.resolve(resolvable)
+
+                deferred.resolve(results.asList())
             }
         }
         promise.fail { e ->
@@ -50,6 +53,14 @@ private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, 
     }
 
     return deferred.promise
+}
+
+private fun <V> AtomicReferenceArray<V>.asList() : List<V> {
+    val list = ArrayList<V>()
+    for (i in 0..this.length()-1) {
+        list add this[i]
+    }
+    return list
 }
 
 
