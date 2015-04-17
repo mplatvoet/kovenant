@@ -10,12 +10,12 @@ fun main(args: Array<String>) {
     val promises = Array(10) { n ->
         async {
             Pair(n, fib(n))
-        } success {
-            pair -> println("fib(${pair.first}) = ${pair.second}")
         }
     }
 
-    all(*promises) always {
+    all(*promises) success {
+        it forEach {pair -> println("fib(${pair.first}) = ${pair.second}")}
+    } always {
         println("All ${promises.size()} promises are done.")
     }
 
