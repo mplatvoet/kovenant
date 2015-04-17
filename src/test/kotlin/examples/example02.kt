@@ -2,6 +2,7 @@ package examples.example02
 
 import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.asExecutorService
+import support.fib
 import java.util.Random
 import java.util.concurrent.Callable
 
@@ -31,13 +32,4 @@ private class FibCallable(private val n: Int) : Callable<Pair<Int, Int>> {
     override fun call() = Pair(n, fib(n))
 }
 
-
-//a very naive fibonacci implementation
-fun fib(n: Int): Int {
-    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
-    return when (n) {
-        0, 1 -> 1
-        else -> fib(n - 1) + fib(n - 2)
-    }
-}
 

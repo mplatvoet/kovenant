@@ -8,25 +8,25 @@ A `Promise<V, E>` allows you to add try types of callbacks:
 * `always` of type `() -> Unit`
 
 
-*Note that the order of calling `success`, `failed` and `always` is undefined.*
+*Note that the order of calling `success`, `fail` and `always` is undefined.*
 
 ```kt
-val promise = Kovenant.async {
+val promise = async {
 	//mimicing those long running ops with:
 	1 + 1
 }
 
-promise.success {
+promise success {
 	//called on succesfull completion of the promise
 	println("result: $it")	
 }
 
-promise.fail {
+promise fail {
 	//called when an exceptions has occurred
 	println("that's weird ${it.message}") 
 }
 
-promise.always {
+promise always {
 	//no matter what result we get, this is always called once.
 }
 ```
@@ -35,7 +35,7 @@ promise.always {
 Naturally, the previous example can be written without those intermediate variables
 
 ```kt
-Kovenant.async {
+async {
 	//some (long running) operation, or just:
 	1 + 1
 } success {
@@ -54,13 +54,13 @@ Kovenant.async {
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `fail` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
 
 ```kt
-Promises.async {
+async {
 	1 + 1
-} .success {
+} success {
 	println("1")	
-} .success {
+} success {
 	println("2")	
-} .success {
+} success {
 	println("3")	
 }
 ```

@@ -10,15 +10,15 @@ fun main(args: Array<String>) {
         workerDispatcher = buildDispatcher { name = "work-new" }
     }
 
-    Kovenant.async {
+    async {
         println("default async $threadName")
-    } .success {
+    } success {
         println("default success $threadName")
     }
 
-    Kovenant.async(ctx) {
+    async(ctx) {
         println("ctx async $threadName")
-    } .success {
+    } success {
         println("ctx success $threadName")
     }
 }

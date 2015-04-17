@@ -51,6 +51,8 @@ class ConcreteKovenant {
         return context
     }
 
+    public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = DeferredPromise(context)
+
     private class ThreadSafeContext() : MutableContext {
 
         private val callbackErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {

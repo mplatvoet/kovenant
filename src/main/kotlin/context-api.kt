@@ -33,6 +33,8 @@ public object Kovenant {
 
     public fun createContext(body: MutableContext.() -> Unit) : Context = concrete.createContext(body)
 
+    public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = concrete.deferred(context)
+
 }
 
 public trait Context {

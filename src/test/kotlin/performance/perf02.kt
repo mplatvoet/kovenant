@@ -1,6 +1,7 @@
 package performance.perf02
 
 import nl.mplatvoet.komponents.kovenant.*
+import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
 import java.util.concurrent.Callable
@@ -70,7 +71,7 @@ private fun napTime() {
 
 fun validatePromises(n: Int) {
     val promises = Array(n) { n ->
-        Kovenant.async {
+        async {
             Pair(fibN, fib(fibN))
         }
     }
@@ -91,16 +92,6 @@ fun validateFutures(n: Int) {
     executorService.invokeAll(callables)
 }
 
-
-//a very naive fibonacci implementation
-fun fib(n: Int): Int {
-    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
-    return when (n) {
-        0, 1 -> 1
-        else -> fib(n - 1) + fib(n - 2)
-    }
-}
-
 private fun await(vararg promises: Promise<*, *>) {
     val latch = CountDownLatch(promises.size())
     promises forEach {
@@ -113,4 +104,3 @@ private fun await(vararg promises: Promise<*, *>) {
 private fun Double.format(pattern: String): String = DecimalFormat(pattern).format(this)
 
 private fun fasterOrSlower(value: Double) = if (value < 1.0) "slower" else "faster"
-

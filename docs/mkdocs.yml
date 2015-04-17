@@ -9,7 +9,6 @@ repo_name: 'GitHub'
 
 pages:
 - ['index.md', 'Home']
-- ['examples.md', 'Examples']
 - ['api/async.md', 'API Documentation', 'Async']
 - ['api/deferred.md', 'API Documentation', 'Deferred']
 - ['api/callbacks.md', 'API Documentation', 'Callbacks']

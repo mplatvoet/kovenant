@@ -1,6 +1,7 @@
 package performance.perf01
 
 import nl.mplatvoet.komponents.kovenant.*
+import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
 import java.util.concurrent.CountDownLatch
@@ -73,7 +74,7 @@ fun configureDispatcher() {
 
 fun validate(n: Int) {
     val promises = Array(n) { n ->
-        Kovenant.async {
+        async {
             val i = 13
             Pair(i, fib(i))
         }
@@ -82,15 +83,6 @@ fun validate(n: Int) {
     await(*promises)
 }
 
-
-//a very naive fibonacci implementation
-fun fib(n: Int): Int {
-    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
-    return when (n) {
-        0, 1 -> 1
-        else -> fib(n - 1) + fib(n - 2)
-    }
-}
 
 private fun await(vararg promises: Promise<*, *>) {
     val latch = CountDownLatch(promises.size())

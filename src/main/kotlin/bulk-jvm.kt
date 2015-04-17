@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger
 private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E>{
     val results = ArrayList<V>(promises.size())
     (0..promises.size()-1).forEach { results.add(null as V) }
-    val deferred = Kovenant.newDeferred<List<V>, E>()
+    val deferred = deferred<List<V>, E>()
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
     promises.forEachIndexed {

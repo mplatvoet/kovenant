@@ -19,40 +19,26 @@ If the operation is successful, meaning if no exception is thrown, the promise i
 *Note that the order of calling `success`, `failed` and `always` is undefined.*
 
 ```kt
-val promise = Kovenant.async {
+async {
 	//some (long running) operation, or just:
 	1 + 1
-}
-
-promise.success {
+} success {
 	//called when no exceptions have occurred
 	println("result: $it")	
 }
 ```
 
 ###And `then`...
-Naturally, the previous example can be written without those intermediate variables
-
-```kt
-Kovenant.async {
-	//some (long running) operation, or just:
-	1 + 1
-} .success {
-	//called when no exceptions have occurred
-	println("result: $it")	
-} 
-```
-
 Kovenant also provides a `then` function in order to chain units of work 
 
 ```kt
-Kovenant.async {
+async {
 	//some (long running) operation, or just:
 	1 + 1
-} .then { i ->
-	"result: $i"	
-} .success { msg ->
-	println(msg)
+} then { 
+	i -> "result: $i"	
+} success { 
+	msg -> println(msg)
 }
 ```
 
@@ -61,13 +47,13 @@ Kovenant.async {
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `failed` and `always` actions to one single promise. Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. Every callback will be called once and only once upon completion. The order of invocation is yet again undefined.
 
 ```kt
-Kovenant.async {
+async {
 	1 + 1
-} .success {
+} success {
 	println("1")	
-} .success {
+} success {
 	println("2")	
-} .success {
+} success {
 	println("3")	
 }
 ```

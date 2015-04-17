@@ -17,7 +17,7 @@ public fun await(vararg promises: Promise<*, *>) {
 
 
 fun main (args: Array<String>) {
-    val promises = Array(50) {Kovenant.async { Thread.sleep(100L) }}
+    val promises = Array(50) { async { Thread.sleep(100L) }}
 
     print("waiting...")
     await(*promises)

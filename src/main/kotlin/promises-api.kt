@@ -40,27 +40,23 @@ public trait Promise<V, E> {
     fun always(callback: () -> Unit): Promise<V, E>
 }
 
-public fun Kovenant.newDeferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = DeferredPromise(context)
+public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = Kovenant.deferred(context)
 
+private fun Context.tryDispatch(fn: () -> Unit) = callbackDispatcher.offer (fn, callbackError)
 
-private fun Context.tryDispatch(body: () -> Unit) {
+//TODO should be worker error
+private fun Context.tryWork(fn: () -> Unit) = workerDispatcher.offer (fn, callbackError)
+
+private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
     try {
-        callbackDispatcher.offer(body)
+        this.offer(fn)
     } catch (e: Exception) {
-        callbackError(e)
+        errorFn(e)
     }
 }
 
-private fun Context.tryWork(runnable: () -> Unit) {
-    try {
-        workerDispatcher.offer(runnable)
-    } catch (e: Exception) {
-        callbackError(e)
-    }
-}
-
-public fun Kovenant.async<V>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
-    val deferred = DeferredPromise<V, Exception>(context)
+public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
+    val deferred = deferred<V, Exception>(context)
     context.tryWork {
         try {
             val result = body()
@@ -69,11 +65,11 @@ public fun Kovenant.async<V>(context: Context = Kovenant.context, body: () -> V)
             deferred.reject(e)
         }
     }
-    return deferred
+    return deferred.promise
 }
 
 public fun <V, R> Promise<V, Exception>.then(context: Context = Kovenant.context, bind: (V) -> R): Promise<R, Exception> {
-    val deferred = DeferredPromise<R, Exception>(context)
+    val deferred = deferred<R, Exception>(context)
     success {
         context.tryWork {
             try {
@@ -87,17 +83,5 @@ public fun <V, R> Promise<V, Exception>.then(context: Context = Kovenant.context
     fail {
         deferred.reject(it)
     }
-    return deferred
+    return deferred.promise
 }
-
-
-
-
-
-
-
-
-
-
-
-
