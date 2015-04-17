@@ -1,4 +1,4 @@
-package examples
+package examples.deferred
 
 import nl.mplatvoet.komponents.kovenant.Promise
 import nl.mplatvoet.komponents.kovenant.deferred

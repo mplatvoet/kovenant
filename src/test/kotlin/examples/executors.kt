@@ -1,16 +1,14 @@
-package examples.example02
+package examples.executors
 
 import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.asExecutorService
 import support.fib
-import java.util.Random
 import java.util.concurrent.Callable
 
 fun main(args: Array<String>) {
     val executorService = Kovenant.context.workerDispatcher.asExecutorService()
 
-    val random = Random()
-    val tasks = listOf(*(Array(5) { FibCallable(random.nextInt(25)) }))
+    val tasks = listOf(*(Array(5) { FibCallable(it * it) }))
 
 
     val (n, fib) = executorService.invokeAny(tasks)

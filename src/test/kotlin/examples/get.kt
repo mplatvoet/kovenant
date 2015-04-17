@@ -1,4 +1,4 @@
-package examples.example04
+package examples.get
 
 
 import nl.mplatvoet.komponents.kovenant.Kovenant
