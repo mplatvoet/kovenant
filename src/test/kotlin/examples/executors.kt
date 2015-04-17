@@ -8,7 +8,7 @@ import java.util.concurrent.Callable
 fun main(args: Array<String>) {
     val executorService = Kovenant.context.workerDispatcher.asExecutorService()
 
-    val tasks = listOf(*(Array(5) { FibCallable(it * it) }))
+    val tasks = listOf(*(Array(5) { FibCallable(25 - it) }))
 
 
     val (n, fib) = executorService.invokeAny(tasks)
