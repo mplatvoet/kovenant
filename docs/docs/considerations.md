@@ -86,5 +86,5 @@ Kovenant.async {
 }
 ```
 the latter has the advantage that it doesn't interfere with other frameworks that introduces such methods. But on the other
-hand who many frameworks bringing async functionality does a project really need? So I decided to stick with top level
+hand how many frameworks bringing async functionality does a project really need? So I decided to stick with top level
 functions, which need to be imported explicitly anyway, to keep things simple. 
