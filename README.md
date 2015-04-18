@@ -4,14 +4,8 @@
 A Promises implementation written in [Kotlin](http://kotlinlang.org) inspired by various Promises implementations.
 
 ```kt
-val promise = async {
-	//some (long running) operation, or just:
-	1 + 1
-}
-
-promise success {
-	//called when no exceptions have occurred
-	println("result: $it")	
+async { "world" } and async { "Hello" } success {
+    println("${it.second} ${it.first}!")
 }
 ```
 
