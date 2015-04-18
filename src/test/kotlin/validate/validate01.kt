@@ -29,7 +29,7 @@ import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-    validate(1000000)
+    validate(10000000)
 }
 
 

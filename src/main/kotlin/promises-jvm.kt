@@ -26,8 +26,8 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
 
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
-            fire(successCbs, value)
-            fire(alwaysCbs)
+            fireSuccess(value)
+            fireAlways()
         } else {
             throw IllegalStateException("Promise already resolved")
         }
@@ -35,8 +35,8 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
 
     override fun reject(error: E) {
         if (trySetFailResult(error)) {
-            fire(failCbs, error)
-            fire(alwaysCbs)
+            fireFail(error)
+            fireAlways()
         } else {
             throw IllegalStateException("Promise already resolved")
         }
@@ -46,87 +46,71 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
 
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
-        if (isSuccessResult()) {
-            val v = getAsValueResult()
-            config.tryDispatch { callback(v) }
-        } else {
-            addSuccessCb(callback)
+        if (isFailResult()) return this;
 
-            // we might have missed the result while adding to the list, therefor trigger
-            // a (possible) second update.
-            if (isSuccessResult()) {
-                val v = getAsValueResult()
-                fire (successCbs, v)
-            }
-        }
+        addSuccessCb(callback)
+
+        //possibly resolved already
+        if (isSuccessResult()) fireSuccess(getAsValueResult())
 
         return this
     }
 
     override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
-        if (isFailResult()) {
-            val e = getAsFailResult()
-            config.tryDispatch { callback(e) }
-        } else {
-            addFailCb(callback)
+        if (isSuccessResult()) return this
 
-            // we might have missed the result while adding to the list, therefor trigger
-            // a (possible) second update.
-            if (isFailResult()) fire (failCbs, getAsFailResult())
-        }
+        addFailCb(callback)
+
+        //possibly rejected already
+        if (isFailResult()) fireFail(getAsFailResult())
 
         return this
     }
 
     override fun always(callback: () -> Unit): Promise<V, E> {
+        addAlwaysCb(callback)
 
-        if (isCompleted()) {
-            config.tryDispatch { callback() }
-        } else {
-            addAlwaysCb(callback)
-
-            // we might have missed the result while adding to the list, therefor trigger
-            // a (possible) second update.
-            if (isCompleted()) fire (alwaysCbs)
-        }
-
+        //possibly completed already
+        if (isCompleted()) fireAlways()
         return this
     }
 
-    private fun fire<T>(ref: ValueNode<(T) -> Unit>?, value: T) {
 
-        ref.iterate {
-            if (!it.marked && it.tryMark()) {
-
-                val function = it.value
+    private fun fireSuccess(value: V) {
+        do {
+            val cb = popSuccessCb()
+            if (cb != null) {
                 config.tryDispatch {
-                    function(value)
+                    cb(value)
                 }
             }
-        }
+        } while (cb != null)
     }
 
-    private fun fire(ref: ValueNode<() -> Unit>?) {
-        ref.iterate {
-            if (!it.marked && it.tryMark()) {
-                val function = it.value
-                config.tryDispatch { function() }
+    private fun fireFail(value: E) {
+        do {
+            val cb = popFailCb()
+            if (cb != null) {
+                config.tryDispatch {
+                    cb(value)
+                }
             }
-        }
+        } while (cb != null)
+    }
+
+    private fun fireAlways() {
+        do {
+            val cb = popAlwaysCb()
+            if (cb != null) {
+                config.tryDispatch {
+                    cb()
+                }
+            }
+        } while (cb != null)
     }
 }
 
-private inline fun <T> ValueNode<T>?.iterate(cb: (ValueNode<T>) -> Unit) {
-    var node = this
-    while (node != null) {
-        val n = node as ValueNode<T>
-        cb(n)
-        node = n.next
-    }
-}
 
-private val <T : Any> ValueNode<T>.next: ValueNode<T>? get() = this.getNext()
-private val <T : Any> ValueNode<T>.marked: Boolean get() = this.isMarked()
-private val <T : Any> ValueNode<T>.value: T get() = this.getValue()
+
 
 
