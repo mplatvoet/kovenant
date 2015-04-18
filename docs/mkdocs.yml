@@ -13,6 +13,7 @@ pages:
 - ['api/deferred.md', 'API Documentation', 'Deferred']
 - ['api/callbacks.md', 'API Documentation', 'Callbacks']
 - ['api/then.md', 'API Documentation', 'Then']
+- ['api/combine.md', 'API Documentation', 'Combine']
 - ['api/configuration.md', 'API Documentation', 'Configuration']
 - ['api/context.md', 'API Documentation', 'Context']
 - ['api/interopJvm.md', 'API Documentation', 'Executors (JVM)']
