@@ -67,12 +67,12 @@ fun main(args: Array<String>) {
         val factor = deltaExc.toDouble() / deltaDis.toDouble()
         factors add factor
         println("[$i/$attempts] Executor: ${deltaExc}ms, Dispatcher: ${deltaDis}ms. " +
-                "Dispatcher is a factor ${factor.format("##0.00")} ${fasterOrSlower(factor)}")
+                "Dispatcher is a factor ${fasterOrSlower(factor)}")
     }
 
     val averageFactor = factors.sum() / attempts.toDouble()
     println("On average with ${attempts} attempts, "+
-            "Dispatcher was a factor ${averageFactor.format("##0.00")} ${fasterOrSlower(averageFactor)}")
+            "Dispatcher was a factor ${fasterOrSlower(averageFactor)}")
 
     excWorkDispatcher.stop(force = true)
     excCallbackDispatcher.stop(force = true)
@@ -117,4 +117,13 @@ private fun await(vararg promises: Promise<*, *>) {
 
 private fun Double.format(pattern: String): String = DecimalFormat(pattern).format(this)
 
-private fun fasterOrSlower(value:Double) = if (value < 1.0) "slower" else "faster"
+private fun fasterOrSlower(value: Double): String {
+    if (value == 0.0) {
+        return "<undetermined>"
+    }
+    if (value < 1.0) {
+
+        return "${(1.0 / value).format("##0.00")} slower"
+    }
+    return "${value.format("##0.00")} faster"
+}
