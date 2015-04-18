@@ -24,6 +24,8 @@ package nl.mplatvoet.komponents.kovenant
 
 public fun all<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> = concreteAll(*promises)
 
+public fun <V1, V2, E> Promise<V1, E>.and(other : Promise<V2, E>) : Promise<Tuple2<V1, V2>, E> = combine(this, other)
+
 public fun combine<V1, V2, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E>
