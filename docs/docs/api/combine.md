@@ -16,3 +16,9 @@ fib20Promise and helloWorldPromise success {
     println("$msg, fib(20) = $fib")
 }
 ```
+or if you have a fetish for conciseness
+```kt
+async { fib(20) } and async { "hello world" } success {
+    println("${it.second}, fib(20) = ${it.first}")
+}
+```
