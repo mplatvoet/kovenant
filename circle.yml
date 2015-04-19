@@ -6,11 +6,8 @@ general:
     - "build/libs"
 
 deployment:
-  libs:
+  circleci:
     branch: master
     commands:
       - ./gradlew libs
-  docs:
-      branch: master
-      commands:
-        - ./publish.sh
+      - ./publish.sh
