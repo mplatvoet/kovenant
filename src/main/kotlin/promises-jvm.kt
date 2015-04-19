@@ -27,7 +27,6 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
-            fireAlways()
         } else {
             throw IllegalStateException("Promise already resolved")
         }
@@ -36,7 +35,6 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
     override fun reject(error: E) {
         if (trySetFailResult(error)) {
             fireFail(error)
-            fireAlways()
         } else {
             throw IllegalStateException("Promise already resolved")
         }
@@ -71,43 +69,37 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
         addAlwaysCb(callback)
 
         //possibly completed already
-        if (isCompleted()) fireAlways()
+        when {
+            isSuccessResult() -> fireSuccess(getAsValueResult())
+            isFailResult() -> fireFail((getAsFailResult()))
+        }
+
         return this
     }
 
 
     private fun fireSuccess(value: V) {
         do {
-            val cb = popSuccessCb()
-            if (cb != null) {
+            val node = popSuccessCb()
+            if (node != null) {
                 config.tryDispatch {
-                    cb(value)
+                    node.runSuccess(value)
                 }
             }
-        } while (cb != null)
+        } while (node != null)
     }
 
     private fun fireFail(value: E) {
         do {
-            val cb = popFailCb()
-            if (cb != null) {
+            val node = popFailCb()
+            if (node != null) {
                 config.tryDispatch {
-                    cb(value)
+                    node.runFail(value)
                 }
             }
-        } while (cb != null)
+        } while (node != null)
     }
 
-    private fun fireAlways() {
-        do {
-            val cb = popAlwaysCb()
-            if (cb != null) {
-                config.tryDispatch {
-                    cb()
-                }
-            }
-        } while (cb != null)
-    }
 }
 
 

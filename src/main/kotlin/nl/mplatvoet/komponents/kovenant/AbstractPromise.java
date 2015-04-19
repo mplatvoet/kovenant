@@ -21,6 +21,7 @@
 
 package nl.mplatvoet.komponents.kovenant;
 
+import kotlin.Function0;
 import kotlin.Function1;
 import kotlin.Unit;
 
@@ -29,29 +30,18 @@ abstract class AbstractPromise<V, E> {
 
     private enum NodeState {CHAINED, POPPING, APPENDING}
 
-    private static final long successCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "successCbs");
-    private static final long failCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "failCbs");
-    private static final long alwaysCbsOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "alwaysCbs");
-
+    private static final long headOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "head");
     private static final long stateOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "state");
-
-
     private static final long nodeStateOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "nodeState");
 
 
-    protected volatile ValueNode<kotlin.Function1<V, kotlin.Unit>> successCbs = null;
-    protected volatile ValueNode<kotlin.Function1<E, kotlin.Unit>> failCbs = null;
-    protected volatile ValueNode<kotlin.Function0<kotlin.Unit>> alwaysCbs = null;
-
+    private volatile ValueNode<V, E> head = null;
     private volatile State state = State.PENDING;
     private volatile Object result = null;
 
 
-    private static final Object EMPTY = new Object();
-
-    @SuppressWarnings("unchecked")
-    private static <T> ValueNode<T> createHeadNode() {
-        return (ValueNode<T>) new ValueNode(EMPTY);
+    private ValueNode<V, E> createHeadNode() {
+        return new RootNode<V, E>();
     }
 
     boolean trySetSuccessResult(V result) {
@@ -106,14 +96,18 @@ abstract class AbstractPromise<V, E> {
 
 
     void addSuccessCb(kotlin.Function1<V, kotlin.Unit> cb) {
-        ValueNode<kotlin.Function1<V, kotlin.Unit>> node = new ValueNode<Function1<V, Unit>>(cb);
+        ValueNode<V, E> node = new SuccessNode<V, E>(cb);
+        addValueNode(node);
+    }
+
+    private void addValueNode(final ValueNode<V, E> node) {
         //ensure there is a head
-        while (successCbs == null) {
-            UnsafeAccess.compareAndSwapObject(this, successCbsOffset, null, createHeadNode());
+        while (head == null) {
+            UnsafeAccess.compareAndSwapObject(this, headOffset, null, createHeadNode());
         }
 
         while (true) {
-            ValueNode<kotlin.Function1<V, kotlin.Unit>> tail = successCbs;
+            ValueNode<V, E> tail = head;
             while (tail.next != null) tail = tail.next;
             if (UnsafeAccess.compareAndSwapObject(tail, nodeStateOffset, NodeState.CHAINED, NodeState.APPENDING)) {
                 tail.next = node;
@@ -124,61 +118,33 @@ abstract class AbstractPromise<V, E> {
     }
 
     void addFailCb(kotlin.Function1<E, kotlin.Unit> cb) {
-        ValueNode<kotlin.Function1<E, kotlin.Unit>> node = new ValueNode<Function1<E, Unit>>(cb);
-        //ensure there is a head
-        while (failCbs == null) {
-            UnsafeAccess.compareAndSwapObject(this, failCbsOffset, null, createHeadNode());
-        }
-
-        while (true) {
-            ValueNode<kotlin.Function1<E, kotlin.Unit>> tail = failCbs;
-            while (tail.next != null) tail = tail.next;
-            if (UnsafeAccess.compareAndSwapObject(tail, nodeStateOffset, NodeState.CHAINED, NodeState.APPENDING)) {
-                tail.next = node;
-                tail.nodeState = NodeState.CHAINED;
-                return;
-            }
-        }
+        ValueNode<V, E> node = new FailNode<V, E>(cb);
+        addValueNode(node);
     }
 
     void addAlwaysCb(kotlin.Function0<kotlin.Unit> cb) {
-        ValueNode<kotlin.Function0<kotlin.Unit>> node = new ValueNode<kotlin.Function0<Unit>>(cb);
-        //ensure there is a head
-        while (alwaysCbs == null) {
-            UnsafeAccess.compareAndSwapObject(this, alwaysCbsOffset, null, createHeadNode());
-        }
-
-        while (true) {
-            ValueNode<kotlin.Function0<kotlin.Unit>> tail = alwaysCbs;
-            while (tail.next != null) tail = tail.next;
-            if (UnsafeAccess.compareAndSwapObject(tail, nodeStateOffset, NodeState.CHAINED, NodeState.APPENDING)) {
-                tail.next = node;
-                tail.nodeState = NodeState.CHAINED;
-                return;
-            }
-        }
+        ValueNode<V, E> node = new AlwaysNode<V, E>(cb);
+        addValueNode(node);
     }
 
-    kotlin.Function1<V, kotlin.Unit> popSuccessCb() {
-        return pop(successCbs);
+    ValueNode<V, E> popSuccessCb() {
+        return pop(SuccessNode.class);
     }
 
-    kotlin.Function1<E, kotlin.Unit> popFailCb() {
-        return pop(failCbs);
+    ValueNode<V, E> popFailCb() {
+        return pop(FailNode.class);
     }
 
-    kotlin.Function0<kotlin.Unit> popAlwaysCb() {
-        return pop(alwaysCbs);
-    }
-
-    private <T> T pop(ValueNode<T> head) {
+    private <T extends ValueNode<V, E>> ValueNode<V, E> pop(Class<T> clazz) {
         if (head == null) return null;
-        for (ValueNode<T> poppable; (poppable = head.next) != null; ) {
+        for (ValueNode<V, E> poppable; (poppable = head.next) != null; ) {
             if (UnsafeAccess.compareAndSwapObject(head, nodeStateOffset, NodeState.CHAINED, NodeState.POPPING)) {
                 if (UnsafeAccess.compareAndSwapObject(poppable, nodeStateOffset, NodeState.CHAINED, NodeState.POPPING)) {
                     head.next = poppable.next;
                     head.nodeState = NodeState.CHAINED;
-                    return poppable.value;
+                    if (poppable instanceof AlwaysNode || clazz.isAssignableFrom(poppable.getClass())) {
+                        return poppable;
+                    }
                 }
                 head.nodeState = NodeState.CHAINED;
             }
@@ -187,16 +153,82 @@ abstract class AbstractPromise<V, E> {
     }
 
 
-    private static class ValueNode<V> {
-        final V value;
-        volatile ValueNode<V> next = null;
+    protected abstract static class ValueNode<V, E> {
+        volatile ValueNode<V, E> next = null;
         volatile NodeState nodeState = NodeState.CHAINED;
 
-        ValueNode(V value) {
-            if (value == null) {
-                throw new IllegalArgumentException();
-            }
-            this.value = value;
+        abstract void runSuccess(V value);
+
+        abstract void runFail(E value);
+    }
+
+    private static class RootNode<V, E> extends ValueNode<V, E> {
+
+        @Override
+        void runSuccess(V value) {
+            //ignore
+        }
+
+        @Override
+        void runFail(E value) {
+            //ignore
+        }
+    }
+
+    protected static class AlwaysNode<V, E> extends ValueNode<V, E> {
+        private final kotlin.Function0<kotlin.Unit> fn;
+
+        public AlwaysNode(Function0<Unit> fn) {
+            if (fn == null) throw new IllegalArgumentException();
+            this.fn = fn;
+        }
+
+        @Override
+        void runSuccess(V value) {
+            fn.invoke();
+        }
+
+        @Override
+        void runFail(E value) {
+            fn.invoke();
+        }
+    }
+
+    protected static class SuccessNode<V, E> extends ValueNode<V, E> {
+        private final kotlin.Function1<V, kotlin.Unit> fn;
+
+        public SuccessNode(Function1<V, Unit> fn) {
+            if (fn == null) throw new IllegalArgumentException();
+            this.fn = fn;
+        }
+
+        @Override
+        void runSuccess(V value) {
+            fn.invoke(value);
+        }
+
+        @Override
+        void runFail(E value) {
+            //ignore
+        }
+    }
+
+    protected static class FailNode<V, E> extends ValueNode<V, E> {
+        private final kotlin.Function1<E, kotlin.Unit> fn;
+
+        public FailNode(Function1<E, Unit> fn) {
+            if (fn == null) throw new IllegalArgumentException();
+            this.fn = fn;
+        }
+
+        @Override
+        void runSuccess(V value) {
+            //ignore
+        }
+
+        @Override
+        void runFail(E value) {
+            fn.invoke(value);
         }
     }
 
