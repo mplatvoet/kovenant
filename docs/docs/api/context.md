@@ -3,9 +3,10 @@ The `Context` object basically the current configuration. It can be obtained fro
 by `Kovenant.configure{...}`. Refer to the [configuration](configuration.md) section for the options. To create 
 a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.configure{...}`.
 
-Functions like [`deferred`](deferred.md), [`async`](async.md) and [`then`](then.md) all have a first parameter which
+Functions like [`deferred`](deferred.md) and [`async`](async.md) have a first parameter which
 is actually a `Context` instance. By default this is `Kovenant.context` so normally you don't have worry about this.
 Just for that case you want to work with multiple configurations at once you have the possibility.
+ 
 
 ```kt
 fun main(args: Array<String>) {

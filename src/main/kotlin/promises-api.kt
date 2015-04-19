@@ -34,10 +34,12 @@ public trait Deferred<V, E> {
 
 
 public trait Promise<V, E> {
+    val context : Context
     fun success(callback: (value: V) -> Unit): Promise<V, E>
     fun fail(callback: (error: E) -> Unit): Promise<V, E>
     fun always(callback: () -> Unit): Promise<V, E>
 }
+
 
 public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = Kovenant.deferred(context)
 
@@ -67,7 +69,7 @@ public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise
     return deferred.promise
 }
 
-public fun <V, R> Promise<V, Exception>.then(context: Context = Kovenant.context, bind: (V) -> R): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     val deferred = deferred<R, Exception>(context)
     success {
         context.tryWork {

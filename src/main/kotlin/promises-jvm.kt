@@ -21,8 +21,7 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-private class DeferredPromise<V, E>(private val config: Context) : AbstractPromise<V, E>(), Promise<V, E>, Deferred<V, E> {
-
+private class DeferredPromise<V, E>(override val context: Context) : AbstractPromise<V, E>(), Promise<V, E>, Deferred<V, E> {
 
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
@@ -82,7 +81,7 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
         do {
             val node = popSuccessCb()
             if (node != null) {
-                config.tryDispatch {
+                context.tryDispatch {
                     node.runSuccess(value)
                 }
             }
@@ -93,7 +92,7 @@ private class DeferredPromise<V, E>(private val config: Context) : AbstractPromi
         do {
             val node = popFailCb()
             if (node != null) {
-                config.tryDispatch {
+                context.tryDispatch {
                     node.runFail(value)
                 }
             }
