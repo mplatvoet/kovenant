@@ -12,12 +12,12 @@ This is of course what is to expect from non-blocking versus blocking concurrenc
 
 ##perf02.kt
 [Perf02.kt](https://github.com/mplatvoet/kovenant/blob/master/src/test/kotlin/performance/perf02.kt) compares Kovenant 
-Promises versus Javas Futures. The results I've seen so far that Javas Futures out perform
-Kovenant Promises on systems where CPUs are few. This is sounds logical since on this systems lock contention is less likely
-and therefor all the CAS loops non-blocking algorithms introduce more overhead. But, just like [perf01.kt](#perf01.kt),
-when more cores are used Kovenant Promises out perform Java Executors. 
+Promises versus Javas Futures. The results I've seen so far is that Javas Futures out perform
+Kovenant Promises on systems where CPUs are few. This sounds logical since on these systems lock contention is less likely
+and therefor all the CAS loops used by non-blocking algorithms introduce more overhead. But, just like [perf01.kt](#perf01.kt),
+when more CPU cores are leveraged, Kovenant Promises out performs Java Executors. 
 
 ##conclusion
 Again, I encourage you to measure for yourself. And keep in mind that the number of physical cores in combination with number 
-of threads can have serious effect on performance. So the results you see on your local machine may differ greatly 
+of threads can have a serious effect on performance. So the results you see on your local machine may differ greatly 
 from the results on a production server.
