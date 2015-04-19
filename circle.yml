@@ -2,3 +2,5 @@ general:
   branches:
     ignore:
       - gh-pages
+  artifacts:
+    - "build/libs"
