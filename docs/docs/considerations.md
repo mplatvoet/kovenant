@@ -87,4 +87,10 @@ Kovenant.async {
 ```
 the latter has the advantage that it doesn't interfere with other frameworks that introduces such methods. But on the other
 hand how many frameworks bringing async functionality does a project really need? So I decided to stick with top level
-functions, which need to be imported explicitly anyway, to keep things simple. 
+functions, which need to be imported explicitly anyway, to keep things simple.
+
+##sun.misc.Unsafe
+I started off with an implementation that was partly written in Java and used the `sun.misc.Unsafe` class. The upside
+was that it was quick and very memory efficient. The downside that it requires proprietary API. So I decided that
+using a generic code base outweighs the performance and memory efficiency gains. As a bonus everything is written in 
+pure Kotlin now.
