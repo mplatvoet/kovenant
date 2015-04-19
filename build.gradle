@@ -1,16 +1,15 @@
-allprojects {
-    ext {
-        appVersion = '0.1.0-kotlin.M11'
-        appGroup = 'nl.mplatvoet.komponents'
-        archivesBaseName = "kovenant"
-    }
-}
+import java.text.SimpleDateFormat
+
+version = '0.1.0-kotlin.M11'
+
+
 buildscript {
     repositories { mavenCentral() }
     dependencies {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
     }
 }
+
 repositories { mavenCentral() }
 
 apply plugin: 'kotlin'
@@ -19,6 +18,23 @@ apply plugin: 'signing'
 
 dependencies {
     compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
+}
+
+
+
+gradle.taskGraph.whenReady {taskGraph ->
+    def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')
+    if (circleBuildNr != null && !circleBuildNr.isEmpty()) {
+        version = version + '+' + circleBuildNr
+    } else {
+        version = version + '+' + buildTime()
+    }
+}
+
+def buildTime() {
+    def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
 }
 
 task libs() {
