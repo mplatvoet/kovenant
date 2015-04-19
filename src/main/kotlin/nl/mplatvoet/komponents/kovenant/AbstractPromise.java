@@ -32,12 +32,8 @@ abstract class AbstractPromise<V, E> {
 
     private enum NodeState {CHAINED, POPPING, APPENDING}
 
-    private static final long headOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "head");
-    private static final long stateOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "state");
-
-
-    private volatile CallbackContextNode<V, E> head = null;
-    private volatile State state = State.PENDING;
+    private final AtomicReference<CallbackContextNode<V, E>> head = new AtomicReference<CallbackContextNode<V, E>>(null);
+    private volatile AtomicReference<State> state = new AtomicReference<State>(State.PENDING);
     private volatile Object result = null;
 
 
@@ -46,10 +42,10 @@ abstract class AbstractPromise<V, E> {
     }
 
     boolean trySetSuccessResult(V result) {
-        if (state != State.PENDING) return false;
-        if (UnsafeAccess.compareAndSwapObject(this, stateOffset, State.PENDING, State.MUTATING)) {
+        if (state.get() != State.PENDING) return false;
+        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
             this.result = result;
-            state = State.SUCCESS;
+            state.set(State.SUCCESS);
             return true;
         }
         return false;
@@ -57,26 +53,26 @@ abstract class AbstractPromise<V, E> {
 
     boolean trySetFailResult(E result) {
 
-        if (state != State.PENDING) return false;
-        if (UnsafeAccess.compareAndSwapObject(this, stateOffset, State.PENDING, State.MUTATING)) {
+        if (state.get() != State.PENDING) return false;
+        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
             this.result = result;
-            state = State.FAIL;
+            state.set(State.FAIL);
             return true;
         }
         return false;
     }
 
 
-    boolean isSuccessResult() {
-        return state == State.SUCCESS;
+    final boolean isSuccessResult() {
+        return state.get() == State.SUCCESS;
     }
 
-    boolean isFailResult() {
-        return state == State.FAIL;
+    final boolean isFailResult() {
+        return state.get() == State.FAIL;
     }
 
     boolean isCompleted() {
-        return state == State.SUCCESS || state == State.FAIL;
+        return isSuccessResult() || isFailResult();
     }
 
     /*
@@ -103,12 +99,12 @@ abstract class AbstractPromise<V, E> {
 
     private void addValueNode(final CallbackContextNode<V, E> node) {
         //ensure there is a head
-        while (head == null) {
-            UnsafeAccess.compareAndSwapObject(this, headOffset, null, createHeadNode());
+        while (head.get() == null) {
+            head.compareAndSet(null, createHeadNode());
         }
 
         while (true) {
-            CallbackContextNode<V, E> tail = head;
+            CallbackContextNode<V, E> tail = head.get();
             while (tail.next != null) tail = tail.next;
             if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
                 if (tail.next == null) {
@@ -140,18 +136,20 @@ abstract class AbstractPromise<V, E> {
     }
 
     private <T extends CallbackContextNode<V, E>> CallbackContext<V, E> pop(Class<T> clazz) {
-        if (head == null) return null;
-        for (CallbackContextNode<V, E> poppable; (poppable = head.next) != null; ) {
-            if (head.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+        CallbackContextNode<V, E> localHead = head.get();
+
+        if (localHead == null) return null;
+        for (CallbackContextNode<V, E> poppable; (poppable = localHead.next) != null; ) {
+            if (localHead.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
                 if (poppable.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
-                    head.next = poppable.next;
-                    head.nodeState.set(NodeState.CHAINED);
+                    localHead.next = poppable.next;
+                    localHead.nodeState.set(NodeState.CHAINED);
                     if (poppable instanceof AlwaysCallbackContextNode || clazz.isAssignableFrom(poppable.getClass())) {
                         poppable.next = null;
                         return poppable;
                     }
                 }
-                head.nodeState.set(NodeState.CHAINED);
+                localHead.nodeState.set(NodeState.CHAINED);
             }
         }
         return null;
