@@ -21,7 +21,14 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-private class DeferredPromise<V, E>(override val context: Context) : AbstractPromise<V, E>(), Promise<V, E>, Deferred<V, E> {
+import java.util.concurrent.atomic.AtomicReference
+
+private class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E> {
+
+    private val head = AtomicReference<CallbackContextNode<V, E>>(null)
+    private val state = AtomicReference(State.PENDING)
+    private volatile var result: Any? = null
+
 
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
@@ -99,7 +106,165 @@ private class DeferredPromise<V, E>(override val context: Context) : AbstractPro
         } while (node != null)
     }
 
+    private enum class State {
+        PENDING
+        MUTATING
+        SUCCESS
+        FAIL
+    }
+
+    private enum class NodeState {
+        CHAINED
+        POPPING
+        APPENDING
+    }
+
+
+    fun trySetSuccessResult(result: V): Boolean {
+        if (state.get() != State.PENDING) return false
+        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
+            this.result = result
+            state.set(State.SUCCESS)
+            return true
+        }
+        return false
+    }
+
+    fun trySetFailResult(result: E): Boolean {
+
+        if (state.get() != State.PENDING) return false
+        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
+            this.result = result
+            state.set(State.FAIL)
+            return true
+        }
+        return false
+    }
+
+
+    private fun isSuccessResult(): Boolean = state.get() == State.SUCCESS
+
+    private fun isFailResult(): Boolean = state.get() == State.FAIL
+
+
+    /*
+        For internal use only! Method doesn't check anything, just casts.
+         */
+    suppress("UNCHECKED_CAST")
+    private fun getAsValueResult(): V = result as V
+
+    /*
+        For internal use only! Method doesn't check anything, just casts.
+         */
+    suppress("UNCHECKED_CAST")
+    private fun getAsFailResult(): E = result as E
+
+
+    private fun addSuccessCb(cb: kotlin.Function1<V, kotlin.Unit>) = addValueNode(SuccessCallbackContextNode<V, E>(cb))
+
+    private fun addFailCb(cb: kotlin.Function1<E, kotlin.Unit>) = addValueNode(FailCallbackContextNode<V, E>(cb))
+
+    private fun addAlwaysCb(cb: kotlin.Function0<kotlin.Unit>) = addValueNode(AlwaysCallbackContextNode<V, E>(cb))
+
+    private fun popSuccessCb(): CallbackContext<V, E>? = pop(javaClass<SuccessCallbackContextNode<V, E>>())
+
+    private fun popFailCb(): CallbackContext<V, E>? = pop(javaClass<FailCallbackContextNode<V, E>>())
+
+    private fun createHeadNode(): CallbackContextNode<V, E> = EmptyCallbackContextNode()
+
+    private fun addValueNode(node: CallbackContextNode<V, E>) {
+        //ensure there is a head
+        while (head.get() == null) {
+            head.compareAndSet(null, createHeadNode())
+        }
+
+        while (true) {
+            var tail = head.get()
+            while (tail.next != null) tail = tail.next
+            if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
+                if (tail.next == null) {
+                    tail.next = node
+                    tail.nodeState.set(NodeState.CHAINED)
+                    return
+                }
+                tail.nodeState.set(NodeState.CHAINED)
+            }
+        }
+    }
+
+
+    private fun <T : CallbackContextNode<V, E>> pop(clazz: Class<T>): CallbackContext<V, E>? {
+        val localHead = head.get()
+
+        if (localHead == null) return null
+
+        do {
+            val popper = localHead.next
+            if (popper != null) {
+                if (localHead.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+                    if (popper.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+                        localHead.next = popper.next
+                        localHead.nodeState.set(NodeState.CHAINED)
+                        if (popper is AlwaysCallbackContextNode<*, *> || clazz.isAssignableFrom(popper.javaClass)) {
+                            popper.next = null
+                            return popper
+                        }
+                    }
+                    localHead.nodeState.set(NodeState.CHAINED)
+                }
+            }
+        } while (popper != null)
+        return null
+    }
+
+    private trait CallbackContext<V, E> {
+        public fun runSuccess(value: V)
+
+        public fun runFail(value: E)
+    }
+
+    private abstract class CallbackContextNode<V, E> : CallbackContext<V, E> {
+        volatile var next: CallbackContextNode<V, E>? = null
+        var nodeState = AtomicReference(NodeState.CHAINED)
+    }
+
+    private class EmptyCallbackContextNode<V, E> : CallbackContextNode<V, E>() {
+
+        override fun runSuccess(value: V) {
+            //ignore
+        }
+
+        override fun runFail(value: E) {
+            //ignore
+        }
+    }
+
+    private class AlwaysCallbackContextNode<V, E>(private val fn: Function0<Unit>) : CallbackContextNode<V, E>() {
+        override fun runSuccess(value: V) = fn.invoke()
+
+        override fun runFail(value: E) = fn.invoke()
+    }
+
+    private class SuccessCallbackContextNode<V, E>(private val fn: Function1<V, Unit>) : CallbackContextNode<V, E>() {
+
+        override fun runSuccess(value: V) = fn.invoke(value)
+
+        override fun runFail(value: E) {
+            //ignore
+        }
+    }
+
+    private class FailCallbackContextNode<V, E>(private val fn: Function1<E, Unit>) : CallbackContextNode<V, E>() {
+
+        override fun runSuccess(value: V) {
+            //ignore
+        }
+
+        override fun runFail(value: E) = fn.invoke(value)
+    }
+
 }
+
 
 
 
