@@ -81,6 +81,12 @@ public trait ContextAware {
     val context : Context
 }
 
+/**
+ * A construct for receiving a notification of an asynchronous job
+ *
+ * A Promise can either resolve in [success] or get rejected and [fail].
+ * Either way, it will [always] let you know.
+ */
 public trait Promise<V, E> {
     fun success(callback: (value: V) -> Unit): Promise<V, E>
     fun fail(callback: (error: E) -> Unit): Promise<V, E>
