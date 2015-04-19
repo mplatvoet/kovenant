@@ -71,6 +71,12 @@ public trait Deferred<V, E> {
     val promise: Promise<V, E>
 }
 
+/**
+ * Mark an class to be aware of the context
+ *
+ * Used by [then] to obtain the current context from a [Promise]
+ *
+ */
 public trait ContextAware {
     val context : Context
 }
