@@ -73,10 +73,31 @@ async {
 ```
 
 ##Execution order
-By default the order of calling `success`, `fail` and `always` is in order of addition per callback type. So if 
- multiple `success` callbacks are added they will be executed in that same order. There is however no guarantee 
- for the order between different types of callbacks. So `always` could be executed before or after `success`. 
- 
-Please note that this is the default behaviour but can easily be broken. This is because Kovenant offers all the 
-callbacks to Dispatcher in order, but depending on the configured Dispatcher the order can change. For instance,
-if you configure the callbackDispatcher to operate with 2 threads the above behaviour will be broken. 
+The order of execution of the callbacks depends greatly on the underlying callback `Dispatcher`. Kovenant guarantees
+that callbacks are offered to the `Dispatcher` in the same order they were added to the `Promise`. The default
+callback Dispatcher also maintains this order. So by default all callbacks are executed in the same order they were 
+added. 
+
+The default behaviour but can easily be broken though. For instance, if you configure the callbackDispatcher to operate with 
+2 threads the order of execution becomes undefined. Not knowing the order of execution can have some undesired side 
+ effects. For example, consider:
+```kt
+val firstRef = AtomicReference<String>()
+val secondRef = AtomicReference<String>()
+
+val first = async { "hello" } success {
+	firstRef.set(it)
+}
+val second = async { "world" } success {
+	secondRef.set(it)
+}
+
+all (first, second) success {
+	println("${firstRef.get()} ${secondRef.get()}")
+}
+```
+
+If we don't have guarantees about the order of the callbacks the above example simply won't work. This is because
+the `all` function also relies on callbacks on the `first` and `second` promise. So without order guarantees the
+`success`callback of `all` might just execute before the `success` callbacks of the `first` and `second` promise. 
+So don't just blindly change the callback `Dispatcher` without actually understanding what you are doing.

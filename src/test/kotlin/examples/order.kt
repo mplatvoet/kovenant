@@ -19,24 +19,32 @@
  * THE SOFTWARE.
  */
 
-package examples.all
+package examples.order
 
+import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.all
 import nl.mplatvoet.komponents.kovenant.async
-import support.fib
+import java.util.concurrent.Executors
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.atomic.AtomicReference
 
-
 fun main(args: Array<String>) {
-    val promises = Array(10) { n ->
-        async {
-            Pair(n, fib(n))
-        }
+    test()
+}
+
+fun test() {
+    val firstRef = AtomicReference<String>()
+    val secondRef = AtomicReference<String>()
+
+    val first = async { "hello" } success {
+        firstRef.set(it)
+    }
+    val second = async { "world" } success {
+        secondRef.set(it)
     }
 
-    all(*promises) success {
-        it forEach { pair -> println("fib(${pair.first}) = ${pair.second}") }
-    } always {
-        println("All ${promises.size()} promises are done.")
+    all (first, second) success {
+        println("${firstRef.get()} ${secondRef.get()}")
     }
 }
+
