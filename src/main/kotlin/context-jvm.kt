@@ -50,7 +50,7 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = DeferredPromise(context)
+    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
 
     private class ThreadSafeContext() : MutableContext {
 
@@ -58,6 +58,12 @@ class ConcreteKovenant {
             { e: Exception -> throw e }
         }
         override var callbackError: (Exception) -> Unit by callbackErrorDelegate
+
+        private val workerErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
+            { e: Exception -> throw e }
+        }
+        override var workerError: (Exception) -> Unit by workerErrorDelegate
+
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
@@ -82,6 +88,7 @@ class ConcreteKovenant {
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
             if (callbackErrorDelegate.initialized) copy.callbackError = callbackError
+            if (workerErrorDelegate.initialized) copy.workerError = workerError
             if (callbackDispatcherDelegate.initialized) copy.callbackDispatcher = callbackDispatcher
             if (workerDispatcherDelegate.initialized) copy.workerDispatcher = workerDispatcher
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
@@ -100,6 +107,9 @@ class ConcreteKovenant {
         private val callbackErrorDelegate = TrackChangesVar { currentConfig.callbackError }
         override var callbackError: (Exception) -> Unit by callbackErrorDelegate
 
+        private val workerErrorDelegate = TrackChangesVar { currentConfig.workerError }
+        override var workerError: (Exception) -> Unit by workerErrorDelegate
+
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
@@ -107,6 +117,7 @@ class ConcreteKovenant {
             if (callbackDispatcherDelegate.written) config.callbackDispatcher = callbackDispatcher
             if (workerDispatcherDelegate.written) config.workerDispatcher = workerDispatcher
             if (callbackErrorDelegate.written) config.callbackError = callbackError
+            if (workerErrorDelegate.written) config.workerError = workerError
             if (multipleCompletionDelegate.written) config.multipleCompletion = multipleCompletion
         }
     }

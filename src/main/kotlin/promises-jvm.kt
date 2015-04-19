@@ -50,7 +50,7 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
 
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
-        if (isFailResult()) return this;
+        if (isFailResult()) return this
 
         addSuccessCb(callback)
 

@@ -40,6 +40,7 @@ public trait Context {
     val callbackDispatcher: Dispatcher
     val workerDispatcher: Dispatcher
     val callbackError: (Exception) -> Unit
+    val workerError: (Exception) -> Unit
     val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
 
@@ -47,5 +48,6 @@ public trait MutableContext : Context {
     override var callbackDispatcher: Dispatcher
     override var workerDispatcher: Dispatcher
     override var callbackError: (Exception) -> Unit
+    override var workerError: (Exception) -> Unit
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
