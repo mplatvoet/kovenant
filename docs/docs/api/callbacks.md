@@ -78,7 +78,7 @@ that callbacks are offered to the `Dispatcher` in the same order they were added
 callback Dispatcher also maintains this order. So by default all callbacks are executed in the same order they were 
 added. 
 
-The default behaviour but can easily be broken though. For instance, if you configure the callbackDispatcher to operate with 
+The default behaviour can easily be broken though. For instance, if you configure the callbackDispatcher to operate with 
 2 threads the order of execution becomes undefined. Not knowing the order of execution can have some undesired side 
  effects. For example, consider:
 ```kt
