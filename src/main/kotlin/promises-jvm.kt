@@ -154,7 +154,7 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
 
     private inline fun popAllSuccessAndAlways(fn: (CallbackContext<V, E>) -> Unit) {
         popAll {
-            if (it is FailCallbackContextNode || it is AlwaysCallbackContextNode) {
+            if (it is SuccessCallbackContextNode || it is AlwaysCallbackContextNode) {
                 fn(it)
             }
         }
