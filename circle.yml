@@ -10,4 +10,3 @@ deployment:
     branch: master
     commands:
       - ./gradlew libs
-      - ./publish.sh
