@@ -25,6 +25,8 @@ import kotlin.Function0;
 import kotlin.Function1;
 import kotlin.Unit;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 abstract class AbstractPromise<V, E> {
     private enum State {PENDING, MUTATING, SUCCESS, FAIL}
 
@@ -32,16 +34,15 @@ abstract class AbstractPromise<V, E> {
 
     private static final long headOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "head");
     private static final long stateOffset = UnsafeAccess.objectFieldOffset(AbstractPromise.class, "state");
-    private static final long nodeStateOffset = UnsafeAccess.objectFieldOffset(ValueNode.class, "nodeState");
 
 
-    private volatile ValueNode<V, E> head = null;
+    private volatile CallbackContextNode<V, E> head = null;
     private volatile State state = State.PENDING;
     private volatile Object result = null;
 
 
-    private ValueNode<V, E> createHeadNode() {
-        return new RootNode<V, E>();
+    private CallbackContextNode<V, E> createHeadNode() {
+        return new EmptyCallbackContextNode<V, E>();
     }
 
     boolean trySetSuccessResult(V result) {
@@ -96,138 +97,143 @@ abstract class AbstractPromise<V, E> {
 
 
     void addSuccessCb(kotlin.Function1<V, kotlin.Unit> cb) {
-        ValueNode<V, E> node = new SuccessNode<V, E>(cb);
+        SuccessCallbackContextNode<V, E> node = new SuccessCallbackContextNode<V, E>(cb);
         addValueNode(node);
     }
 
-    private void addValueNode(final ValueNode<V, E> node) {
+    private void addValueNode(final CallbackContextNode<V, E> node) {
         //ensure there is a head
         while (head == null) {
             UnsafeAccess.compareAndSwapObject(this, headOffset, null, createHeadNode());
         }
 
         while (true) {
-            ValueNode<V, E> tail = head;
+            CallbackContextNode<V, E> tail = head;
             while (tail.next != null) tail = tail.next;
-            if (UnsafeAccess.compareAndSwapObject(tail, nodeStateOffset, NodeState.CHAINED, NodeState.APPENDING)) {
-                tail.next = node;
-                tail.nodeState = NodeState.CHAINED;
-                return;
+            if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
+                if (tail.next == null) {
+                    tail.next = node;
+                    tail.nodeState.set(NodeState.CHAINED);
+                    return;
+                }
+                tail.nodeState.set(NodeState.CHAINED);
             }
         }
     }
 
     void addFailCb(kotlin.Function1<E, kotlin.Unit> cb) {
-        ValueNode<V, E> node = new FailNode<V, E>(cb);
+        FailCallbackContextNode<V, E> node = new FailCallbackContextNode<V, E>(cb);
         addValueNode(node);
     }
 
     void addAlwaysCb(kotlin.Function0<kotlin.Unit> cb) {
-        ValueNode<V, E> node = new AlwaysNode<V, E>(cb);
+        AlwaysCallbackContextNode<V, E> node = new AlwaysCallbackContextNode<V, E>(cb);
         addValueNode(node);
     }
 
-    ValueNode<V, E> popSuccessCb() {
-        return pop(SuccessNode.class);
+    CallbackContext<V, E> popSuccessCb() {
+        return pop(SuccessCallbackContextNode.class);
     }
 
-    ValueNode<V, E> popFailCb() {
-        return pop(FailNode.class);
+    CallbackContext<V, E> popFailCb() {
+        return pop(FailCallbackContextNode.class);
     }
 
-    private <T extends ValueNode<V, E>> ValueNode<V, E> pop(Class<T> clazz) {
+    private <T extends CallbackContextNode<V, E>> CallbackContext<V, E> pop(Class<T> clazz) {
         if (head == null) return null;
-        for (ValueNode<V, E> poppable; (poppable = head.next) != null; ) {
-            if (UnsafeAccess.compareAndSwapObject(head, nodeStateOffset, NodeState.CHAINED, NodeState.POPPING)) {
-                if (UnsafeAccess.compareAndSwapObject(poppable, nodeStateOffset, NodeState.CHAINED, NodeState.POPPING)) {
+        for (CallbackContextNode<V, E> poppable; (poppable = head.next) != null; ) {
+            if (head.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+                if (poppable.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
                     head.next = poppable.next;
-                    head.nodeState = NodeState.CHAINED;
-                    if (poppable instanceof AlwaysNode || clazz.isAssignableFrom(poppable.getClass())) {
+                    head.nodeState.set(NodeState.CHAINED);
+                    if (poppable instanceof AlwaysCallbackContextNode || clazz.isAssignableFrom(poppable.getClass())) {
+                        poppable.next = null;
                         return poppable;
                     }
                 }
-                head.nodeState = NodeState.CHAINED;
+                head.nodeState.set(NodeState.CHAINED);
             }
         }
         return null;
     }
 
+    interface CallbackContext<V, E> {
+        void runSuccess(V value);
 
-    protected abstract static class ValueNode<V, E> {
-        volatile ValueNode<V, E> next = null;
-        volatile NodeState nodeState = NodeState.CHAINED;
-
-        abstract void runSuccess(V value);
-
-        abstract void runFail(E value);
+        void runFail(E value);
     }
 
-    private static class RootNode<V, E> extends ValueNode<V, E> {
+    private abstract static class CallbackContextNode<V, E> implements CallbackContext<V, E> {
+        volatile CallbackContextNode<V, E> next = null;
+        AtomicReference<NodeState> nodeState = new AtomicReference<NodeState>(NodeState.CHAINED);
+    }
+
+    private static class EmptyCallbackContextNode<V, E> extends CallbackContextNode<V, E> {
 
         @Override
-        void runSuccess(V value) {
+        public void runSuccess(V value) {
             //ignore
         }
 
         @Override
-        void runFail(E value) {
+        public void runFail(E value) {
             //ignore
         }
     }
 
-    protected static class AlwaysNode<V, E> extends ValueNode<V, E> {
+    protected static class AlwaysCallbackContextNode<V, E> extends CallbackContextNode<V, E> {
         private final kotlin.Function0<kotlin.Unit> fn;
 
-        public AlwaysNode(Function0<Unit> fn) {
+        public AlwaysCallbackContextNode(Function0<Unit> fn) {
             if (fn == null) throw new IllegalArgumentException();
             this.fn = fn;
         }
 
         @Override
-        void runSuccess(V value) {
+        public void runSuccess(V value) {
             fn.invoke();
         }
 
         @Override
-        void runFail(E value) {
+        public void runFail(E value) {
             fn.invoke();
         }
     }
 
-    protected static class SuccessNode<V, E> extends ValueNode<V, E> {
+    protected static class SuccessCallbackContextNode<V, E> extends CallbackContextNode<V, E> {
         private final kotlin.Function1<V, kotlin.Unit> fn;
 
-        public SuccessNode(Function1<V, Unit> fn) {
+        public SuccessCallbackContextNode(Function1<V, Unit> fn) {
             if (fn == null) throw new IllegalArgumentException();
             this.fn = fn;
         }
 
         @Override
-        void runSuccess(V value) {
+        public void runSuccess(V value) {
             fn.invoke(value);
         }
 
         @Override
-        void runFail(E value) {
+        public void runFail(E value) {
             //ignore
         }
     }
 
-    protected static class FailNode<V, E> extends ValueNode<V, E> {
+    protected static class FailCallbackContextNode<V, E> extends CallbackContextNode<V, E> {
         private final kotlin.Function1<E, kotlin.Unit> fn;
 
-        public FailNode(Function1<E, Unit> fn) {
+        public FailCallbackContextNode(Function1<E, Unit> fn) {
             if (fn == null) throw new IllegalArgumentException();
             this.fn = fn;
         }
 
         @Override
-        void runSuccess(V value) {
+        public void runSuccess(V value) {
             //ignore
         }
 
         @Override
-        void runFail(E value) {
+        public void runFail(E value) {
             fn.invoke(value);
         }
     }
