@@ -21,7 +21,7 @@ dependencies {
     compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
 }
 
-task release() {
+task libs() {
     dependsOn jar
 }
 
@@ -47,6 +47,6 @@ task wrapper(type: Wrapper) {
     gradleVersion = '2.3'
 }
 
-defaultTasks 'clean', 'release'
+defaultTasks 'clean', 'libs'
 
 

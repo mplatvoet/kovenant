@@ -4,3 +4,9 @@ general:
       - gh-pages
   artifacts:
     - "build/libs"
+
+deployment:
+  master:
+    branch: [master, gradle]
+    commands:
+      - ./gradlew libs
