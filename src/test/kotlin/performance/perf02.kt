@@ -87,8 +87,10 @@ fun main(args: Array<String>) {
 }
 
 private fun napTime() {
-    System.gc()
-    Thread.sleep(TimeUnit.MILLISECONDS.convert(napTimeSeconds, TimeUnit.SECONDS))
+    if (napTimeSeconds > 0) {
+        System.gc()
+        Thread.sleep(TimeUnit.MILLISECONDS.convert(napTimeSeconds, TimeUnit.SECONDS))
+    }
 }
 
 
