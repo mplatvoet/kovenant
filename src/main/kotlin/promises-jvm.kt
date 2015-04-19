@@ -23,7 +23,7 @@ package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicReference
 
-private class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E> {
+private class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E>, ContextAware {
 
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
     private val state = AtomicReference(State.PENDING)

@@ -26,15 +26,56 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.RejectedExecutionException
 import kotlin.InlineOption.ONLY_LOCAL_RETURN
 
+
+/**
+ * Deferred is the private part of the [Promise]
+ *
+ * A Deferred object let's you control a an accompanied [Promise] object
+ * by either [resolve] or [reject] it. Any implementation must make sure
+ * that a Deferred object can only be completed once as either resolved
+ * or rejected.
+ *
+ * It's up to the implementation what happens when a Deferred gets
+ * resolved or rejected multiple times. It may simply be ignored or throw
+ * an Exception.
+ */
 public trait Deferred<V, E> {
+    /**
+     * Resolves this deferred with the provided value
+     *
+     * It's up to the implementation what happens when a Deferred gets
+     * resolved multiple times. It may simply be ignored or throw
+     * an Exception.
+     *
+     * @param [value] the value to resolve this deferred with
+     */
     fun resolve(value: V)
+
+    /**
+     * Rejects this deferred with the provided error
+     *
+     * It's up to the implementation what happens when a Deferred gets
+     * rejected multiple times. It may simply be ignored or throw
+     * an Exception.
+     *
+     * @param [error] the value to reject this deferred with
+     */
     fun reject(error: E)
+
+    /**
+     * Holds the accompanied [Promise]
+     *
+     * The accompanied [Promise] for this deferred. Multiple invocations
+     * must lead to the some instance of the Promise.
+     */
     val promise: Promise<V, E>
 }
 
+public trait ContextAware {
+    val context : Context
+}
 
 public trait Promise<V, E> {
-    val context : Context
     fun success(callback: (value: V) -> Unit): Promise<V, E>
     fun fail(callback: (error: E) -> Unit): Promise<V, E>
     fun always(callback: () -> Unit): Promise<V, E>
@@ -69,6 +110,11 @@ public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise
 }
 
 public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+    val context = when (this) {
+        is ContextAware -> this.context
+        else -> Kovenant.context
+    }
+
     val deferred = deferred<R, Exception>(context)
     success {
         context.tryWork {
