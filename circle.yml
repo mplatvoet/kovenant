@@ -6,7 +6,7 @@ general:
     - "build/libs"
 
 deployment:
-  master:
-    branch: [master, gradle]
+  libs:
+    branch: master
     commands:
       - ./gradlew libs
