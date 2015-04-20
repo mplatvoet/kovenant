@@ -36,6 +36,7 @@ else
     git config credential.https://github.com/mplatvoet/kovenant-site.$NAME $PUBLISH_KEY
     git config user.name "$NAME"
     git config user.email $EMAIL
+    git config push.default simple
 
 fi
 git add .
