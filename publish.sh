@@ -33,6 +33,7 @@ cd $REPOSITORY_ROOT
 if [ -z "$PUBLISH_KEY" ]; then
     echo "local publish"
 else
+    git config credential.helper cache
     git config credential.https://github.com/mplatvoet/kovenant-site.$NAME $PUBLISH_KEY
     git config user.name "$NAME"
     git config user.email $EMAIL
