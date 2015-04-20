@@ -30,6 +30,11 @@ diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk
 cp -rf $GENERATE_ROOT/ $REPOSITORY_ROOT
 
 cd $REPOSITORY_ROOT
+if [ -z "$PUBLISH_KEY" ]; then
+    git config credential.https://github.com/mplatvoet/kovenant-site.$NAME $PUBLISH_KEY
+    git config user.name "$NAME"
+    git config user.email $EMAIL
+fi
 git add .
 git status
 git commit -m "auto publish"
