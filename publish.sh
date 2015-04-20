@@ -1,32 +1,36 @@
 #!/usr/bin/env bash
+set -e
 
-echo cleaning build directory
-rm -rf gh-pages
+PROJECT_ROOT=`pwd`
 
-echo cleaning site directory
-rm -rf docs/site
+DOCS_SOURCE="$PROJECT_ROOT/docs"
+
+BUILD_ROOT="$PROJECT_ROOT/build/gh-pages"
+REPOSITORY_ROOT="$BUILD_ROOT/repository"
+GENERATE_ROOT="$BUILD_ROOT/generate"
+
+echo "Clearing build directory $BUILD_ROOT"
+rm -rf $BUILD_ROOT
+
+mkdir $BUILD_ROOT
 
 echo cloning git into build directory
-git clone https://github.com/mplatvoet/kovenant-site.git gh-pages
-cd gh-pages
+git clone https://github.com/mplatvoet/kovenant-site.git $REPOSITORY_ROOT
+cd $REPOSITORY_ROOT
 git checkout gh-pages
-cd ..
 
-cd docs
+
+cd $DOCS_SOURCE
 mkdocs build
-cd ..
-cp -rf docs/site/ gh-pages/
+mv $DOCS_SOURCE/site $GENERATE_ROOT
 
-cd gh-pages
+diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk -v base="$REPOSITORY_ROOT" '$1=="Only"&&$3==base":" {print base"/"$4}' | sort -r | awk '{cmd="git rm " $1; system(cmd)}'
+
+
+cp -rf $GENERATE_ROOT/ $REPOSITORY_ROOT
+
+cd $REPOSITORY_ROOT
 git add .
 git status
 git commit -m "auto publish"
 git push
-
-cd ..
-echo cleaning build directory
-rm -rf gh-pages
-
-echo cleaning site directory
-rm -rf docs/site
-echo done
