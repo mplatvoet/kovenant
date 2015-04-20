@@ -32,7 +32,7 @@ def setLibsDir() {
         def libsDir = new File(artifactsPath, "libs")
         if (libsDir.mkdirs()) {
             jar {
-                destinationDir = projectDir
+                destinationDir = libsDir
             }
         }
     }
@@ -43,7 +43,6 @@ def enrichVersion() {
     def buildMetaData = circleBuildNr ? circleBuildNr : buildTime()
 
     def kotlinVersion = extractKotlinMilestoneVersion()
-    println kotlinVersion
     def identifier = kotlinVersion ? "kotlinM$kotlinVersion" : "unknown"
 
     version = "$version-$identifier+$buildMetaData"
@@ -67,12 +66,9 @@ String extractRawKotlinVersion() {
             def name = dep.name.toString()
             def group = dep.group.toString()
             if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
-                println dep.version
                 return dep.version
             }
-
         }
-
     }
     return null
 }
