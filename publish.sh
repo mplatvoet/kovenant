@@ -24,7 +24,7 @@ cd $DOCS_SOURCE
 mkdocs build
 mv $DOCS_SOURCE/site $GENERATE_ROOT
 
-diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk -v base="$REPOSITORY_ROOT" '$1=="Only"&&$3==base":" {print base"/"$4}' | sort -r | awk '{cmd="git rm " $1;system(echo cmd) system(cmd)}'
+diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk -v base="$REPOSITORY_ROOT" '$1=="Only"&&$3==base":" {print base"/"$4}' | sort -r | awk '{cmd="git rm " $1; system(cmd)}'
 
 
 cp -rf $GENERATE_ROOT/* $REPOSITORY_ROOT
