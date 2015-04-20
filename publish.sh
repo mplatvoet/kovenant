@@ -7,7 +7,7 @@ echo cleaning site directory
 rm -rf docs/site
 
 echo cloning git into build directory
-git clone https://github.com/mplatvoet/kovenant.git gh-pages
+git clone https://github.com/mplatvoet/kovenant-site.git gh-pages
 cd gh-pages
 git checkout gh-pages
 cd ..
