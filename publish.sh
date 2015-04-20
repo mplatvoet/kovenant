@@ -27,13 +27,16 @@ mv $DOCS_SOURCE/site $GENERATE_ROOT
 diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk -v base="$REPOSITORY_ROOT" '$1=="Only"&&$3==base":" {print base"/"$4}' | sort -r | awk '{cmd="git rm " $1; system(cmd)}'
 
 
-cp -rf $GENERATE_ROOT/ $REPOSITORY_ROOT
+cp -rf $GENERATE_ROOT/* $REPOSITORY_ROOT
 
 cd $REPOSITORY_ROOT
 if [ -z "$PUBLISH_KEY" ]; then
+    echo "local publish"
+else
     git config credential.https://github.com/mplatvoet/kovenant-site.$NAME $PUBLISH_KEY
     git config user.name "$NAME"
     git config user.email $EMAIL
+
 fi
 git add .
 git status
