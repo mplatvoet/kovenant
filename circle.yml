@@ -2,8 +2,6 @@ general:
   branches:
     ignore:
       - gh-pages
-#  artifacts:
-#    - "build/libs"
 
 test:
   post:
@@ -14,9 +12,10 @@ test:
     - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
 #TODO make this publish the docs
-#deployment:
-#  circleci:
-#    branch: master
-#    commands:
+deployment:
+  circleci:
+    branch: master
+    commands:
+      - pip install mkdocs
 #     - ./publish.sh
 
