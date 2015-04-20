@@ -16,6 +16,6 @@ deployment:
   circleci:
     branch: master
     commands:
-      - pip install mkdocs
+      - sudo pip install mkdocs
 #     - ./publish.sh
 
