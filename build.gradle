@@ -1,6 +1,4 @@
-import java.text.SimpleDateFormat
-
-version = '0.1.0-kotlin.M11'
+version = '0.1.0'
 
 
 buildscript {
@@ -23,17 +21,65 @@ dependencies {
 
 
 
-gradle.taskGraph.whenReady {taskGraph ->
-    def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')
-    if (circleBuildNr != null && !circleBuildNr.isEmpty()) {
-        version = version + '+' + circleBuildNr
-    } else {
-        version = version + '+' + buildTime()
+gradle.taskGraph.whenReady { taskGraph ->
+    enrichVersion()
+    setLibsDir()
+}
+
+def setLibsDir() {
+    def artifactsPath = System.getenv('CIRCLE_ARTIFACTS')?.trim()
+    if (artifactsPath) {
+        def libsDir = new File(artifactsPath, "libs")
+        if (libsDir.mkdirs()) {
+            jar {
+                destinationDir = projectDir
+            }
+        }
     }
 }
 
+def enrichVersion() {
+    def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')?.trim()
+    def buildMetaData = circleBuildNr ? circleBuildNr : buildTime()
+
+    def kotlinVersion = extractKotlinMilestoneVersion()
+    println kotlinVersion
+    def identifier = kotlinVersion ? "kotlinM$kotlinVersion" : "unknown"
+
+    version = "$version-$identifier+$buildMetaData"
+}
+
+String extractKotlinMilestoneVersion() {
+    def rawVersion = extractRawKotlinVersion()
+    if (rawVersion) {
+        def matcher = rawVersion =~ /\d+/
+        matcher.find()
+        matcher.find(matcher.end())
+        return rawVersion.substring(matcher.start(), matcher.end())
+    }
+    return null
+}
+
+String extractRawKotlinVersion() {
+    for (scope in rootProject.configurations.all) {
+
+        for (dep in scope.dependencies) {
+            def name = dep.name.toString()
+            def group = dep.group.toString()
+            if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
+                println dep.version
+                return dep.version
+            }
+
+        }
+
+    }
+    return null
+}
+
+
 def buildTime() {
-    def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    def df = new java.text.SimpleDateFormat("yyyyMMdd'T'HHmm'Z'")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     return df.format(new Date())
 }

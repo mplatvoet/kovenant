@@ -2,16 +2,19 @@ general:
   branches:
     ignore:
       - gh-pages
-  artifacts:
-    - "build/libs"
+#  artifacts:
+#    - "build/libs"
 
 test:
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - ./gradlew libs
 
-deployment:
-  circleci:
-    branch: master
-    commands:
-      - ./gradlew libs
+#TODO make this publish the docs
+#deployment:
+#  circleci:
+#    branch: master
+#    commands:
+#     - ./publish.sh
+
