@@ -23,20 +23,9 @@ dependencies {
 
 gradle.taskGraph.whenReady { taskGraph ->
     enrichVersion()
-    setLibsDir()
 }
 
-def setLibsDir() {
-    def artifactsPath = System.getenv('CIRCLE_ARTIFACTS')?.trim()
-    if (artifactsPath) {
-        def libsDir = new File(artifactsPath, "libs")
-        if (libsDir.mkdirs()) {
-            jar {
-                destinationDir = libsDir
-            }
-        }
-    }
-}
+
 
 def enrichVersion() {
     def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')?.trim()

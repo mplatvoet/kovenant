@@ -10,7 +10,8 @@ test:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
     - ./gradlew libs
-    -
+    - mkdir -p $CIRCLE_ARTIFACTS/libs/
+    - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
 #TODO make this publish the docs
 #deployment:
