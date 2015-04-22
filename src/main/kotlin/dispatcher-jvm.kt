@@ -98,7 +98,7 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 
 trait WaitStrategyBuilder {
     fun addBusyPoll(numberOfPolls: Int = 1000)
-    fun addSleepPoll(numberOfPolls: Int = 100, sleepTimeInMs: Long = 10)
+    fun addSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
 }
 
 class ConcreteWaitStrategyBuilder(private val workQueue: ConcurrentLinkedQueue<() -> Unit>) : WaitStrategyBuilder {
