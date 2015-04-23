@@ -7,7 +7,6 @@ buildscript {
     repositories { mavenCentral() }
     dependencies {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
-        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4'
     }
 }
 
@@ -23,11 +22,75 @@ dependencies {
 }
 
 
-
 gradle.taskGraph.whenReady { taskGraph ->
     enrichVersion()
 }
 
+
+task libs() {
+    dependsOn jar
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        configuration = configurations.archives
+
+        repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: '', password: '')
+        }
+
+
+        pom.project {
+            name = 'Kovenant'
+            packaging = 'jar'
+            description = project.description
+            url = 'http://kovenant.mplatvoet.nl'
+            inceptionYear '2015'
+
+            scm {
+                url = 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                connection = 'scm:git:fgit@github.com:mplatvoet/kovenant.git'
+            }
+
+            licenses {
+                license {
+                    name = 'MIT License'
+                    url 'http://opensource.org/licenses/MIT'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id = 'mplatvoet'
+                    name = 'Mark Platvoet'
+                    email = 'mplatvoet@gmail.com'
+                    url = 'http://mplatvoet.nl'
+                }
+            }
+        }
+    }
+}
+
+
+
+signing {
+    sign configurations.archives
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4-rc-1'
+}
 
 
 def enrichVersion() {
@@ -70,32 +133,6 @@ def buildTime() {
     def df = new java.text.SimpleDateFormat("yyyyMMdd'T'HHmm'Z'")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     return df.format(new Date())
-}
-
-task libs() {
-    dependsOn jar
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.4-rc-1'
 }
 
 defaultTasks 'clean', 'libs'
