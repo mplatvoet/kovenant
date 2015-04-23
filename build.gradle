@@ -1,10 +1,13 @@
 version = '0.1.0'
+group = 'nl.mplatvoet.komponents'
+description = 'Kovenant. Promises for Kotlin.'
 
 
 buildscript {
     repositories { mavenCentral() }
     dependencies {
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
+        classpath 'de.huxhorn.gradle:de.huxhorn.gradle.pgp-plugin:0.0.4'
     }
 }
 
@@ -92,7 +95,7 @@ signing {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.3'
+    gradleVersion = '2.4-rc-1'
 }
 
 defaultTasks 'clean', 'libs'
