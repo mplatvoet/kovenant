@@ -32,7 +32,7 @@ fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception>
 Any `Exception` from the bind method is considered a rejection and a successful computation a fulfillment. That way 
 the Promise resolves in just 2 states. Kovenant's `then` behaves quite similar to Option/Maybe/Try types for that matter.
  
-So reason enough to not follow this spec. 
+So reason enough to not follow the [Promises/A+](https://promisesaplus.com/) spec. 
 
 ##Non Blocking
 Most Promises implementations provide functions like `isDone() : Boolean` and blocking functions `get() : V` as an alternative for 
@@ -49,7 +49,7 @@ which the extension function can delegate if the current promise is of the secon
 
 ###I need it now!
 Still, if you desperately need such functionality already it's easy to implement on the Jvm as shown by 
-[example04.kt](https://github.com/mplatvoet/kovenant/blob/master/src/test/kotlin/examples/example04.kt). It basically
+[get.kt](https://github.com/mplatvoet/kovenant/blob/master/src/test/kotlin/examples/get.kt). It basically
  comes down to this:
 
 ```kt
