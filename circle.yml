@@ -1,7 +1,6 @@
-general:
-  branches:
-    ignore:
-      - gh-pages
+machine:
+  java:
+    version: oraclejdk6
 
 # TODO reenable on final commit
 #test:
