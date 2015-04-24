@@ -40,9 +40,10 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
-task libs() {
+task jars() {
     dependsOn jar, sourcesJar, javadocJar
 }
+
 
 artifacts {
     archives jar
@@ -59,6 +60,10 @@ task release {
 }
 
 
+
+def sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePwd : ''
+
 uploadArchives {
     dependsOn release
 
@@ -66,7 +71,7 @@ uploadArchives {
         configuration = configurations.archives
 
         repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            authentication(userName: sonatypeUsername, password: sonatypePassword)
+            authentication(userName: sonatypeUsr, password: sonatypePwd)
         }
 
 
