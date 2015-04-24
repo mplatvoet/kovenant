@@ -33,19 +33,25 @@ cd $REPOSITORY_ROOT
 if [ -z "GIT_API" ]; then
     echo "local publish"
 else
+{
     git config user.name "$GIT_NAME"
     git config user.email "$GIT_EMAIL"
     git config push.default simple
     git remote set-url origin https://${GIT_API}@github.com/mplatvoet/kovenant-site.git
+} &> /dev/null
 fi
 git add .
 git status
 git commit -m "auto publish"
+
 git push
 
-cd $REPOSITORY_ROOT
 if [ -z "GIT_API" ]; then
-    echo "nothing to cleanup"
+    git push
 else
+{
+    git push
     git remote set-url origin https://github.com/mplatvoet/kovenant-site.git
+} &> /dev/null
 fi
+cd $REPOSITORY_ROOT
