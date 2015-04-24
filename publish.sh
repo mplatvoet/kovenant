@@ -30,17 +30,22 @@ diff -qr $REPOSITORY_ROOT $GENERATE_ROOT --exclude .git --exclude .DS_Store| awk
 cp -rf $GENERATE_ROOT/* $REPOSITORY_ROOT
 
 cd $REPOSITORY_ROOT
-if [ -z "$PUBLISH_KEY" ]; then
+if [ -z "GIT_API" ]; then
     echo "local publish"
 else
-    git config credential.helper cache
-    git config credential.https://github.com/mplatvoet/kovenant-site.$NAME $PUBLISH_KEY
-    git config user.name "$NAME"
-    git config user.email $EMAIL
+    git config user.name "$GIT_NAME"
+    git config user.email "$GIT_EMAIL"
     git config push.default simple
-
+    git remote set-url origin https://${GIT_API}@github.com/mplatvoet/kovenant-site.git
 fi
 git add .
 git status
 git commit -m "auto publish"
 git push
+
+cd $REPOSITORY_ROOT
+if [ -z "GIT_API" ]; then
+    echo "nothing to cleanup"
+else
+    git remote set-url origin https://github.com/mplatvoet/kovenant-site.git
+fi
