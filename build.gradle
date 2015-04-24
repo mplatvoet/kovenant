@@ -1,4 +1,6 @@
 version = '0.1.0'
+group = 'nl.mplatvoet.komponents'
+description = 'Kovenant. Promises for Kotlin.'
 
 
 buildscript {
@@ -22,9 +24,95 @@ dependencies {
 
 
 gradle.taskGraph.whenReady { taskGraph ->
-    enrichVersion()
+    if (!taskGraph.hasTask(release)) {
+        enrichVersion()
+    }
 }
 
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task jars() {
+    dependsOn jar, sourcesJar, javadocJar
+}
+
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+task release {
+    dependsOn clean, signArchives
+}
+
+
+
+def sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePwd : ''
+
+uploadArchives {
+    dependsOn release
+
+    repositories.mavenDeployer {
+        configuration = configurations.archives
+
+        repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: sonatypeUsr, password: sonatypePwd)
+        }
+
+
+        pom.project {
+            name 'Kovenant'
+            packaging 'jar'
+            description project.description
+            url 'http://kovenant.mplatvoet.nl'
+            inceptionYear '2015'
+
+            scm {
+                url 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
+            }
+
+            licenses {
+                license {
+                    name 'MIT License'
+                    url 'http://opensource.org/licenses/MIT'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'mplatvoet'
+                    name 'Mark Platvoet'
+                    email 'mplatvoet@gmail.com'
+                    url 'http://mplatvoet.nl'
+                }
+            }
+        }
+    }
+}
+
+
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4-rc-1'
+}
 
 
 def enrichVersion() {
@@ -67,32 +155,6 @@ def buildTime() {
     def df = new java.text.SimpleDateFormat("yyyyMMdd'T'HHmm'Z'")
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     return df.format(new Date())
-}
-
-task libs() {
-    dependsOn jar
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.3'
 }
 
 defaultTasks 'clean', 'libs'

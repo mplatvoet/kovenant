@@ -1,21 +1,20 @@
-general:
-  branches:
-    ignore:
-      - gh-pages
+machine:
+  java:
+    version: oraclejdk6
+
 
 test:
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-    - ./gradlew libs
+    - ./gradlew jars
     - mkdir -p $CIRCLE_ARTIFACTS/libs/
     - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
-#TODO make this publish the docs
 deployment:
   circleci:
     branch: master
     commands:
       - sudo pip install mkdocs
-#      - ./publish.sh
+      - ./publish.sh
 
