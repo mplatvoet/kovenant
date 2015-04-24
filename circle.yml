@@ -2,18 +2,18 @@ machine:
   java:
     version: oraclejdk6
 
-# TODO reenable on final commit
-#test:
-#  post:
-#    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-#    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-#    - ./gradlew libs
-#    - mkdir -p $CIRCLE_ARTIFACTS/libs/
-#    - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
+
+test:
+  post:
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+    - ./gradlew libs
+    - mkdir -p $CIRCLE_ARTIFACTS/libs/
+    - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
 deployment:
   circleci:
-    branch: feature/publishing #TODO change this to master on final commit
+    branch: master
     commands:
       - sudo pip install mkdocs
       - ./publish.sh
