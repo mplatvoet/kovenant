@@ -3,19 +3,19 @@ general:
     ignore:
       - gh-pages
 
-test:
-  post:
-    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
-    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
-    - ./gradlew libs
-    - mkdir -p $CIRCLE_ARTIFACTS/libs/
-    - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
+# TODO reenable on final commit
+#test:
+#  post:
+#    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+#    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+#    - ./gradlew libs
+#    - mkdir -p $CIRCLE_ARTIFACTS/libs/
+#    - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
-#TODO make this publish the docs
 deployment:
   circleci:
-    branch: master
+    branch: feature/publishing #TODO change this to master on final commit
     commands:
       - sudo pip install mkdocs
-#      - ./publish.sh
+      - ./publish.sh
 
