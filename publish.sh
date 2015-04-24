@@ -42,13 +42,13 @@ else
 fi
 git add .
 git status
-git commit -m "auto publish"
+git commit -m "auto publish" || true
 
 if [ -z "GIT_API" ]; then
-    git push | true
+    git push || true
 else
 {
-    git push | true
+    git push || true
     git remote set-url origin https://github.com/mplatvoet/kovenant-site.git
 } &> /dev/null
 fi
