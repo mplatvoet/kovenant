@@ -44,13 +44,11 @@ git add .
 git status
 git commit -m "auto publish"
 
-git push
-
 if [ -z "GIT_API" ]; then
-    git push
+    git push || true
 else
 {
-    git push
+    git push || true
     git remote set-url origin https://github.com/mplatvoet/kovenant-site.git
 } &> /dev/null
 fi
