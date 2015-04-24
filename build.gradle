@@ -22,14 +22,13 @@ dependencies {
 }
 
 
+
 gradle.taskGraph.whenReady { taskGraph ->
-    enrichVersion()
+    if (!taskGraph.hasTask(release)) {
+        enrichVersion()
+    }
 }
 
-
-task libs() {
-    dependsOn jar
-}
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
@@ -41,30 +40,51 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+task libs() {
+    dependsOn jar, sourcesJar, javadocJar
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+task release {
+    dependsOn clean, signArchives
+}
+
+
 uploadArchives {
+    dependsOn release
+
     repositories.mavenDeployer {
         configuration = configurations.archives
 
         repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            authentication(userName: '', password: '')
+            authentication(userName: sonatypeUsername, password: sonatypePassword)
         }
 
 
         pom.project {
-            name = 'Kovenant'
-            packaging = 'jar'
-            description = project.description
-            url = 'http://kovenant.mplatvoet.nl'
+            name 'Kovenant'
+            packaging 'jar'
+            description project.description
+            url 'http://kovenant.mplatvoet.nl'
             inceptionYear '2015'
 
             scm {
-                url = 'scm:git:git@github.com:mplatvoet/kovenant.git'
-                connection = 'scm:git:fgit@github.com:mplatvoet/kovenant.git'
+                url 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
             }
 
             licenses {
                 license {
-                    name = 'MIT License'
+                    name 'MIT License'
                     url 'http://opensource.org/licenses/MIT'
                     distribution 'repo'
                 }
@@ -72,10 +92,10 @@ uploadArchives {
 
             developers {
                 developer {
-                    id = 'mplatvoet'
-                    name = 'Mark Platvoet'
-                    email = 'mplatvoet@gmail.com'
-                    url = 'http://mplatvoet.nl'
+                    id 'mplatvoet'
+                    name 'Mark Platvoet'
+                    email 'mplatvoet@gmail.com'
+                    url 'http://mplatvoet.nl'
                 }
             }
         }
@@ -84,9 +104,6 @@ uploadArchives {
 
 
 
-signing {
-    sign configurations.archives
-}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.4-rc-1'
