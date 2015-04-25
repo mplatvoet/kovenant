@@ -12,7 +12,7 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `Java 6` and `kotlin-stdlib:0.11.91`
+This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
 
 ###Gradle
 ```groovy

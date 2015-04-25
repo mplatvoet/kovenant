@@ -23,7 +23,8 @@ Developed with the following [goals](goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-This version is build against `Java 6` and `kotlin-stdlib:0.11.91`
+This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
+
 
 ###Gradle
 ```groovy
