@@ -11,11 +11,21 @@ async { "world" } and async { "Hello" } success {
 
 Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
  
-##Quick start
-
-###Maven
-_Intended to be available via maven central_
+## Getting started
+This version is build against `Java 6` and `kotlin-stdlib:0.11.91`
 
 ###Gradle
-_Intended to be available via maven central_
+```groovy
+dependencies {
+    compile 'nl.mplatvoet.komponents:kovenant:0.1.0'
+}
+```
 
+###Maven
+```xml
+<dependency>
+	<groupId>nl.mplatvoet.komponents</groupId>
+	<artifactId>kovenant</artifactId>
+	<version>0.1.0</version>
+</dependency>
+```

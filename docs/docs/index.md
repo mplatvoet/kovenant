@@ -23,9 +23,20 @@ Developed with the following [goals](goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
+This version is build against `Java 6` and `kotlin-stdlib:0.11.91`
 
 ###Gradle
-_Soon on maven central_
+```groovy
+dependencies {
+    compile 'nl.mplatvoet.komponents:kovenant:0.1.0'
+}
+```
 
 ###Maven
-_Soon on maven central_
+```xml
+<dependency>
+	<groupId>nl.mplatvoet.komponents</groupId>
+	<artifactId>kovenant</artifactId>
+	<version>0.1.0</version>
+</dependency>
+```
