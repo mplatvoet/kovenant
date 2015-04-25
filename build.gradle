@@ -27,7 +27,6 @@ apply plugin: 'propdeps-eclipse'
 dependencies {
     provided    'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
 
-    testCompile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91'
     testCompile 'junit:junit:4.12'
 }
 
