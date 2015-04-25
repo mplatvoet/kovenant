@@ -1,4 +1,4 @@
-[![Circle CI](https://circleci.com/gh/mplatvoet/kovenant.svg?style=svg&circle-token=fc8b76ad0630c6794673f67e65df3928b4a5ab86)](https://circleci.com/gh/mplatvoet/kovenant)
+[![CircleCI branch](https://img.shields.io/circleci/project/mplatvoet/kovenant/master.svg)](https://circleci.com/gh/mplatvoet/kovenant/tree/master) [![Maven Central](https://img.shields.io/maven-central/v/nl.mplatvoet.komponents/kovenant.svg)](http://search.maven.org/#browse%7C-339523586) [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/mplatvoet/kovenant/blob/master/LICENSE)
 
 #Kovenant 0.1.0
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
@@ -23,9 +23,20 @@ Developed with the following [goals](goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
+This version is build against `Java 6` and `kotlin-stdlib:0.11.91`
 
 ###Gradle
-_Soon on maven central_
+```groovy
+dependencies {
+    compile 'nl.mplatvoet.komponents:kovenant:0.1.0'
+}
+```
 
 ###Maven
-_Soon on maven central_
+```xml
+<dependency>
+	<groupId>nl.mplatvoet.komponents</groupId>
+	<artifactId>kovenant</artifactId>
+	<version>0.1.0</version>
+</dependency>
+```

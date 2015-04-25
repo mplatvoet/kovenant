@@ -56,13 +56,13 @@ signing {
 }
 
 task release {
-    dependsOn clean, signArchives
+    dependsOn signArchives
 }
 
 
 
 def sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePwd : ''
+def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
 
 uploadArchives {
     dependsOn release
@@ -70,7 +70,10 @@ uploadArchives {
     repositories.mavenDeployer {
         configuration = configurations.archives
 
-        repository(url: "http://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
             authentication(userName: sonatypeUsr, password: sonatypePwd)
         }
 
