@@ -178,7 +178,13 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
 
         while (true) {
             var tail = head.get()
-            while (tail.next != null) tail = tail.next
+            while (true) {
+                val next = tail.next
+                if (next == null) {
+                    break
+                }
+                tail = next
+            }
             if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
                 if (tail.next == null) {
                     tail.next = node
