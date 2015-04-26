@@ -29,3 +29,6 @@ dependencies {
 	<version>0.1.1</version>
 </dependency>
 ```
+
+##Issues
+Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
