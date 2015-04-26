@@ -1,6 +1,6 @@
 allprojects {
     ext {
-        appVersion = '0.1.1'
+        appVersion = '0.1.2'
         appGroup = 'nl.mplatvoet.komponents'
 
         sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
