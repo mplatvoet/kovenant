@@ -1,8 +1,14 @@
-version = '0.1.1'
-group = 'nl.mplatvoet.komponents'
-description = 'Kovenant. Promises for Kotlin.'
+allprojects {
+    ext {
+        appVersion = '0.1.1'
+        appGroup = 'nl.mplatvoet.komponents'
 
+        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+    }
+}
 
+//Need to duplicate this in order to make it compile.
 buildscript {
     repositories {
         mavenCentral()
@@ -14,111 +20,123 @@ buildscript {
     }
 }
 
-repositories { mavenCentral() }
+subprojects {
+    buildscript {
+        repositories {
+            mavenCentral()
+            jcenter()
+        }
+        dependencies {
+            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
+            classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+        }
+    }
 
-apply plugin: 'optional-base'
-apply plugin: 'kotlin'
-apply plugin: 'maven'
-apply plugin: 'signing'
+    repositories { mavenCentral() }
 
-dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91', optional
+    apply plugin: 'optional-base'
+    apply plugin: 'kotlin'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
 
-    testCompile 'junit:junit:4.12'
+    dependencies {
+        compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91', optional
+
+        testCompile 'junit:junit:4.12'
+    }
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    task releaseSub {
+        dependsOn signArchives
+    }
+
+
+
+    uploadArchives {
+        dependsOn releaseSub
+
+        repositories.mavenDeployer {
+            configuration = configurations.archives
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: sonatypeUsr, password: sonatypePwd)
+            }
+
+
+            pom.project {
+                name 'Kovenant'
+                packaging 'jar'
+                description project.description
+                url 'http://kovenant.mplatvoet.nl'
+                inceptionYear '2015'
+
+                scm {
+                    url 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                    connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'http://opensource.org/licenses/MIT'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'mplatvoet'
+                        name 'Mark Platvoet'
+                        email 'mplatvoet@gmail.com'
+                        url 'http://mplatvoet.nl'
+                    }
+                }
+            }
+        }
+    }
 }
-
 
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
     if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
         enrichVersion()
+    } else {
+        allprojects*.version = appVersion
     }
-}
-
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+    allprojects*.group = appGroup
 }
 
 task jars() {
-    dependsOn jar, sourcesJar, javadocJar
-}
-
-
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
-signing {
-    sign configurations.archives
+    dependsOn subprojects.jar, subprojects.sourcesJar, subprojects.javadocJar
 }
 
 task release {
-    dependsOn signArchives
+    dependsOn subprojects.releaseSub
 }
-
-
-
-def sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
-
-uploadArchives {
-    dependsOn release
-
-    repositories.mavenDeployer {
-        configuration = configurations.archives
-
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-
-        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-            authentication(userName: sonatypeUsr, password: sonatypePwd)
-        }
-
-
-        pom.project {
-            name 'Kovenant'
-            packaging 'jar'
-            description project.description
-            url 'http://kovenant.mplatvoet.nl'
-            inceptionYear '2015'
-
-            scm {
-                url 'scm:git:git@github.com:mplatvoet/kovenant.git'
-                connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
-            }
-
-            licenses {
-                license {
-                    name 'MIT License'
-                    url 'http://opensource.org/licenses/MIT'
-                    distribution 'repo'
-                }
-            }
-
-            developers {
-                developer {
-                    id 'mplatvoet'
-                    name 'Mark Platvoet'
-                    email 'mplatvoet@gmail.com'
-                    url 'http://mplatvoet.nl'
-                }
-            }
-        }
-    }
-}
-
-
-
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.4-rc-1'
@@ -132,7 +150,7 @@ def enrichVersion() {
     def kotlinVersion = extractKotlinMilestoneVersion()
     def identifier = kotlinVersion ? "kotlinM$kotlinVersion" : "unknown"
 
-    version = "$version-$identifier+$buildMetaData"
+    allprojects*.version = "$appVersion-$identifier+$buildMetaData"
 }
 
 String extractKotlinMilestoneVersion() {
@@ -147,13 +165,14 @@ String extractKotlinMilestoneVersion() {
 }
 
 String extractRawKotlinVersion() {
-    for (scope in rootProject.configurations.all) {
-
-        for (dep in scope.dependencies) {
-            def name = dep.name.toString()
-            def group = dep.group.toString()
-            if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
-                return dep.version
+    for (project in subprojects) {
+        for (scope in project.configurations.all) {
+            for (dep in scope.dependencies) {
+                def name = dep.name.toString()
+                def group = dep.group.toString()
+                if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
+                    return dep.version
+                }
             }
         }
     }
@@ -167,6 +186,6 @@ def buildTime() {
     return df.format(new Date())
 }
 
-defaultTasks 'clean', 'libs'
+defaultTasks 'clean', 'jars'
 
 

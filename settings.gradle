@@ -1,1 +1,11 @@
 rootProject.name = 'kovenant'
+include 'core'
+
+rootProject.children.each { project ->
+    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
+    String projectDirName = "projects/$projectFileName"
+    project.projectDir = new File(settingsDir, projectDirName)
+    project.buildFileName = "${projectFileName}.gradle"
+}
+
+project(":core").name = "kovenant"
