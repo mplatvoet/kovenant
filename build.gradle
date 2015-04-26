@@ -186,6 +186,6 @@ def buildTime() {
     return df.format(new Date())
 }
 
-defaultTasks 'clean', 'libs'
+defaultTasks 'clean', 'jars'
 
 

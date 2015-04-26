@@ -7,3 +7,5 @@ rootProject.children.each { project ->
     project.projectDir = new File(settingsDir, projectDirName)
     project.buildFileName = "${projectFileName}.gradle"
 }
+
+project(":core").name = "kovenant"
