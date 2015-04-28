@@ -29,7 +29,7 @@ This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:0.1.1'
+    compile 'nl.mplatvoet.komponents:kovenant:0.1.+'
 }
 ```
 
@@ -38,9 +38,8 @@ dependencies {
 <dependency>
 	<groupId>nl.mplatvoet.komponents</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>0.1.1</version>
+	<version>[0.1.0,0.2.0)</version>
 </dependency>
 ```
-
 ##Issues
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
