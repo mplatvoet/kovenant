@@ -1,1 +1,1 @@
-description = "Kovenant. Promises for Kotlin"
+project.description = "The core of Kovenant Promises for Kotlin"

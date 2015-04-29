@@ -70,8 +70,6 @@ subprojects {
         dependsOn signArchives
     }
 
-
-
     uploadArchives {
         dependsOn releaseSub
 
@@ -85,41 +83,52 @@ subprojects {
                 authentication(userName: sonatypeUsr, password: sonatypePwd)
             }
 
-
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description project.description
-                url 'http://kovenant.mplatvoet.nl'
-                inceptionYear '2015'
-
-                scm {
-                    url 'https://github.com/mplatvoet/kovenant'
-                    connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
+            pom.whenConfigured { configgedPom ->
+                configgedPom.dependencies.removeAll { dep ->
+                    dep.scope == "test"
                 }
 
-                licenses {
-                    license {
-                        name 'MIT License'
-                        url 'http://opensource.org/licenses/MIT'
-                        distribution 'repo'
+                configgedPom.dependencies = configgedPom.dependencies.sort { dep ->
+                    "$dep.scope:$dep.groupId:$dep.artifactId"
+                }
+
+                configgedPom.project {
+                    name project.name
+                    packaging 'jar'
+                    description project.description
+                    println("hurray $project.description")
+                    url 'http://kovenant.mplatvoet.nl'
+                    inceptionYear '2015'
+
+                    scm {
+                        url 'https://github.com/mplatvoet/kovenant'
+                        connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
                     }
-                }
 
-                developers {
-                    developer {
-                        id 'mplatvoet'
-                        name 'Mark Platvoet'
-                        email 'mplatvoet@gmail.com'
-                        url 'http://mplatvoet.nl'
+                    licenses {
+                        license {
+                            name 'MIT License'
+                            url 'http://opensource.org/licenses/MIT'
+                            distribution 'repo'
+                        }
                     }
-                }
 
-                issueManagement {
-                    system = "YouTrack"
-                    url = "http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant"
+                    developers {
+                        developer {
+                            id 'mplatvoet'
+                            name 'Mark Platvoet'
+                            email 'mplatvoet@gmail.com'
+                            url 'http://mplatvoet.nl'
+                        }
+                    }
+
+                    issueManagement {
+                        system = "YouTrack"
+                        url = "http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant"
+                    }
                 }
             }
+
         }
     }
 }
