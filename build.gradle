@@ -1,11 +1,14 @@
 buildscript {
+    ext.kotlinVersion = '0.11.91.2'
+    ext.extraConfVersion = '2.2.+'
+
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
     }
 }
 
@@ -16,7 +19,7 @@ allprojects {
         appVersion = '0.1.2'
         appGroup = 'nl.mplatvoet.komponents'
 
-        kotlinVersion = '0.11.91'
+
         junitVersion = '4.12'
 
         sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
