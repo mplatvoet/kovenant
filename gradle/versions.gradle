@@ -1,0 +1,47 @@
+ext {
+    enrichVersion = this.&enrichVersion
+}
+
+
+def enrichVersion() {
+    def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')?.trim()
+    def buildMetaData = circleBuildNr ? circleBuildNr : buildTime()
+
+    def kotlinVersion = extractKotlinMilestoneVersion()
+    def identifier = kotlinVersion ? "kotlinM$kotlinVersion" : "unknown"
+
+    allprojects*.version = "$appVersion-$identifier+$buildMetaData"
+}
+
+String extractKotlinMilestoneVersion() {
+    def rawVersion = extractRawKotlinVersion()
+    if (rawVersion) {
+        def matcher = rawVersion =~ /\d+/
+        matcher.find()
+        matcher.find(matcher.end())
+        return rawVersion.substring(matcher.start(), matcher.end())
+    }
+    return null
+}
+
+String extractRawKotlinVersion() {
+    for (project in subprojects) {
+        for (scope in project.configurations.all) {
+            for (dep in scope.dependencies) {
+                def name = dep.name.toString()
+                def group = dep.group.toString()
+                if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
+                    return dep.version
+                }
+            }
+        }
+    }
+    return null
+}
+
+
+def buildTime() {
+    def df = new java.text.SimpleDateFormat("yyyyMMdd'T'HHmm'Z'")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
+}
