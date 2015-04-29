@@ -194,7 +194,7 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
         }
     }
 
-    private fun findTailNode() : CallbackContextNode<V, E> {
+    private fun findTailNode(): CallbackContextNode<V, E> {
         var tail = head.get()
         while (true) {
             val next = tail.next
