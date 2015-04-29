@@ -94,7 +94,7 @@ subprojects {
                 inceptionYear '2015'
 
                 scm {
-                    url 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                    url 'https://github.com/mplatvoet/kovenant'
                     connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
                 }
 
@@ -113,6 +113,11 @@ subprojects {
                         email 'mplatvoet@gmail.com'
                         url 'http://mplatvoet.nl'
                     }
+                }
+
+                issueManagement {
+                    system = "YouTrack"
+                    url = "http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant"
                 }
             }
         }
