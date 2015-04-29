@@ -1,5 +1,6 @@
-project.description = "Kovenant. Promises for Kotlin"
+project.description = "Kovenant. Promises for Kotlin."
 
 dependencies {
     compile project(':kovenant-core')
+    compile project(':kovenant-combine')
 }

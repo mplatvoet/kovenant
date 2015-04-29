@@ -1,6 +1,7 @@
 rootProject.name = 'root'
 
 include 'core'
+include 'combine'
 include 'kovenant'
 
 rootProject.children.each { project ->
@@ -11,3 +12,4 @@ rootProject.children.each { project ->
 }
 
 project(":core").name = "kovenant-core"
+project(":combine").name = "kovenant-combine"
