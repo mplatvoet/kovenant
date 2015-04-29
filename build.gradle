@@ -1,14 +1,3 @@
-allprojects {
-    ext {
-        appVersion = '0.1.2'
-        appGroup = 'nl.mplatvoet.komponents'
-
-        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
-    }
-}
-
-//Need to duplicate this in order to make it compile.
 buildscript {
     repositories {
         mavenCentral()
@@ -20,24 +9,30 @@ buildscript {
     }
 }
 
-subprojects {
-    buildscript {
-        repositories {
-            mavenCentral()
-            jcenter()
-        }
-        dependencies {
-            classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
-            classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
-        }
-    }
+allprojects {
+    ext {
+        appVersion = '0.1.2'
+        appGroup = 'nl.mplatvoet.komponents'
 
+        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+    }
+}
+
+
+
+subprojects {
     repositories { mavenCentral() }
 
     apply plugin: 'optional-base'
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
+
+    compileJava {
+        sourceCompatibility = "1.6"
+        targetCompatibility = "1.6"
+    }
 
     dependencies {
         compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91', optional

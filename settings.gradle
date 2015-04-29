@@ -1,4 +1,4 @@
-rootProject.name = 'kovenant'
+rootProject.name = 'root'
 include 'core'
 
 rootProject.children.each { project ->
@@ -8,4 +8,4 @@ rootProject.children.each { project ->
     project.buildFileName = "${projectFileName}.gradle"
 }
 
-project(":core").name = "kovenant"
+project(":core").name = "kovenant-core"
