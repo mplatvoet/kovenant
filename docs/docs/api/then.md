@@ -1,4 +1,8 @@
 #Then
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
+
 `then` operates similar to [`async`](async.md) except that it takes the output from a previous `Promise` as it's input.
 This allows you to chain units of work.
 
