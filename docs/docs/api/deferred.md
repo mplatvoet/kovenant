@@ -1,4 +1,8 @@
 #Deferred
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
+
 With a `Deferred<V,E>` you can take matters in your own hand. Instead of relying on [`async`](async.md) for resolving
 or rejecting a promise it's up to the developer. You obtain a deferred object by simply calling `deferred<V, E>()`.
 From there you can either `resolve(V)` or `reject(E)` the deferred. This can only be set once and by default trying

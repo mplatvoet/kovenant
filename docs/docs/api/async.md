@@ -1,4 +1,8 @@
 #Async
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
+
 The easiest way to create a `Promise` is by using `async`, e.g.
 ```kt
 val promise = async { foo() }

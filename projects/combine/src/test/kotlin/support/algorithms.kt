@@ -19,52 +19,14 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
-
-import java.util.ArrayList
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReferenceArray
+package support
 
 
-private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> {
-    val deferred = deferred<List<V>, E>()
-
-    val results = AtomicReferenceArray<V>(promises.size())
-    val successCount = AtomicInteger(promises.size())
-    val failCount = AtomicInteger(0)
-    promises.forEachIndexed {
-        i, promise ->
-        promise.success { v ->
-            results[i] = v
-            if (successCount.decrementAndGet() == 0) {
-
-                deferred.resolve(results.asList())
-            }
-        }
-        promise.fail { e ->
-            if (failCount.incrementAndGet() == 1) {
-                deferred.reject(e)
-            }
-        }
-
+//a very naive fibonacci implementation
+public fun fib(n: Int): Int {
+    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
+    return when (n) {
+        0, 1 -> 1
+        else -> fib(n - 1) + fib(n - 2)
     }
-
-    return deferred.promise
 }
-
-
-private fun <V> AtomicReferenceArray<V>.asList(): List<V> {
-    val list = ArrayList<V>()
-    for (i in 0..this.length() - 1) {
-        list add this[i]
-    }
-    return list
-}
-
-
-
-
-
-
-
-

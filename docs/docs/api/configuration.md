@@ -1,4 +1,8 @@
 #Configuration
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
+
 Configuration of Kovenant can easily be done in code. Configuring Kovenant is completely threadsafe, so Kovenant
 can be reconfigured during a running application from multiple threads. But you probably want to do this when 
 your application starts so that you don't create much waste.
