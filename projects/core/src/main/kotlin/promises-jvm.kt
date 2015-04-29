@@ -172,19 +172,11 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
 
     private fun addValueNode(node: CallbackContextNode<V, E>) {
         //ensure there is a head
-        while (head.get() == null) {
-            head.compareAndSet(null, createHeadNode())
-        }
+        ensureHeadNode()
 
         while (true) {
-            var tail = head.get()
-            while (true) {
-                val next = tail.next
-                if (next == null) {
-                    break
-                }
-                tail = next
-            }
+            val tail = findTailNode()
+
             if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
                 if (tail.next == null) {
                     tail.next = node
@@ -193,6 +185,23 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
                 }
                 tail.nodeState.set(NodeState.CHAINED)
             }
+        }
+    }
+
+    private fun ensureHeadNode() {
+        while (head.get() == null) {
+            head.compareAndSet(null, createHeadNode())
+        }
+    }
+
+    private fun findTailNode() : CallbackContextNode<V, E> {
+        var tail = head.get()
+        while (true) {
+            val next = tail.next
+            if (next == null) {
+                return tail
+            }
+            tail = next
         }
     }
 
