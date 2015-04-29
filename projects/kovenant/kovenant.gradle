@@ -1,0 +1,5 @@
+project.description = "Kovenant. Promises for Kotlin"
+
+dependencies {
+    compile project(':kovenant-core')
+}

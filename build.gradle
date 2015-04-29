@@ -29,6 +29,9 @@ allprojects {
 subprojects {
     repositories { mavenCentral() }
 
+    def pomOnlyProject = project.name == "kovenant"
+    println("Is $project.name a pom only project: $pomOnlyProject")
+
     apply plugin: 'optional-base'
     apply plugin: 'kotlin'
     apply plugin: 'maven'
@@ -45,36 +48,48 @@ subprojects {
         testCompile "junit:junit:${junitVersion}"
     }
 
-    task javadocJar(type: Jar) {
-        classifier = 'javadoc'
-        from javadoc
-    }
-
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
 
 
-    artifacts {
-        archives jar
-        archives javadocJar
-        archives sourcesJar
+
+    if (pomOnlyProject) {
+        artifacts {}
+    } else {
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives jar
+            archives javadocJar
+            archives sourcesJar
+        }
+        signing {
+            sign configurations.archives
+        }
+
+        task releaseSub {
+            dependsOn signArchives
+        }
     }
 
-    signing {
-        sign configurations.archives
-    }
 
-    task releaseSub {
-        dependsOn signArchives
-    }
 
     uploadArchives {
-        dependsOn releaseSub
+
+        if (!pomOnlyProject) {
+            dependsOn releaseSub
+        }
 
         repositories.mavenDeployer {
-            configuration = configurations.archives
+            if (!pomOnlyProject) {
+                configuration = configurations.archives
+            }
 
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
@@ -94,7 +109,7 @@ subprojects {
 
                 configgedPom.project {
                     name project.name
-                    packaging 'jar'
+                    packaging(pomOnlyProject ? 'pom' : 'jar')
                     description project.description
                     println("hurray $project.description")
                     url 'http://kovenant.mplatvoet.nl'
@@ -145,11 +160,13 @@ gradle.taskGraph.whenReady { taskGraph ->
 }
 
 task jars() {
-    dependsOn subprojects.jar, subprojects.sourcesJar, subprojects.javadocJar
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.jar
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.sourcesJar
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.javadocJar
 }
 
 task release {
-    dependsOn subprojects.releaseSub
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.releaseSub
 }
 
 task wrapper(type: Wrapper) {
