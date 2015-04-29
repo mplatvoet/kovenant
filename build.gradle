@@ -30,7 +30,6 @@ subprojects {
     repositories { mavenCentral() }
 
     def pomOnlyProject = project.name == "kovenant"
-    println("Is $project.name a pom only project: $pomOnlyProject")
 
     apply plugin: 'optional-base'
     apply plugin: 'kotlin'
