@@ -14,6 +14,9 @@ allprojects {
         appVersion = '0.1.2'
         appGroup = 'nl.mplatvoet.komponents'
 
+        kotlinVersion = '0.11.91'
+        junitVersion = '4.12'
+
         sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
         sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
     }
@@ -35,9 +38,9 @@ subprojects {
     }
 
     dependencies {
-        compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91', optional
+        compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}", optional
 
-        testCompile 'junit:junit:4.12'
+        testCompile "junit:junit:${junitVersion}"
     }
 
     task javadocJar(type: Jar) {
