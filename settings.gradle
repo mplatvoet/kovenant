@@ -3,6 +3,7 @@ rootProject.name = 'root'
 include 'core'
 include 'combine'
 include 'kovenant'
+include 'disruptor'
 
 rootProject.children.each { project ->
     String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
@@ -11,5 +12,6 @@ rootProject.children.each { project ->
     project.buildFileName = "${projectFileName}.gradle"
 }
 
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
+project(':core').name = 'kovenant-core'
+project(':combine').name = 'kovenant-combine'
+project(':disruptor').name = 'kovenant-disruptor'
