@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     Kovenant.configure {
         callbackDispatcher = disruptorDispatcher
     }
-    validate(10000000)
+    validate(100000)
 
     disruptorDispatcher.stop()
 }

@@ -28,6 +28,7 @@ import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor.dsl.ProducerType
 import nl.mplatvoet.komponents.kovenant.Dispatcher
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 public fun buildDisruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDisruptorBuilder()
@@ -40,6 +41,7 @@ public enum class Producers {
 }
 
 public trait DisruptorBuilder {
+    var name: String
     var numberOfThreads: Int
     var bufferSize: Int
     var producers: Producers
@@ -50,6 +52,7 @@ private class ConcreteDisruptorBuilder : DisruptorBuilder {
     private var producerType = ProducerType.MULTI
     private var buffer = 1024
 
+    override var name = "kovenant-disruptor"
     override var numberOfThreads: Int
         get() = threads
         set(value) {
@@ -77,14 +80,34 @@ private class ConcreteDisruptorBuilder : DisruptorBuilder {
         }
 
     fun buildDispatcher(): Dispatcher {
-        return DisruptorDispatcher(buffer, threads, producerType)
+        return DisruptorDispatcher(name, buffer, threads, producerType)
     }
 }
 
 
-private class DisruptorDispatcher(private val bufferSize: Int, private val threads: Int, private val producerType: ProducerType) : Dispatcher {
-    private val disrupter = Disruptor(FunctionEventFactory(), bufferSize, Executors.newFixedThreadPool(threads), producerType, SleepingWaitStrategy())
+private class DisruptorDispatcher(private val name: String,
+                                  private val bufferSize: Int,
+                                  private val threads: Int,
+                                  private val producerType: ProducerType) : Dispatcher {
+
+    val executorService = Executors.newFixedThreadPool(threads) {
+        runnable ->
+        val thread = Thread(runnable, name)
+        thread.setDaemon(false)
+        //        thread.start()
+        thread
+    }
+
+    private val disrupter = Disruptor(FunctionEventFactory(),
+            bufferSize,
+            executorService,
+            producerType,
+            SleepingWaitStrategy())
+
     private val buffer = disrupter.getRingBuffer()
+
+    private volatile var running = true
+    private val publishers = AtomicInteger(0)
 
     init {
         disrupter.handleEventsWith(FunctionEventHandler())
@@ -94,20 +117,37 @@ private class DisruptorDispatcher(private val bufferSize: Int, private val threa
     }
 
     override fun offer(task: () -> Unit): Boolean {
+        if (!running) return false;
+        publishers.incrementAndGet()
+        try {
+            if (!running) return false;
+
+            publishToRingBuffer(task)
+        } finally {
+            publishers.decrementAndGet()
+        }
+        return true
+    }
+
+    private fun publishToRingBuffer(task: () -> Unit) {
         val seq = buffer.next()
         try {
             buffer[seq].value = task
         } finally {
             buffer.publish(seq)
         }
-        return true
     }
 
 
     //TODO, implement this properly
     override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
-        //disrupter.shutdown() // shutdown only works properly if publishing has stopped.
-        //needs some guards here
+        //        running = false
+        //        while (publishers.get() > 0) {
+        //            //just spin till all the publishers are gone
+        //        }
+        //        disrupter.shutdown()
+        //        executorService.shutdown()
+        //        executorService.awaitTermination(1, TimeUnit.DAYS)
         return listOf()
     }
 
@@ -137,7 +177,6 @@ private class FunctionEventHandler : EventHandler<FunctionEvent> {
 private class FunctionEventFactory : EventFactory<FunctionEvent> {
     override fun newInstance(): FunctionEvent = FunctionEvent()
 }
-
 
 private object PowerOfTwo {
     private val max = 1 shl 30
