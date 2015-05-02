@@ -29,9 +29,61 @@ import com.lmax.disruptor.dsl.ProducerType
 import nl.mplatvoet.komponents.kovenant.Dispatcher
 import java.util.concurrent.Executors
 
-//TODO provide kotlin configuration
-class DisruptorDispatcher() : Dispatcher {
-    private val disrupter = Disruptor(FunctionEventFactory(), 1024, Executors.newFixedThreadPool(1), ProducerType.MULTI, SleepingWaitStrategy())
+public fun buildDisruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
+    val builder = ConcreteDisruptorBuilder()
+    builder.body()
+    return builder.buildDispatcher()
+}
+
+public enum class Producers {
+    MULTIPLE SINGLE
+}
+
+public trait DisruptorBuilder {
+    var numberOfThreads: Int
+    var bufferSize: Int
+    var producers: Producers
+}
+
+private class ConcreteDisruptorBuilder : DisruptorBuilder {
+    private var threads = 1
+    private var producerType = ProducerType.MULTI
+    private var buffer = 1024
+
+    override var numberOfThreads: Int
+        get() = threads
+        set(value) {
+            if (value < 1) throw IllegalArgumentException("can't have less then one thread")
+            threads = value
+        }
+
+    override var bufferSize: Int
+        get() = buffer
+        set(value) {
+            if (value < 0) throw IllegalArgumentException("negative buffer size, really?")
+            buffer = PowerOfTwo.roundUp(value)
+        }
+    override var producers: Producers
+        get() = when (producerType) {
+            ProducerType.MULTI -> Producers.MULTIPLE
+            ProducerType.SINGLE -> Producers.SINGLE
+        }
+
+        set(value) {
+            producerType = when (value) {
+                Producers.MULTIPLE -> ProducerType.MULTI
+                Producers.SINGLE -> ProducerType.SINGLE
+            }
+        }
+
+    fun buildDispatcher(): Dispatcher {
+        return DisruptorDispatcher(buffer, threads, producerType)
+    }
+}
+
+
+private class DisruptorDispatcher(private val bufferSize: Int, private val threads: Int, private val producerType: ProducerType) : Dispatcher {
+    private val disrupter = Disruptor(FunctionEventFactory(), bufferSize, Executors.newFixedThreadPool(threads), producerType, SleepingWaitStrategy())
     private val buffer = disrupter.getRingBuffer()
 
     init {
@@ -84,5 +136,17 @@ private class FunctionEventHandler : EventHandler<FunctionEvent> {
 
 private class FunctionEventFactory : EventFactory<FunctionEvent> {
     override fun newInstance(): FunctionEvent = FunctionEvent()
+}
+
+
+private object PowerOfTwo {
+    private val max = 1 shl 30
+
+    public fun roundUp(value: Int): Int = when {
+        value >= max -> max
+        value > 1 -> Integer.highestOneBit((value - 1) shl 1)
+        else -> 1
+    }
+
 }
 

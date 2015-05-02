@@ -25,7 +25,7 @@ import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.Promise
 import nl.mplatvoet.komponents.kovenant.async
 import nl.mplatvoet.komponents.kovenant.buildDispatcher
-import nl.mplatvoet.komponents.kovenant.disruptor.DisruptorDispatcher
+import nl.mplatvoet.komponents.kovenant.disruptor.buildDisruptor
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -34,7 +34,7 @@ import java.util.concurrent.CountDownLatch
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val callDispatcher = buildDispatcher { numberOfThreads = 1 }
-val callDisruptor = DisruptorDispatcher()
+val callDisruptor = buildDisruptor { }
 
 val attempts = 10
 val warmupRounds = 100000
