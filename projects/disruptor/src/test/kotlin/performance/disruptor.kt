@@ -34,7 +34,9 @@ import java.util.concurrent.CountDownLatch
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val callDispatcher = buildDispatcher { numberOfThreads = 1 }
-val callDisruptor = buildDisruptor { }
+val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
+val callDisruptor = buildDisruptor { numberOfThreads = 1 }
+val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 val attempts = 10
 val warmupRounds = 100000
@@ -81,12 +83,14 @@ fun main(args: Array<String>) {
 fun configureDisruptor() {
     Kovenant.configure {
         callbackDispatcher = callDisruptor
+        workerDispatcher = workDisruptor
     }
 }
 
 fun configureDispatcher() {
     Kovenant.configure {
         callbackDispatcher = callDispatcher
+        workerDispatcher = workDispatcher
     }
 }
 
