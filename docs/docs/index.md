@@ -46,11 +46,12 @@ dependencies {
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
 it's needed to keep class en method count low. 
 
-|artifact        |description|
-|----------------|-----------|
-|kovenant        |container artifact that consists of `kovenant-core` and `kovenant-combine`|
-|kovenant-core   |The core of kovenant. Provides the API and default implementations|
-|kovenant-combine|Adds combine functionality that keep everything strongly typed|
+|artifact          |description                                                                                        |
+|------------------|---------------------------------------------------------------------------------------------------|
+|kovenant          |Container artifact that consists of `kovenant-core` and `kovenant-combine`                         |
+|kovenant-core     |The core of kovenant. Provides the API and default implementations                                 |
+|kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
+|kovenant-android  |Extensions for Android specific needs                                                              | 
 
 ##Issues
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)

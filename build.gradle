@@ -35,6 +35,7 @@ subprojects {
     def pomOnlyProject = project.name == "kovenant"
 
     apply plugin: 'optional-base'
+    apply plugin: 'provided-base'
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
