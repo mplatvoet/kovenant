@@ -19,36 +19,14 @@
  * THE SOFTWARE.
  */
 
-package examples.executors
-
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.jvm.asExecutorService
-import support.fib
-import java.util.concurrent.Callable
-
-fun main(args: Array<String>) {
-    val executorService = Kovenant.context.workerDispatcher.asExecutorService()
-
-    val tasks = listOf(*(Array(5) { FibCallable(25 - it) }))
+package support
 
 
-    val (n, fib) = executorService invokeAny tasks
-    println("invokeAny: fib($n) = $fib")
-    println()
-
-    val results = executorService invokeAll tasks
-    results forEach { future ->
-        val (i, res) = future.get()
-        println("invokeAll: fib($i) = $res")
+//a very naive fibonacci implementation
+public fun fib(n: Int): Int {
+    if (n < 0) throw IllegalArgumentException("negative numbers not allowed")
+    return when (n) {
+        0, 1 -> 1
+        else -> fib(n - 1) + fib(n - 2)
     }
-
-    //Not necessary but shuts down a bit quicker
-    executorService.shutdownNow()
 }
-
-
-private class FibCallable(private val n: Int) : Callable<Pair<Int, Int>> {
-    override fun call() = Pair(n, fib(n))
-}
-
-
