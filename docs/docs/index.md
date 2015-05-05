@@ -23,13 +23,13 @@ Developed with the following [goals](goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
-
+This version is build against `Java 8` and `kotlin-stdlib:0.11.91`.
+Source and target compatibility is `Java 6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:0.1.+'
+    compile 'nl.mplatvoet.komponents:kovenant:1.0.+'
 }
 ```
 
@@ -38,7 +38,7 @@ dependencies {
 <dependency>
 	<groupId>nl.mplatvoet.komponents</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[0.1.0,0.2.0)</version>
+	<version>[1.0.0,1.1.0)</version>
 </dependency>
 ```
 
@@ -48,7 +48,7 @@ it's needed to keep class en method count low.
 
 |artifact          |description                                                                                        |
 |------------------|---------------------------------------------------------------------------------------------------|
-|kovenant          |Container artifact that consists of `kovenant-core` and `kovenant-combine`                         |
+|kovenant          |Container artifact that consists of `kovenant-core`, `kovenant-combine` and `kovenant-jvm`         |
 |kovenant-core     |The core of kovenant. Provides the API and default implementations                                 |
 |kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
 |kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |

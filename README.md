@@ -3,6 +3,10 @@
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
 
+> *PLEASE NOTE*, THIS IS THE DEVELOPMENT BRANCH
+> Documented artifacts are not published yet, refer to the master branch for the released version.
+> This is just preparation for the next release.
+
 ```kt
 async { "world" } and async { "Hello" } success {
     println("${it.second} ${it.first}!")
@@ -12,12 +16,13 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
+This version is build against `Java 8` and `kotlin-stdlib:0.11.91`.
+Source and target compatibility is `Java 6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:0.1.+'
+    compile 'nl.mplatvoet.komponents:kovenant:1.0.+'
 }
 ```
 
@@ -26,9 +31,21 @@ dependencies {
 <dependency>
 	<groupId>nl.mplatvoet.komponents</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[0.1.0,0.2.0)</version>
+	<version>[1.0.0,1.1.0)</version>
 </dependency>
 ```
+
+###Artifacts
+Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
+it's needed to keep class en method count low. 
+
+|artifact          |description                                                                                        |
+|------------------|---------------------------------------------------------------------------------------------------|
+|kovenant          |Container artifact that consists of `kovenant-core`, `kovenant-combine` and `kovenant-jvm`         |
+|kovenant-core     |The core of kovenant. Provides the API and default implementations                                 |
+|kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
+|kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |
+|kovenant-android  |Extensions for Android specific needs                                                              | 
 
 ##Issues
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
