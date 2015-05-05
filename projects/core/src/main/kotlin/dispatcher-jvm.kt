@@ -43,7 +43,7 @@ trait DispatcherBuilder {
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
     private var localName = "dispatcher"
-    private var localNumberOfThreads = availableProcessors
+    private var localNumberOfThreads = threadAdvice
     private var localExceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
     private var localErrorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
 
@@ -97,8 +97,11 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 }
 
 trait PollStrategyBuilder {
+    fun addYieldingPoll(numberOfPolls: Int = 1000)
     fun addBusyPoll(numberOfPolls: Int = 1000)
+    fun addBlockingPoll()
     fun addSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
+    fun addBlockingSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
 }
 
 class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) : PollStrategyBuilder {
@@ -106,12 +109,24 @@ class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) 
 
     fun clear() = strategies.clear()
 
-    override fun addBusyPoll(numberOfPolls: Int) {
+    override fun addYieldingPoll(numberOfPolls: Int) {
         strategies add YieldingPollStrategy(pollable = workQueue, attempts = numberOfPolls)
     }
 
     override fun addSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
         strategies add SleepingPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+    }
+
+    override fun addBusyPoll(numberOfPolls: Int) {
+        strategies add BusyPollStrategy(pollable = workQueue, attempts = numberOfPolls)
+    }
+
+    override fun addBlockingPoll() {
+        strategies add BlockingPollStrategy(pollable = workQueue)
+    }
+
+    override fun addBlockingSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
+        strategies add BlockingSleepPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
     private fun buildDefaultStrategy(): PollStrategy<() -> Unit> {
@@ -517,6 +532,10 @@ private class BlockingPollStrategy<V : Any>(private val pollable: Pollable<V>) :
     override fun get(): V? = pollable.poll(block = true)
 }
 
+//on multicores, leave one thread out so that
+//the dispatcher thread can run on it's own core
+private val threadAdvice: Int
+    get() = Math.max(availableProcessors - 1, 1)
 
 private val availableProcessors: Int
     get() = Runtime.getRuntime().availableProcessors()

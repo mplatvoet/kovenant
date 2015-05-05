@@ -41,6 +41,20 @@ val performanceRounds = 1000000
 val napTimeSeconds = 3L
 val fibN = 13
 
+val cbDispatch = buildDispatcher {
+    numberOfThreads = 1
+    configureWaitStrategy {
+        addYieldingPoll()
+        addBlockingPoll()
+    }
+}
+val workDispatch = buildDispatcher {
+    configureWaitStrategy {
+        addYieldingPoll()
+        addBlockingPoll()
+    }
+}
+
 fun main(args: Array<String>) {
     println(
             """Performance test
@@ -52,9 +66,11 @@ fun main(args: Array<String>) {
 """)
 
     Kovenant.configure {
-        workerDispatcher = buildDispatcher {
-            numberOfThreads = numberOfWorkerThreads
-        }
+
+        callbackDispatcher = cbDispatch
+
+
+        workerDispatcher = workDispatch
     }
 
 
@@ -87,6 +103,8 @@ fun main(args: Array<String>) {
             "Promises where a factor ${fasterOrSlower(averageFactor)}")
 
     executorService.shutdownNow()
+    workDispatch.stop()
+    cbDispatch.stop()
 }
 
 private fun napTime() {
