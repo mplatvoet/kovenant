@@ -38,7 +38,7 @@ trait DispatcherBuilder {
     var numberOfThreads: Int
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
-    fun configureWaitStrategy(body: WaitStrategyBuilder.() -> Unit)
+    fun configureWaitStrategy(body: PollStrategyBuilder.() -> Unit)
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -47,8 +47,8 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
     private var localExceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
     private var localErrorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
 
-    private val workQueue = ConcurrentLinkedQueue<() -> Unit>()
-    private val waitStrategyBuilder = ConcreteWaitStrategyBuilder(workQueue)
+    private val workQueue = WorkQueue<() -> Unit>()
+    private val pollStrategyBuilder = ConcretePollStrategyBuilder(workQueue)
 
     override var name: String
         get() = localName
@@ -79,9 +79,9 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
         }
 
 
-    override fun configureWaitStrategy(body: WaitStrategyBuilder.() -> Unit) {
-        waitStrategyBuilder.clear()
-        waitStrategyBuilder.body()
+    override fun configureWaitStrategy(body: PollStrategyBuilder.() -> Unit) {
+        pollStrategyBuilder.clear()
+        pollStrategyBuilder.body()
     }
 
     fun build(): Dispatcher {
@@ -90,47 +90,39 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
                 exceptionHandler = localExceptionHandler,
                 errorHandler = localErrorHandler,
                 workQueue = workQueue,
-                waitStrategy = waitStrategyBuilder.build())
+                pollStrategy = pollStrategyBuilder.build())
     }
 
 
 }
 
-trait WaitStrategyBuilder {
+trait PollStrategyBuilder {
     fun addBusyPoll(numberOfPolls: Int = 1000)
     fun addSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
 }
 
-class ConcreteWaitStrategyBuilder(private val workQueue: ConcurrentLinkedQueue<() -> Unit>) : WaitStrategyBuilder {
-    private val strategies = ArrayList<WaitStrategy>()
+class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) : PollStrategyBuilder {
+    private val strategies = ArrayList<PollStrategy<() -> Unit>>()
 
     fun clear() = strategies.clear()
 
     override fun addBusyPoll(numberOfPolls: Int) {
-        strategies add BusyPollWaitStrategy(queue = workQueue, attempts = numberOfPolls)
+        strategies add YieldingPollStrategy(pollable = workQueue, attempts = numberOfPolls)
     }
 
     override fun addSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
-        strategies add SleepPollWaitStrategy(queue = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+        strategies add SleepingPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
-    private fun buildDefaultStrategy(): WaitStrategy {
-        return ChainWaitStrategy(listOf(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue)))
+    private fun buildDefaultStrategy(): PollStrategy<() -> Unit> {
+        return ChainPollStrategy(listOf(YieldingPollStrategy(workQueue), SleepingPollStrategy(workQueue)))
     }
 
-    fun build(): WaitStrategy = if (strategies.isEmpty()) {
+    fun build(): PollStrategy<() -> Unit> = if (strategies.isEmpty()) {
         buildDefaultStrategy()
     } else {
-        ChainWaitStrategy(strategies)
+        ChainPollStrategy(strategies)
     }
-}
-
-trait WaitStrategy {
-    /*
-    Waits for any amount of time determined by the strategy used
-    Returns true if thread should expect more work, false if it can be shutdown
-     */
-    fun waitAndReturnAlive(): Boolean
 }
 
 
@@ -138,8 +130,8 @@ private class NonBlockingDispatcher(val name: String,
                                     val numberOfThreads: Int,
                                     private val exceptionHandler: (Exception) -> Unit,
                                     private val errorHandler: (Throwable) -> Unit,
-                                    private val workQueue: ConcurrentLinkedQueue<() -> Unit>,
-                                    private val waitStrategy: WaitStrategy) : Dispatcher {
+                                    private val workQueue: WorkQueue<() -> Unit>,
+                                    private val pollStrategy: PollStrategy<() -> Unit>) : Dispatcher {
 
     init {
         if (numberOfThreads < 1) {
@@ -234,9 +226,7 @@ private class NonBlockingDispatcher(val name: String,
     private fun newThreadContext(): ThreadContext {
         val threadName = "${name}-${threadId.incrementAndGet()}"
 
-        return ThreadContext(
-                threadName = threadName,
-                waitStrategy = waitStrategy)
+        return ThreadContext(threadName = threadName)
     }
 
 
@@ -256,11 +246,11 @@ private class NonBlockingDispatcher(val name: String,
     }
 
 
-    private inner class ThreadContext(val threadName: String, private val waitStrategy: WaitStrategy) {
+    private inner class ThreadContext(val threadName: String) {
 
         private val pending = 0
         private val running = 1
-        private val waiting = 2
+        private val polling = 2
         private val mutating = 3
 
         private val state = AtomicInteger(pending)
@@ -284,10 +274,45 @@ private class NonBlockingDispatcher(val name: String,
 
         private fun run() {
             while (alive) {
+                var pollResult: (() -> Unit)? = null
+                changeState(pending, polling)
+                try {
+                    pollResult = if (keepAlive) pollStrategy.get() else workQueue.poll(block = false)
+                    if (!keepAlive || pollResult == null) {
+                        //not interested in keeping alive and no work left. Die.
+                        if (deRegisterRequest(this)) {
+                            //de register succeeded, shutdown this context.
+                            interrupt()
+                        }
+                    }
 
-                val fn = workQueue.poll() // can this throw an InterruptedException?
+                } catch(e: InterruptedException) {
+                    if (!alive) {
+                        //only set the interrupted flag again if thread is interrupted via this context.
+                        //otherwise either user code has interrupted the thread and we can ignore that
+                        //or this thread has become kamikaze and we can ignore that too
+                        thread.interrupt()
+                    }
+                } finally {
+                    changeState(polling, pending)
+                    if (!keepAlive && alive) {
+                        //if at this point keepAlive is false but the context itself is alive
+                        //the thread might be in an interrupted state, we need to clear that because
+                        //we are probably in graceful shutdown mode and we don't want to interfere with any
+                        //tasks that need to be executed
+                        Thread.interrupted()
+
+                        if (!alive) {
+                            //oh you concurrency, you tricky bastard. We might just cleared that interrupted flag
+                            //but it can be the case that after checking all the flags this context was interrupted
+                            //for a full shutdown and we just cleared that. So interrupt again.
+                            thread.interrupt()
+                        }
+                    }
+                }
+
+                val fn = pollResult
                 if (fn != null) {
-
                     changeState(pending, running)
 
 
@@ -311,56 +336,21 @@ private class NonBlockingDispatcher(val name: String,
                         changeState(running, pending)
                     }
 
-                } else {
-                    changeState(pending, waiting)
-                    try {
-                        if (!keepAlive || !waitStrategy.waitAndReturnAlive()) {
-                            //waited and not alive. Who are we to ignore that kind of advice. Let's die.
-                            if (deRegisterRequest(this)) {
-                                //de register succeeded, shutdown this context.
-                                interrupt()
-                            }
-                        }
-                    } catch (e: InterruptedException) {
-                        if (!alive) {
-                            //only set the interrupted flag again if thread is interrupted via this context.
-                            //otherwise either user code has interrupted the thread and we can ignore that
-                            //or this thread has become kamikaze and we can ignore that too
-                            thread.interrupt()
-                        }
-                    } finally {
-                        changeState(waiting, pending)
-                        if (!keepAlive && alive) {
-                            //if at this point keepAlive is false but the context itself is alive
-                            //the thread might be in an interrupted state, we need to clear that because
-                            //we are probably in graceful shutdown mode and we don't want to interfere with any
-                            //tasks that need to be executed
-                            Thread.interrupted()
-
-                            if (!alive) {
-                                //oh you concurrency, you tricky bastard. We might just cleared that interrupted flag
-                                //but it can be the case that after checking all the flags this context was interrupted
-                                //for a full shutdown and we just cleared that. So interrupt again.
-                                thread.interrupt()
-                            }
-                        }
-                    }
-
                 }
             }
         }
 
 
         /*
-        Become 'kamikaze' or just really suicidal. Try to bypass the waitStrategy for quick and clean death.
+        Become 'kamikaze' or just really suicidal. Try to bypass the pollStrategy for quick and clean death.
          */
         fun kamikaze() {
             keepAlive = false
-            if (tryChangeState(waiting, mutating)) {
-                //this thread is in the waiting state and we are going to interrupt it.
-                //because our waiting strategies might be blocked
+            if (tryChangeState(polling, mutating)) {
+                //this thread is in the pollin state and we are going to interrupt it.
+                //because our polling strategies might be blocked
                 thread.interrupt()
-                changeState(mutating, waiting)
+                changeState(mutating, polling)
             }
 
         }
@@ -384,6 +374,13 @@ private class WorkQueue<V : Any>() : Offerable<V>, Pollable<V> {
     //introduces quite a lot of overhead and the semantics
     //are just the same
     private val mutex = Object()
+
+    public fun size(): Int = queue.size()
+
+    public fun isEmpty(): Boolean = queue.isEmpty()
+    public fun isNotEmpty(): Boolean = !isEmpty()
+
+    public fun remove(elem: Any?): Boolean = queue.remove(elem)
 
     override fun offer(elem: V): Boolean {
         val added = queue offer elem
@@ -518,39 +515,6 @@ private class BlockingSleepPollStrategy<V : Any>(private val pollable: Pollable<
 
 private class BlockingPollStrategy<V : Any>(private val pollable: Pollable<V>) : PollStrategy<V> {
     override fun get(): V? = pollable.poll(block = true)
-}
-
-
-private class ChainWaitStrategy(private val strategies: List<WaitStrategy>) : WaitStrategy {
-    override fun waitAndReturnAlive(): Boolean {
-        strategies.forEach {
-            if (it.waitAndReturnAlive()) return true
-        }
-        return false
-    }
-}
-
-private class BusyPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
-                                   private val attempts: Int = 1000) : WaitStrategy {
-    override fun waitAndReturnAlive(): Boolean {
-        for (i in 0..attempts) {
-            if (queue.isNotEmpty()) return true
-            Thread.yield()
-        }
-        return false
-    }
-}
-
-private class SleepPollWaitStrategy(private val queue: ConcurrentLinkedQueue<*>,
-                                    private val attempts: Int = 100,
-                                    private val sleepTimeMs: Long = 10) : WaitStrategy {
-    override fun waitAndReturnAlive(): Boolean {
-        for (i in 0..attempts) {
-            if (queue.isNotEmpty()) return true
-            Thread.sleep(sleepTimeMs)
-        }
-        return false
-    }
 }
 
 
