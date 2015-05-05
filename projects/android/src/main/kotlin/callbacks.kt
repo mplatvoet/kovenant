@@ -21,21 +21,25 @@
 
 package nl.mplatvoet.komponents.kovenant.android
 
-import nl.mplatvoet.komponents.kovenant.Context
-import nl.mplatvoet.komponents.kovenant.ContextAware
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
+import nl.mplatvoet.komponents.kovenant.*
 
-public fun <V, E> Promise<V, E>.successUI(body: (value: V) -> Unit): Promise<V, E> = success {
-    LooperExecutor.main.submit(Param1Callback(ctx, it, body))
+
+public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
+    val deferred = deferred<V, Exception>(context)
+    LooperExecutor.main submit PromiseUiRunnable(deferred, body)
+    return deferred.promise
 }
 
-public fun <V, E> Promise<V, E>.failUI(body: (error: E) -> Unit): Promise<V, E> = fail {
-    LooperExecutor.main.submit(Param1Callback(ctx, it, body))
+public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = success {
+    LooperExecutor.main submit Param1Callback(ctx, it, body)
 }
 
-public fun <V, E> Promise<V, E>.alwaysUI(body: () -> Unit): Promise<V, E> = always {
-    LooperExecutor.main.submit(Param0Callback(ctx, body))
+public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = fail {
+    LooperExecutor.main submit Param1Callback(ctx, it, body)
+}
+
+public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = always {
+    LooperExecutor.main submit Param0Callback(ctx, body)
 }
 
 
@@ -56,6 +60,16 @@ private class Param0Callback(private val context: Context, private val body: () 
         } catch(e: Exception) {
             context.callbackError(e)
         }
+    }
+}
+
+private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
+                                   private val body: () -> V) : Runnable {
+    override fun run() = try {
+        val result = body()
+        deferred.resolve(result)
+    } catch(e: Exception) {
+        deferred.reject(e)
     }
 }
 

@@ -32,7 +32,7 @@ public enum class DispatcherType {
     FULL BASIC
 }
 
-public fun androidUIDispatcher(): Dispatcher = BasicAndroidDispatcher.uiDispatcher
+public fun androidUiDispatcher(): Dispatcher = BasicAndroidDispatcher.uiDispatcher
 
 public fun buildLooperDispatcher(looper: Looper,
                                  type: DispatcherType = DispatcherType.BASIC): Dispatcher {
