@@ -19,4 +19,8 @@
  * THE SOFTWARE.
  */
 
-project.description = "The core of Kovenant. Promises for Kotlin."
+project.description = "Jvm interopability for Kovenant. Promises for Kotlin."
+
+dependencies {
+    compile project(':kovenant-core')
+}
