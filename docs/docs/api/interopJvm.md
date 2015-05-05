@@ -1,5 +1,5 @@
 #Executors (JVM)
-part of [`kovenant-core`](../index.md#artifacts)
+part of [`kovenant-jvm`](../index.md#artifacts)
 
 ---
 
