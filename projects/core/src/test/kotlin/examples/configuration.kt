@@ -43,7 +43,7 @@ fun main (args: Array<String>) {
             //resets after a thread executes any new task.
             configureWaitStrategy {
                 //A busy poll strategy simple polls the provided amount of polls without interrupting the thread.
-                addBusyPoll(numberOfPolls = 1000)
+                addYieldingPoll(numberOfPolls = 1000)
 
                 //A sleep poll strategy simply puts the thread to sleep between polls.
                 addSleepPoll(numberOfPolls = 100, sleepTimeInMs = 10)
