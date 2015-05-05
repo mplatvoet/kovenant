@@ -453,6 +453,72 @@ private trait Pollable<V : Any> {
 }
 
 
+private trait PollStrategy<V : Any> {
+    throws(javaClass<InterruptedException>())
+    fun get(): V?
+}
+
+private class ChainPollStrategy<V : Any>(private val strategies: List<PollStrategy<V>>) : PollStrategy<V> {
+    override fun get(): V? {
+        strategies.forEach { strategy ->
+            val result = strategy.get()
+            if (result != null) return result
+        }
+        return null
+    }
+}
+
+private class YieldingPollStrategy<V : Any>(private val pollable: Pollable<V>,
+                                            private val attempts: Int = 1000) : PollStrategy<V> {
+    override fun get(): V? {
+        for (i in 0..attempts) {
+            val value = pollable.poll(block = false)
+            if (value != null) return value
+            Thread.yield()
+        }
+        return null
+    }
+}
+
+private class BusyPollStrategy<V : Any>(private val pollable: Pollable<V>,
+                                        private val attempts: Int = 1000) : PollStrategy<V> {
+    override fun get(): V? {
+        for (i in 0..attempts) {
+            val value = pollable.poll(block = false)
+            if (value != null) return value
+        }
+        return null
+    }
+}
+
+private class SleepingPollStrategy<V : Any>(private val pollable: Pollable<V>,
+                                            private val attempts: Int = 100,
+                                            private val sleepTimeMs: Long = 10) : PollStrategy<V> {
+    override fun get(): V? {
+        for (i in 0..attempts) {
+            val value = pollable.poll(block = false)
+            if (value != null) return value
+            Thread.sleep(sleepTimeMs)
+        }
+        return null
+    }
+}
+
+private class BlockingSleepPollStrategy<V : Any>(private val pollable: Pollable<V>,
+                                                 private val attempts: Int = 100,
+                                                 private val sleepTimeMs: Long = 10) : PollStrategy<V> {
+    override fun get(): V? {
+        for (i in 0..attempts) {
+            val value = pollable.poll(block = true, timeoutMs = sleepTimeMs)
+            if (value != null) return value
+        }
+        return null
+    }
+}
+
+private class BlockingPollStrategy<V : Any>(private val pollable: Pollable<V>) : PollStrategy<V> {
+    override fun get(): V? = pollable.poll(block = true)
+}
 
 
 private class ChainWaitStrategy(private val strategies: List<WaitStrategy>) : WaitStrategy {
