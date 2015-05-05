@@ -32,15 +32,16 @@ import java.util.ArrayList
 import java.util.concurrent.CountDownLatch
 
 
-val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-val callDispatcher = buildDispatcher { numberOfThreads = 1 }
-val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
-val callDisruptor = buildDisruptor { numberOfThreads = 1 }
-val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 val attempts = 10
 val warmupRounds = 100000
 val timingRounds = 1000000
+
+val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+val callDispatcher = buildDispatcher { numberOfThreads = 1 }
+//val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
+val callDisruptor = buildDisruptor { numberOfThreads = 1 }
+//val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 fun main(args: Array<String>) {
     println(
@@ -83,14 +84,14 @@ fun main(args: Array<String>) {
 fun configureDisruptor() {
     Kovenant.configure {
         callbackDispatcher = callDisruptor
-        workerDispatcher = workDisruptor
+        //workerDispatcher = workDisruptor
     }
 }
 
 fun configureDispatcher() {
     Kovenant.configure {
         callbackDispatcher = callDispatcher
-        workerDispatcher = workDispatcher
+        //workerDispatcher = workDispatcher
     }
 }
 
@@ -111,7 +112,9 @@ private fun await(vararg promises: Promise<*, *>) {
     val latch = CountDownLatch(promises.size())
     promises forEach {
         p ->
-        p success  { latch.countDown() }
+        p success  {
+            latch.countDown()
+        }
         p fail { latch.countDown() }
     }
     latch.await()
