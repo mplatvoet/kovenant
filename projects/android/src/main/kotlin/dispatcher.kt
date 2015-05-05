@@ -28,15 +28,26 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-public fun androidUIDispatcher(): Dispatcher = looperDispatcher(Looper.getMainLooper())
+public enum class DispatcherType {
+    FULL BASIC
+}
 
-public fun looperDispatcher(looper: Looper,
-                            fullDispatcher: Boolean = false): Dispatcher {
+public fun androidUIDispatcher(): Dispatcher = BasicAndroidDispatcher.uiDispatcher
+
+public fun buildLooperDispatcher(looper: Looper,
+                                 type: DispatcherType = DispatcherType.BASIC): Dispatcher {
     val executor = LooperExecutor(looper)
-    return if (fullDispatcher) FullAndroidDispatcher(executor) else BasicAndroidDispatcher(executor)
+
+    return when (type) {
+        DispatcherType.BASIC -> BasicAndroidDispatcher(executor)
+        DispatcherType.FULL -> FullAndroidDispatcher(executor)
+    }
 }
 
 private class BasicAndroidDispatcher(private val looperExecutor: LooperExecutor) : Dispatcher {
+    public companion object {
+        val uiDispatcher: Dispatcher = BasicAndroidDispatcher(LooperExecutor.main)
+    }
 
     override fun offer(task: () -> Unit): Boolean {
         looperExecutor.submit(FnRunnable(task))

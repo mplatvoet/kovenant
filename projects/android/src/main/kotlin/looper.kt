@@ -26,9 +26,9 @@ import android.os.Message
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public class LooperExecutor(private val looper: Looper) : Handler.Callback {
-    companion object {
-        public val main: LooperExecutor = LooperExecutor(Looper.getMainLooper())
+private class LooperExecutor(private val looper: Looper) : Handler.Callback {
+    public companion object {
+        val main: LooperExecutor = LooperExecutor(Looper.getMainLooper())
     }
 
     private val untrackedId = Int.MIN_VALUE
@@ -49,7 +49,7 @@ public class LooperExecutor(private val looper: Looper) : Handler.Callback {
     }
 
     public fun claimTrackingId(): Int {
-        var id = 0
+        var id: Int
         do {
             id = idCounter.incrementAndGet()
         } while (id == untrackedId)
