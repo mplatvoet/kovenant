@@ -25,6 +25,8 @@ import nl.mplatvoet.komponents.kovenant.Dispatcher
 import java.util.ArrayList
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 public fun androidUIDispatcher(): Dispatcher = looperDispatcher(Looper.getMainLooper())
 
@@ -49,19 +51,25 @@ private class BasicAndroidDispatcher(private val looperExecutor: LooperExecutor)
     override val stopped: Boolean
         get() = throw UnsupportedOperationException()
 
+
+    private class FnRunnable(private val body: () -> Unit) : Runnable {
+        override fun run() = body()
+    }
 }
 
 private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) : Dispatcher {
     private val queue = ConcurrentLinkedQueue<ControllableFnRunnable>()
+    private val unfinishedCount = AtomicInteger(0)
 
-    private volatile var running = true
+    private val running = AtomicBoolean(true)
 
     override fun offer(task: () -> Unit): Boolean {
-        if (!running) return false;
+        if (!running.get()) return false;
 
         val trackingId = looperExecutor.claimTrackingId()
-        val runnable = ControllableFnRunnable(queue, trackingId, task)
+        val runnable = ControllableFnRunnable(trackingId, task)
         queue add runnable
+        unfinishedCount.incrementAndGet()
         looperExecutor.submit(runnable, trackingId)
 
         return true
@@ -69,11 +77,33 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
     }
 
     override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
-        running = false
+        if (running.compareAndSet(true, false)) {
+            if (block) {
+                val localTimeOutMs = if (force) 1 else timeOutMs
+                val now = System.currentTimeMillis()
+                val napTimeMs = Math.min(timeOutMs, 10L)
 
-        // TODO also implement waiting for all jobs to finish
+                fun allJobsDone() = unfinishedCount.get() <= 0
+                fun keepWaiting() = localTimeOutMs < 1 || (System.currentTimeMillis() - now) >= localTimeOutMs
 
-        return drainAll()
+                var interrupted = false
+                while (!allJobsDone() && keepWaiting()) {
+                    try {
+                        Thread.sleep(napTimeMs)
+                    } catch (e: InterruptedException) {
+                        //ignoring for now since it would break the shutdown contract
+                        //remember and interrupt later
+                        interrupted = true
+                    }
+                }
+                if (interrupted) {
+                    //calling thread was interrupted during shutdown, set the interrupted flag again
+                    Thread.currentThread().interrupt()
+                }
+                return drainAll()
+            }
+        }
+        return ArrayList() //drainAll() also returns an ArrayList, returning this for consistency
     }
 
     private fun drainAll(): List<() -> Unit> {
@@ -112,31 +142,28 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
         return null
     }
 
-    //TODO not correct, jobs can still be running
     override val terminated: Boolean
-        get() = stopped && queue.isEmpty()
+        get() = stopped && unfinishedCount.get() == 0
 
     override val stopped: Boolean
-        get() = running
+        get() = running.get()
 
-}
+    private inner class ControllableFnRunnable(
+            val trackingId: Int,
+            val body: () -> Unit) : Runnable {
 
-private class ControllableFnRunnable(private val queue: Queue<ControllableFnRunnable>,
-                                     val trackingId: Int,
-                                     val body: () -> Unit) : Runnable {
-    override fun run() {
-        if (queue remove this) {
-            //only execute if we are the one removing ourselves from the queue
-            //otherwise this job has been cancelled
-            body()
+        override fun run() {
+            if (queue remove this) {
+                //only execute if we are the one removing ourselves from the queue
+                //otherwise this job has been cancelled
+                body()
+
+                unfinishedCount.decrementAndGet()
+            }
         }
     }
-
 }
 
 
-private class FnRunnable(private val body: () -> Unit) : Runnable {
-    override fun run() = body()
-}
 
 
