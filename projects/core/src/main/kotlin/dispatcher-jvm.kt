@@ -114,7 +114,7 @@ class ConcreteWaitStrategyBuilder(private val workQueue: ConcurrentLinkedQueue<(
         strategies add SleepPollWaitStrategy(queue = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
-    private fun buildDefaultStrategy() :WaitStrategy {
+    private fun buildDefaultStrategy(): WaitStrategy {
         return ChainWaitStrategy(listOf(BusyPollWaitStrategy(workQueue), SleepPollWaitStrategy(workQueue)))
     }
 
@@ -215,7 +215,7 @@ private class NonBlockingDispatcher(val name: String,
         return ArrayList() //depleteQueue() also returns an ArrayList, returning this for consistency
     }
 
-    override val terminated : Boolean get() = stopped && contextCount.get() < 0
+    override val terminated: Boolean get() = stopped && contextCount.get() < 0
 
     override val stopped: Boolean get() = !running.get()
 
@@ -374,6 +374,85 @@ private class NonBlockingDispatcher(val name: String,
 
 
 }
+
+
+private class WorkQueue<V : Any>() : Offerable<V>, Pollable<V> {
+    private val queue = ConcurrentLinkedQueue<V>()
+    private val waitingThreads = AtomicInteger(0)
+
+    //yes I could also use a ReentrantLock with a Condition but
+    //introduces quite a lot of overhead and the semantics
+    //are just the same
+    private val mutex = Object()
+
+    override fun offer(elem: V): Boolean {
+        val added = queue offer elem
+
+        if (added && waitingThreads.get() > 0) {
+            synchronized(mutex) {
+                //maybe there aren't any threads waiting or
+                //there isn't anything in the queue anymore
+                //just notify, we've got this far
+                mutex.notifyAll()
+            }
+        }
+
+        return added
+    }
+
+    override fun poll(block: Boolean, timeoutMs: Long): V? {
+        if (!block) return queue.poll()
+
+        val elem = queue.poll()
+        if (elem != null) return elem
+
+        waitingThreads.incrementAndGet()
+        try {
+            return if (timeoutMs > -1L) {
+                blockingPoll(timeoutMs)
+            } else {
+                blockingPoll()
+            }
+        } finally {
+            waitingThreads.decrementAndGet()
+        }
+
+    }
+
+    private fun blockingPoll(): V? {
+        synchronized(mutex) {
+            while (true) {
+                val retry = queue.poll()
+                if (retry != null) return retry
+                mutex.wait()
+            }
+        }
+        throw IllegalStateException("unreachable")
+    }
+
+    private fun blockingPoll(timeoutMs: Long): V? {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        synchronized(mutex) {
+            while (true) {
+                val retry = queue.poll()
+                if (retry != null || System.currentTimeMillis() >= deadline) return retry
+                mutex.wait(timeoutMs)
+            }
+        }
+        throw IllegalStateException("unreachable")
+    }
+}
+
+private trait Offerable<V : Any> {
+    fun offer(elem: V): Boolean
+}
+
+private trait Pollable<V : Any> {
+    throws(javaClass<InterruptedException>())
+    fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
+}
+
+
 
 
 private class ChainWaitStrategy(private val strategies: List<WaitStrategy>) : WaitStrategy {
