@@ -21,7 +21,10 @@
 
 package performance.perf02
 
-import nl.mplatvoet.komponents.kovenant.*
+import nl.mplatvoet.komponents.kovenant.Kovenant
+import nl.mplatvoet.komponents.kovenant.Promise
+import nl.mplatvoet.komponents.kovenant.async
+import nl.mplatvoet.komponents.kovenant.buildDispatcher
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList

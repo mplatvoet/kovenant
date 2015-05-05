@@ -51,6 +51,7 @@ it's needed to keep class en method count low.
 |kovenant          |Container artifact that consists of `kovenant-core` and `kovenant-combine`                         |
 |kovenant-core     |The core of kovenant. Provides the API and default implementations                                 |
 |kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
+|kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |
 |kovenant-android  |Extensions for Android specific needs                                                              | 
 
 ##Issues
