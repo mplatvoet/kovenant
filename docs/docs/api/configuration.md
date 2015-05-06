@@ -58,8 +58,8 @@ can be chained and are executed in order of configuration.
 
 |strategy|parameters|description|
 |--------|----------|-----------|
-|yielding|numberOfPolls|Keeps polling the `numberOfPolls` and [yields](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#yield()) the thread between polls. Yielding on environments where the number of active threads exceeds the number of physical cores.|
-|busy|numberOfPolls|Keeps polling the `numberOfPolls`. Use when alot of of work is expected very frequently (nano seconds)|
+|yielding|numberOfPolls|Keeps polling the `numberOfPolls` and [yields](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#yield()) the thread between polls. Yielding is most suitable on environments where the number of active threads exceeds the number of physical cores.|
+|busy|numberOfPolls|Keeps polling the `numberOfPolls`. Use when a lot of work is expected very frequently (nano seconds)|
 |blocking|<none>|Blocks until there is new work. *Note that this approach prevents the `Dispatcher` from shutting down*. This strategy only makes sense as last of the chain since it either receives work or blocks. Can also block the producing threads for short amounts of time so effectively kills the non blocking nature of Kovenant|
 |sleeping|numberOfPolls, sleepTimeInMs|Sleeps in between the `numberOfPolls` for the given `sleepTimeInMs`. Doesn't wake earlier if new is presented but sleeps the whole thing through. It is thus advised to keep `sleepTimeMs` very low |
 |blockingSleep|numberOfPolls,|sleepTimeInMs|Sleeps in between the `numberOfPolls` for the given `sleepTimeInMs`. Wakes up early if work is presented within the `sleepTimeInMs`. Can also block the producing threads for short amounts of time so effectively kills the non blocking nature of Kovenant|
