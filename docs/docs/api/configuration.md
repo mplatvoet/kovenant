@@ -36,23 +36,23 @@ buildDispatcher {
     configurePollStrategy { ... }
 }
 ```
-*name*
+####name
 Sets the name of this `Dispatcher`. Is also used as thread names appended by a number
 
-*numberOfThreads*
+####numberOfThreads
 The maximum number of threads this `Dispatcher` concurrently keeps alive. Note that the actual
 number of threads can be lower and depends on how much work is offered. Also, during the lifetime
 of the `Dispatcher` the number ov threads instantiated can be far greater because threads can 
 also be destroyed.
 
-*exceptionHandler*
+####exceptionHandler
 Get notified of exceptions from within the `Dispatcher` of running tasks. Normally Kovenant handles errors on the 
 Promise level but the Dispatcher can also be used directly and those jobs might leak exceptions.
 
-*errorHandler*
+####errorHandler
 When things go seriously wrong, e.g. `OutOfMemoryError`, this is what is tried to be called.
 
-*configurePollStrategy*
+####configurePollStrategy
 The way you configure you poll strategy greatly influences the way the `Dispatcher` behaves. Poll strategies
 can be chained and are executed in order of configuration. 
 
