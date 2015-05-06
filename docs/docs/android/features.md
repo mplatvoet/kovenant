@@ -1,4 +1,4 @@
-#Android
+#Android features
 part of [`kovenant-android`](../index.md#artifacts)
 
 ---
