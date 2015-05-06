@@ -36,23 +36,23 @@ buildDispatcher {
     configurePollStrategy { ... }
 }
 ```
-####name
+**name**
 Sets the name of this `Dispatcher`. Is also used as thread names appended by a number
 
-####numberOfThreads
+**numberOfThreads**
 The maximum number of threads this `Dispatcher` concurrently keeps alive. Note that the actual
 number of threads can be lower and depends on how much work is offered. Also, during the lifetime
 of the `Dispatcher` the number ov threads instantiated can be far greater because threads can 
 also be destroyed.
 
-####exceptionHandler
+**exceptionHandler**
 Get notified of exceptions from within the `Dispatcher` of running tasks. Normally Kovenant handles errors on the 
 Promise level but the Dispatcher can also be used directly and those jobs might leak exceptions.
 
-####errorHandler
+**errorHandler**
 When things go seriously wrong, e.g. `OutOfMemoryError`, this is what is tried to be called.
 
-####configurePollStrategy
+**configurePollStrategy**
 The way you configure you poll strategy greatly influences the way the `Dispatcher` behaves. Poll strategies
 can be chained and are executed in order of configuration. 
 
@@ -63,6 +63,21 @@ can be chained and are executed in order of configuration.
 |blocking|<none>|Blocks until there is new work. *Note that this approach prevents the `Dispatcher` from shutting down*. This strategy only makes sense as last of the chain since it either receives work or blocks. Can also block the producing threads for short amounts of time so effectively kills the non blocking nature of Kovenant|
 |sleeping|numberOfPolls, sleepTimeInMs|Sleeps in between the `numberOfPolls` for the given `sleepTimeInMs`. Doesn't wake earlier if new is presented but sleeps the whole thing through. It is thus advised to keep `sleepTimeMs` very low |
 |blockingSleep|numberOfPolls,|sleepTimeInMs|Sleeps in between the `numberOfPolls` for the given `sleepTimeInMs`. Wakes up early if work is presented within the `sleepTimeInMs`. Can also block the producing threads for short amounts of time so effectively kills the non blocking nature of Kovenant|
+
+```kt
+val dispatcher = buildDispatcher {
+    name = "Bob the builder"
+    numberOfThreads = 1
+    
+    configurePollStrategy {                
+        yielding(numberOfPolls = 1000)
+        
+        sleeping(numberOfPolls = 100, 
+                     sleepTimeInMs = 10)
+        blocking()
+    }
+}
+```
 
 What's best for your situation depends on your needs. So like always with concurrency: test instead of guess.
 
