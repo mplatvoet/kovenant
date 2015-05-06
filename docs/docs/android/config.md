@@ -3,8 +3,8 @@ part of [`kovenant-android`](../index.md#artifacts)
 
 ---
 
-Kovenant works just fine without any configuration nut for Android the default settings are probably
-not best suited. By default, if there isn't any work left, Kovenant shuts down it's worker and callback threads.
+Kovenant works just fine without any configuration but for Android the default settings are probably
+not best suited. Because by default, if there isn't any work left, Kovenant shuts down it's worker and callback threads.
 Normally this is just fine but on Android it's quite common to do some work on user input. That would lead to
 a constant creation and destruction of threads. That's not good for responsiveness nor for battery life.
  
@@ -40,6 +40,4 @@ public class MainActivity : ... {
     }
 }
 ```
-
-`configureKovenant()`
 

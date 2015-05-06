@@ -44,7 +44,7 @@ dependencies {
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
-it's needed to keep class en method count low. 
+it's needed to keep class and method count low. 
 
 |artifact          |description                                                                                        |
 |------------------|---------------------------------------------------------------------------------------------------|
