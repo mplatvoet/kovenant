@@ -38,7 +38,7 @@ trait DispatcherBuilder {
     var numberOfThreads: Int
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
-    fun configureWaitStrategy(body: PollStrategyBuilder.() -> Unit)
+    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit)
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -79,7 +79,7 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
         }
 
 
-    override fun configureWaitStrategy(body: PollStrategyBuilder.() -> Unit) {
+    override fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) {
         pollStrategyBuilder.clear()
         pollStrategyBuilder.body()
     }
@@ -97,11 +97,11 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 }
 
 trait PollStrategyBuilder {
-    fun addYieldingPoll(numberOfPolls: Int = 1000)
-    fun addBusyPoll(numberOfPolls: Int = 1000)
-    fun addBlockingPoll()
-    fun addSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
-    fun addBlockingSleepPoll(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
+    fun yielding(numberOfPolls: Int = 1000)
+    fun busy(numberOfPolls: Int = 1000)
+    fun blocking()
+    fun sleeping(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
+    fun blockingSleep(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
 }
 
 class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) : PollStrategyBuilder {
@@ -109,23 +109,23 @@ class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) 
 
     fun clear() = strategies.clear()
 
-    override fun addYieldingPoll(numberOfPolls: Int) {
+    override fun yielding(numberOfPolls: Int) {
         strategies add YieldingPollStrategy(pollable = workQueue, attempts = numberOfPolls)
     }
 
-    override fun addSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
+    override fun sleeping(numberOfPolls: Int, sleepTimeInMs: Long) {
         strategies add SleepingPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
-    override fun addBusyPoll(numberOfPolls: Int) {
+    override fun busy(numberOfPolls: Int) {
         strategies add BusyPollStrategy(pollable = workQueue, attempts = numberOfPolls)
     }
 
-    override fun addBlockingPoll() {
+    override fun blocking() {
         strategies add BlockingPollStrategy(pollable = workQueue)
     }
 
-    override fun addBlockingSleepPoll(numberOfPolls: Int, sleepTimeInMs: Long) {
+    override fun blockingSleep(numberOfPolls: Int, sleepTimeInMs: Long) {
         strategies add BlockingSleepPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 

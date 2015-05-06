@@ -43,15 +43,15 @@ val fibN = 13
 
 val cbDispatch = buildDispatcher {
     numberOfThreads = 1
-    configureWaitStrategy {
-        addYieldingPoll()
-        addBlockingPoll()
+    configurePollStrategy {
+        yielding()
+        blocking()
     }
 }
 val workDispatch = buildDispatcher {
-    configureWaitStrategy {
-        addYieldingPoll()
-        addBlockingPoll()
+    configurePollStrategy {
+        yielding()
+        blocking()
     }
 }
 
