@@ -37,12 +37,9 @@ private class LooperExecutor(private val looper: Looper) : Handler.Callback {
 
     override fun handleMessage(msg: Message): Boolean {
         val task = msg.obj as Runnable
-        try {
-            task.run()
-        } finally {
-            //not necessary but let's clean quick and swift
-            msg.recycle()
-        }
+
+        task.run()
+
         // signal message was handled
         //no need to try other handlers
         return true
@@ -63,6 +60,6 @@ private class LooperExecutor(private val looper: Looper) : Handler.Callback {
 
     public fun submit(runnable: Runnable, trackingId: Int = untrackedId) {
         val message = handler.obtainMessage(trackingId, runnable)
-        handler.dispatchMessage(message)
+        handler.sendMessage(message)
     }
 }
