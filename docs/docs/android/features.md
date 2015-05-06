@@ -49,7 +49,7 @@ promiseOnUi {
 ##Dispatcher
 You can configure Kovenant to dispatch all callbacks on the main thread by using the `androidUiDispatcher()`. 
 
->Please note, this approach can have a **serious negative** effect **on** Androids UI **performance** since you can delegate
+>Please note, this approach can have a **serious negative effect on Androids UI performance** since you can delegate
 >to much work to the UI thread way too easy.
 
 That all being said. You, of course, know what you are doing.  
