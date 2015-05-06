@@ -1,4 +1,8 @@
 #Context
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
+
 The `Context` object basically the current configuration. It can be obtained from `Kovenant.context` and configured
 by `Kovenant.configure{...}`. Refer to the [configuration](configuration.md) section for the options. To create 
 a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.configure{...}`.

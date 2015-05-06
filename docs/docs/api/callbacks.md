@@ -1,4 +1,7 @@
 #Callbacks
+part of [`kovenant-core`](../index.md#artifacts)
+
+---
 
 ##The bare basics
 A `Promise<V, E>` allows you to add 3 types of callbacks:

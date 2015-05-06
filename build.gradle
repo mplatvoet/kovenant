@@ -1,172 +1,216 @@
-version = '0.1.1'
-group = 'nl.mplatvoet.komponents'
-description = 'Kovenant. Promises for Kotlin.'
-
+/*
+ * Copyright (c) 2015 Mark Platvoet<mplatvoet@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * THE SOFTWARE.
+ */
 
 buildscript {
+    ext.kotlinVersion = '0.11.91.2'
+    ext.extraConfVersion = '2.2.+'
+
     repositories {
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:0.11.91'
-        classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:2.2.+'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
     }
 }
 
-repositories { mavenCentral() }
+apply from: "${rootProject.projectDir}/gradle/versions.gradle"
 
-apply plugin: 'optional-base'
-apply plugin: 'kotlin'
-apply plugin: 'maven'
-apply plugin: 'signing'
+allprojects {
+    ext {
+        appVersion = '1.0.0'
+        appGroup = 'nl.mplatvoet.komponents'
 
-dependencies {
-    compile 'org.jetbrains.kotlin:kotlin-stdlib:0.11.91', optional
 
-    testCompile 'junit:junit:4.12'
+        junitVersion = '4.12'
+
+        sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
+        sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+    }
 }
 
+
+
+subprojects {
+    repositories { mavenCentral() }
+
+    def pomOnlyProject = project.name == "kovenant"
+
+    apply plugin: 'optional-base'
+    apply plugin: 'provided-base'
+    apply plugin: 'kotlin'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    compileJava {
+        sourceCompatibility = "1.6"
+        targetCompatibility = "1.6"
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}", optional
+
+        testCompile "junit:junit:${junitVersion}"
+    }
+
+
+
+
+    if (pomOnlyProject) {
+        artifacts {}
+    } else {
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
+        }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives jar
+            archives javadocJar
+            archives sourcesJar
+        }
+        signing {
+            sign configurations.archives
+        }
+
+        task releaseSub {
+            dependsOn signArchives
+        }
+    }
+
+
+
+    uploadArchives {
+
+        if (!pomOnlyProject) {
+            dependsOn releaseSub
+        }
+
+        repositories.mavenDeployer {
+            if (!pomOnlyProject) {
+                configuration = configurations.archives
+            }
+
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+                authentication(userName: sonatypeUsr, password: sonatypePwd)
+            }
+
+            pom.whenConfigured { configgedPom ->
+                configgedPom.dependencies.removeAll { dep ->
+                    dep.scope == "test"
+                }
+
+                configgedPom.dependencies = configgedPom.dependencies.sort { dep ->
+                    "$dep.scope:$dep.groupId:$dep.artifactId"
+                }
+
+                configgedPom.project {
+                    name project.name
+                    packaging(pomOnlyProject ? 'pom' : 'jar')
+                    description project.description
+                    println("hurray $project.description")
+                    url 'http://kovenant.mplatvoet.nl'
+                    inceptionYear '2015'
+
+                    scm {
+                        url 'https://github.com/mplatvoet/kovenant'
+                        connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'MIT License'
+                            url 'http://opensource.org/licenses/MIT'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'mplatvoet'
+                            name 'Mark Platvoet'
+                            email 'mplatvoet@gmail.com'
+                            url 'http://mplatvoet.nl'
+                        }
+                    }
+
+                    issueManagement {
+                        system = "YouTrack"
+                        url = "http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant"
+                    }
+                }
+            }
+
+        }
+    }
+}
 
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
     if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
         enrichVersion()
+    } else {
+        allprojects*.version = appVersion
     }
-}
-
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+    allprojects*.group = appGroup
 }
 
 task jars() {
-    dependsOn jar, sourcesJar, javadocJar
-}
-
-
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
-signing {
-    sign configurations.archives
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.jar
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.sourcesJar
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.javadocJar
 }
 
 task release {
-    dependsOn signArchives
+    dependsOn subprojects.findAll { it.name != 'kovenant' }.releaseSub
 }
-
-
-
-def sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
-def sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
-
-uploadArchives {
-    dependsOn release
-
-    repositories.mavenDeployer {
-        configuration = configurations.archives
-
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-
-        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-            authentication(userName: sonatypeUsr, password: sonatypePwd)
-        }
-
-
-        pom.project {
-            name 'Kovenant'
-            packaging 'jar'
-            description project.description
-            url 'http://kovenant.mplatvoet.nl'
-            inceptionYear '2015'
-
-            scm {
-                url 'scm:git:git@github.com:mplatvoet/kovenant.git'
-                connection 'scm:git:git@github.com:mplatvoet/kovenant.git'
-            }
-
-            licenses {
-                license {
-                    name 'MIT License'
-                    url 'http://opensource.org/licenses/MIT'
-                    distribution 'repo'
-                }
-            }
-
-            developers {
-                developer {
-                    id 'mplatvoet'
-                    name 'Mark Platvoet'
-                    email 'mplatvoet@gmail.com'
-                    url 'http://mplatvoet.nl'
-                }
-            }
-        }
-    }
-}
-
-
-
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.4-rc-1'
-}
 
-
-def enrichVersion() {
-    def circleBuildNr = System.getenv('CIRCLE_BUILD_NUM')?.trim()
-    def buildMetaData = circleBuildNr ? circleBuildNr : buildTime()
-
-    def kotlinVersion = extractKotlinMilestoneVersion()
-    def identifier = kotlinVersion ? "kotlinM$kotlinVersion" : "unknown"
-
-    version = "$version-$identifier+$buildMetaData"
-}
-
-String extractKotlinMilestoneVersion() {
-    def rawVersion = extractRawKotlinVersion()
-    if (rawVersion) {
-        def matcher = rawVersion =~ /\d+/
-        matcher.find()
-        matcher.find(matcher.end())
-        return rawVersion.substring(matcher.start(), matcher.end())
+    doLast() {
+        def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
+        def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
+        File wrapperFile = file("gradlew")
+        wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
+                "GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
+        File wrapperBatFile = file("gradlew.bat")
+        wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
+                "set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
     }
-    return null
-}
-
-String extractRawKotlinVersion() {
-    for (scope in rootProject.configurations.all) {
-
-        for (dep in scope.dependencies) {
-            def name = dep.name.toString()
-            def group = dep.group.toString()
-            if (name.equals("kotlin-stdlib") && group.equals("org.jetbrains.kotlin")) {
-                return dep.version
-            }
-        }
-    }
-    return null
 }
 
 
-def buildTime() {
-    def df = new java.text.SimpleDateFormat("yyyyMMdd'T'HHmm'Z'")
-    df.setTimeZone(TimeZone.getTimeZone("UTC"))
-    return df.format(new Date())
-}
 
-defaultTasks 'clean', 'libs'
+
+defaultTasks 'clean', 'jars'
 
 

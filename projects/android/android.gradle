@@ -1,0 +1,6 @@
+description = "Android extensions for Kovenant. Promises for Kotlin"
+
+dependencies {
+    compile project(':kovenant-core')
+    provided 'com.google.android:android:2.2.1'
+}

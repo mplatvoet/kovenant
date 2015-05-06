@@ -1,6 +1,6 @@
 site_name: 'Kovenant'
 site_url: 'http://kovenant.mplatvoet.nl'
-site_description: 'Kovenant documentation. Promises for Kotlin.'
+site_description: 'Kovenant. Promises for Kotlin.'
 site_author: 'Mark Platvoet'
 copyright: '2015'
 
@@ -17,9 +17,11 @@ pages:
 - ['api/configuration.md', 'API Documentation', 'Configuration']
 - ['api/context.md', 'API Documentation', 'Context']
 - ['api/interopJvm.md', 'API Documentation', 'Executors (JVM)']
+- ['android/features.md', 'Features']
+- ['android/config.md', 'Configuring']
 - ['goals.md', 'Goals']
-- ['performance.md', 'Performance']
-- ['considerations.md', 'Considerations']
+- ['performance.md', 'Misc', 'Performance']
+- ['considerations.md','Misc', 'Considerations']
 
 #theme: bootstrap
 theme_dir: theme/yeti
