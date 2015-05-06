@@ -32,7 +32,7 @@ private class LooperExecutor(private val looper: Looper) : Handler.Callback {
     }
 
     private val untrackedId = Int.MIN_VALUE
-    private val handler = Handler(looper)
+    private val handler = Handler(looper, this)
     private val idCounter = AtomicInteger(0)
 
     override fun handleMessage(msg: Message): Boolean {
