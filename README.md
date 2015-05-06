@@ -3,10 +3,6 @@
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
 
-> *PLEASE NOTE*, THIS IS THE DEVELOPMENT BRANCH
-> Documented artifacts are not published yet, refer to the master branch for the released version.
-> This is just preparation for the next release.
-
 ```kt
 async { "world" } and async { "Hello" } success {
     println("${it.second} ${it.first}!")
@@ -16,7 +12,7 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `Java 8` and `kotlin-stdlib:0.11.91`.
+This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
 Source and target compatibility is `Java 6`
 
 ###Gradle
@@ -37,7 +33,7 @@ dependencies {
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
-it's needed to keep class en method count low. 
+it's needed to keep class and method count low. 
 
 |artifact          |description                                                                                        |
 |------------------|---------------------------------------------------------------------------------------------------|

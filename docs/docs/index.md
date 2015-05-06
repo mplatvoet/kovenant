@@ -44,7 +44,7 @@ dependencies {
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
-it's needed to keep class en method count low. 
+it's needed to keep class and method count low. 
 
 |artifact          |description                                                                                        |
 |------------------|---------------------------------------------------------------------------------------------------|
@@ -56,3 +56,6 @@ it's needed to keep class en method count low.
 
 ##Issues
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
+
+##Release notes
+Release notes can be found on [Github](https://github.com/mplatvoet/kovenant/releases)
