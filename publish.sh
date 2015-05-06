@@ -4,7 +4,7 @@ set -e
 PROJECT_ROOT=`pwd`
 
 DOCS_SOURCE="$PROJECT_ROOT/docs"
-
+mkdir "$PROJECT_ROOT/build"
 BUILD_ROOT="$PROJECT_ROOT/build/gh-pages"
 REPOSITORY_ROOT="$BUILD_ROOT/repository"
 GENERATE_ROOT="$BUILD_ROOT/generate"
