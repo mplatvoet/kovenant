@@ -56,3 +56,6 @@ it's needed to keep class and method count low.
 
 ##Issues
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
+
+##Release notes
+Release notes can be found on [Github](https://github.com/mplatvoet/kovenant/releases)
