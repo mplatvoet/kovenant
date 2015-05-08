@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package examples
+package examples.lazy
 
 import nl.mplatvoet.komponents.kovenant.delegates.lazyPromise
 import nl.mplatvoet.komponents.kovenant.use
