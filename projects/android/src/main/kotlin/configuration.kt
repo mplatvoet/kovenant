@@ -21,9 +21,31 @@
 
 package nl.mplatvoet.komponents.kovenant.android
 
+import android.app.Activity
 import nl.mplatvoet.komponents.kovenant.Dispatcher
 import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.buildDispatcher
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+
+private val initCount = AtomicInteger(0)
+private val disposable = AtomicReference<Disposable>(null)
+
+public fun startKovenant() {
+    initCount.onlyFirst {
+        disposable set configureKovenant()
+    }
+}
+
+
+
+public fun stopKovenant(force: Boolean = false) {
+    val dispose = disposable.get()
+    if (dispose != null && disposable.compareAndSet(dispose, null)) {
+        dispose.close(false)
+        initCount.set(0)
+    }
+}
 
 /**
  * Configures Kovenant for common Android scenarios.
@@ -84,5 +106,14 @@ private class DispatchersDisposable(private vararg val dispatcher: Dispatcher) :
         }
     }
 
+}
+
+private inline fun AtomicInteger.onlyFirst(body: () -> Unit) {
+    val threadNumber = incrementAndGet()
+    if (threadNumber == 1) {
+        body()
+    } else {
+        decrementAndGet()
+    }
 }
 
