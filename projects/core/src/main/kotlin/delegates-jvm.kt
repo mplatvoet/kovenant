@@ -19,55 +19,74 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.mplatvoet.komponents.kovenant.delegates
 
+import nl.mplatvoet.komponents.kovenant.Context
+import nl.mplatvoet.komponents.kovenant.Promise
+import nl.mplatvoet.komponents.kovenant.async
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
 
+private class LazyPromiseVal<in R, T>(private val context: Context, initializer: () -> T) : ReadOnlyProperty<R, Promise<T, Exception>> {
+    private volatile var initializer: (() -> T)?
+    private volatile var value: Promise<T, Exception>? = null
+    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
 
-[suppress("UNCHECKED_CAST")]
-public class ThreadSafeLazyVar<T>(private val initializer: () -> T) : ReadWriteProperty<Any?, T> {
-    private val lock = ReentrantReadWriteLock()
-    private volatile var value: Any? = null
+    init {
+        this.initializer = initializer
+    }
 
-
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
-        if (value == null) {
-            try {
-                lock.writeLock().lock()
-                if (value == null) {
-                    value = mask(initializer())
+    override fun get(thisRef: R, desc: PropertyMetadata): Promise<T, Exception> {
+        // Busy/Spin lock, expecting async to return quickly
+        // Don't want to using blocking semantics since
+        // it's not in the nature of Kovenant
+        while (value == null) {
+            val counter = threadCount
+            if (counter != null) {
+                val threadNumber = counter.incrementAndGet()
+                if (threadNumber == 1) {
+                    val fn = initializer!!
+                    value = async(context) { fn() }
+                    initializer = null // prevents memory leaking
+                    break
                 }
-            } finally {
-                lock.writeLock().unlock()
             }
         }
-        return unmask(value) as T
+        return value!!
     }
-
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
-        this.value = mask(value)
-    }
-
-    val initialized: Boolean get() = value != null
 }
 
-[suppress("UNCHECKED_CAST")]
-private class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
-    private volatile var value: Any? = null
+private class LazyPromiseVar<in R, T>(private val context: Context, initializer: () -> T) : ReadWriteProperty<R, Promise<T, Exception>> {
+    private volatile var initializer: (() -> T)?
+    private volatile var value : Promise<T, Exception>? = null
+    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
 
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
-        val curVal = value
-        return if (curVal != null) unmask(curVal) as T else source()
+    init {
+        this.initializer = initializer
     }
 
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
-        this.value = mask(value)
+    override fun get(thisRef: R, desc: PropertyMetadata): Promise<T, Exception> {
+        // Busy/Spin lock, expecting async to return quickly
+        // Don't want to using blocking semantics since
+        // it's not in the nature of Kovenant
+        while (value == null) {
+            val counter = threadCount
+            if (counter != null) {
+                val threadNumber = counter.incrementAndGet()
+                if (threadNumber == 1) {
+                    val fn = initializer!!
+                    value = async(context) { fn() }
+                    initializer = null // prevents memory leaking
+                    break
+                }
+            }
+        }
+        return value!!
     }
 
-    val written: Boolean get() = value != null
+    override fun set(thisRef: R, desc: PropertyMetadata, value: Promise<T, Exception>) {
+        this.value = value
+    }
 }
-
-private val NULL_VALUE: Any = Any()
-private fun mask(value: Any?): Any = value ?: NULL_VALUE
-private fun unmask(value: Any?): Any? = if (value == NULL_VALUE) null else value

@@ -143,3 +143,26 @@ public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Excepti
     }
     return deferred.promise
 }
+
+public fun <V, R> Promise<V, Exception>.use(bind: V.() -> R): Promise<R, Exception> {
+    val context = when (this) {
+        is ContextAware -> this.context
+        else -> Kovenant.context
+    }
+
+    val deferred = deferred<R, Exception>(context)
+    success {
+        context.tryWork {
+            try {
+                val result = it.bind()
+                deferred.resolve(result)
+            } catch(e: Exception) {
+                deferred.reject(e)
+            }
+        }
+    }
+    fail {
+        deferred.reject(it)
+    }
+    return deferred.promise
+}
