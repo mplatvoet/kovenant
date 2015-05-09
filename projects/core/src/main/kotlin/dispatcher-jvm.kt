@@ -236,7 +236,15 @@ private class NonBlockingDispatcher(val name: String,
         throw IllegalStateException("unreachable")
     }
 
-    override fun tryCancel(task: () -> Unit): Boolean = workQueue.remove(task)
+    override fun tryCancel(task: () -> Unit): Boolean {
+        if (workQueue.remove(task)) return true
+
+        //try any of the running threadContexts
+        threadContexts forEach {
+            if (it.cancel(task)) return true
+        }
+        return false
+    }
 
     private fun newThreadContext(): ThreadContext {
         val threadName = "${name}-${threadId.incrementAndGet()}"
@@ -272,6 +280,7 @@ private class NonBlockingDispatcher(val name: String,
         private val thread = Thread() { run() }
         private volatile var alive = true
         private volatile var keepAlive: Boolean = true
+        private volatile var pollResult: (() -> Unit)? = null
 
 
         init {
@@ -289,7 +298,6 @@ private class NonBlockingDispatcher(val name: String,
 
         private fun run() {
             while (alive) {
-                var pollResult: (() -> Unit)? = null
                 changeState(pending, polling)
                 try {
                     pollResult = if (keepAlive) pollStrategy.get() else workQueue.poll(block = false)
@@ -348,6 +356,19 @@ private class NonBlockingDispatcher(val name: String,
 
                         errorHandler(t)
                     } finally {
+                        if (alive && pollResult == null) {
+                            //thread might be interrupted due to cancellation
+                            //so clear the interrupted flag because we are still alive
+                            Thread.interrupted()
+
+                            if (!alive) {
+                                //oh again you concurrency, you tricky bastard. We might just cleared that interrupted flag
+                                //but it can be the case that after checking all the flags this context was interrupted
+                                //for a full shutdown and we just cleared that. So interrupt again.
+                                thread.interrupt()
+                            }
+
+                        }
                         changeState(running, pending)
                     }
 
@@ -362,12 +383,43 @@ private class NonBlockingDispatcher(val name: String,
         fun kamikaze() {
             keepAlive = false
             if (tryChangeState(polling, mutating)) {
-                //this thread is in the pollin state and we are going to interrupt it.
+                //this thread is in the polling state and we are going to interrupt it.
                 //because our polling strategies might be blocked
                 thread.interrupt()
                 changeState(mutating, polling)
             }
 
+        }
+
+        fun cancel(task: () -> Unit): Boolean {
+            while (task identityEquals pollResult) {
+                //Can't catch this at state pending or polling, loop while we are running
+
+                //if we're in running state try interrupting it
+                //so we need to claim the time for doing this by going from a running to
+                //mutating state
+                if (tryChangeState(running, mutating)) {
+
+                    //Though we successfully changed from running to mutating it might
+                    //just be a complete different task already. check again
+                    val cancelable = task identityEquals pollResult
+                    if (cancelable) {
+                        //interrupt this thread so any running process can catch that
+                        thread.interrupt()
+
+                        //set pollResult to null to signal we cancelled this task.
+                        //That way we can clear the interrupted flag
+                        pollResult = null
+                    }
+
+                    //always change back to running
+                    changeState(mutating, running)
+
+                    //we had a successful cacncel request
+                    if (cancelable) return true
+                }
+            }
+            return false
         }
 
         fun interrupt() {
