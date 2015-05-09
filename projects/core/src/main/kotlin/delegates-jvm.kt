@@ -19,17 +19,25 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.delegates
+package nl.mplatvoet.komponents.kovenant.properties
 
 import nl.mplatvoet.komponents.kovenant.Context
+import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.Promise
 import nl.mplatvoet.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.properties.ReadOnlyProperty
-import kotlin.properties.ReadWriteProperty
 
-private class LazyPromiseVal<in R, T>(private val context: Context, initializer: () -> T) : ReadOnlyProperty<R, Promise<T, Exception>> {
+
+private class LazyPromise<in R, T>(
+        //Need to allow `null` context because we could easily
+        //create this property before Kovenant gets configured.
+        //that would lead to this property using another Context
+        //than the rest of the program.
+        private val context: Context?,
+        initializer: () -> T) : ReadOnlyProperty<R, Promise<T, Exception>> {
+
+
     private volatile var initializer: (() -> T)?
     private volatile var value: Promise<T, Exception>? = null
     private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
@@ -48,45 +56,16 @@ private class LazyPromiseVal<in R, T>(private val context: Context, initializer:
                 val threadNumber = counter.incrementAndGet()
                 if (threadNumber == 1) {
                     val fn = initializer!!
-                    value = async(context) { fn() }
+                    value = async(context ?: Kovenant.context) { fn() }
                     initializer = null // prevents memory leaking
+                    threadCount = null //gc, you're up
                     break
                 }
             }
+            //Signal other threads are more important at the moment
+            //Since another thread is initializing this property
+            Thread.yield()
         }
         return value!!
-    }
-}
-
-private class LazyPromiseVar<in R, T>(private val context: Context, initializer: () -> T) : ReadWriteProperty<R, Promise<T, Exception>> {
-    private volatile var initializer: (() -> T)?
-    private volatile var value : Promise<T, Exception>? = null
-    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
-
-    init {
-        this.initializer = initializer
-    }
-
-    override fun get(thisRef: R, desc: PropertyMetadata): Promise<T, Exception> {
-        // Busy/Spin lock, expecting async to return quickly
-        // Don't want to using blocking semantics since
-        // it's not in the nature of Kovenant
-        while (value == null) {
-            val counter = threadCount
-            if (counter != null) {
-                val threadNumber = counter.incrementAndGet()
-                if (threadNumber == 1) {
-                    val fn = initializer!!
-                    value = async(context) { fn() }
-                    initializer = null // prevents memory leaking
-                    break
-                }
-            }
-        }
-        return value!!
-    }
-
-    override fun set(thisRef: R, desc: PropertyMetadata, value: Promise<T, Exception>) {
-        this.value = value
     }
 }
