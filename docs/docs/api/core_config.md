@@ -37,7 +37,7 @@ private val threadName : String get() = Thread.currentThread().getName()
 ```
 
 ##Configuration
-Configuration of Kovenant is done entirely in code and any changes to the [`Context`](context.md) are completely 
+Configuration of Kovenant is done entirely in code and any changes to the [`Context`](#context) are completely 
 threadsafe, so Kovenant can be reconfigured during a running application from multiple threads. But you probably want 
 to do this when your application starts. 
 
@@ -52,11 +52,11 @@ Kovenant.configure {
     callbackDispatcher = ...
 }
 ```
-You can provide your own `Dispatcher` implementation, [convert](interopJvm.md) an existing `Executor` (Jvm) or 
+You can provide your own `Dispatcher` implementation, [convert](jvm_usage.md) an existing `Executor` (Jvm) or 
 use `buildDispatcher` (Jvm) to create configure the build in `Dispatcher`.
 
 >CONFIGURE **ONE** THREAD FOR THE CALLBACK DISPATCHER
->understand the [implications](callbacks.md#execution-order) when using more then one thread
+>understand the [implications](core_usage.md#execution-order) when using more then one thread
 
 ####buildDispatcher
 Let me state upfront that this method is *not threadsafe*.
