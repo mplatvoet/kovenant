@@ -336,11 +336,16 @@ private class NonBlockingDispatcher(val name: String,
 
                 val fn = pollResult
                 if (fn != null) {
-                    changeState(pending, running)
-
-
                     try {
-                        fn()
+                        changeState(pending, running)
+                        try {
+                            fn()
+                        } finally {
+                            //Need to switch back to pending as soon as possible
+                            //otherwise funny things might happen when we use cancel.
+                            //cancel may only interrupt during running state.
+                            changeState(running, pending)
+                        }
                     } catch(e: InterruptedException) {
                         if (!alive) {
                             //only set the interrupted flag again if thread is interrupted via this context.
@@ -356,9 +361,9 @@ private class NonBlockingDispatcher(val name: String,
 
                         errorHandler(t)
                     } finally {
-                        if (alive && pollResult == null) {
-                            //thread might be interrupted due to cancellation
-                            //so clear the interrupted flag because we are still alive
+                        if (pollResult == null && alive) {
+                            //thread is interrupted due to cancellation
+                            //so clear the interrupted flag because it may still be there
                             Thread.interrupted()
 
                             if (!alive) {
@@ -367,11 +372,8 @@ private class NonBlockingDispatcher(val name: String,
                                 //for a full shutdown and we just cleared that. So interrupt again.
                                 thread.interrupt()
                             }
-
                         }
-                        changeState(running, pending)
                     }
-
                 }
             }
         }
