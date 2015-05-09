@@ -23,7 +23,43 @@ package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicReference
 
-private class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E>, ContextAware {
+
+private class ExecutingDeferredPromise<V>(callable: () -> V, context: Context) :
+        DeferredPromise<V, Exception>(context),
+        Cancelable<Exception> {
+    private volatile var task: (() -> Unit)?
+
+    init {
+        val wrapper = {
+            try {
+                val result = callable()
+                resolve(result)
+            } catch(e: Exception) {
+                reject(e)
+            } finally {
+                //avoid leaking memory after a reject/resolve
+                task = null
+            }
+        }
+        task = wrapper
+        context.workerDispatcher.offer (wrapper, context.workerError)
+    }
+
+    override fun cancel(error: Exception): Boolean {
+        val wrapper = task
+        if (wrapper != null) {
+            task = null
+            context.workerDispatcher.tryCancel(wrapper)
+        }
+        //TODO
+        //if casState to new CANCEL state succeeds return true and reject with provided value.
+        //This way any latches based on callbacks will succeed
+
+        return false //if we are changing the state, return true
+    }
+}
+
+private open class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E>, ContextAware {
 
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
     private val state = AtomicReference(State.PENDING)
@@ -274,9 +310,3 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
     }
 
 }
-
-
-
-
-
-

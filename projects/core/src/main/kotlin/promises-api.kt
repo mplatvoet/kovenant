@@ -76,6 +76,17 @@ public trait ContextAware {
     val context: Context
 }
 
+
+/**
+ * Mark a class to be cancelable
+ *
+ * What cancelling exactly means is up to the implementor.
+ * But the intention is stopping.
+ */
+public trait Cancelable<E> {
+    fun cancel(error: E): Boolean
+}
+
 /**
  * A construct for receiving a notification of an asynchronous job
  *
