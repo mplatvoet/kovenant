@@ -42,6 +42,9 @@ dependencies {
 </dependency>
 ```
 
+###Android Demo app
+Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
+
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
 it's needed to keep class and method count low. 

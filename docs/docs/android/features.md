@@ -2,10 +2,9 @@
 part of [`kovenant-android`](../index.md#artifacts)
 
 ---
-
 While Kovenant is perfectly usable on Android as-is, there are a couple things that are specific to the platform.
 One is that Android applications can only interact with the interface through the main thread. By default
-Kovenant operates on its own maintained pool of threads.
+Kovenant operates on its own maintained pool of threads and thus can't update the UI.
 
 There are two ways we can achieve interacting with the main thread, besides the standard Android facilities of course.
 One is by specific extensions methods and the other is by a specific `Dispatcher`.
@@ -75,3 +74,6 @@ not be an issue for background threads but can most certainly be an issue for th
 
 If you want to [convert](../api/jvm_usage.md) back and forth between `Executor`s and `Dispatcher`s you probably 
 want to use a `FULL` `DispatcherType`, otherwise you are better of with a `BASIC` one.
+
+##Demo app
+For a workable demo please checkout the [Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).

@@ -41,7 +41,7 @@ of having a promises API. Though this might just one of this topics where I will
 make it easier to work with async jobs, not harder. 
 
 If I decide to add additional functions for determining state and retrieval of values it will *not* be added to the
-[Promise interface](https://github.com/mplatvoet/kovenant/blob/master/src/main/kotlin/promises-api.kt). Instead, 
+[Promise interface](https://github.com/mplatvoet/kovenant/blob/master/projects/core/src/main/kotlin/promises-api.kt). Instead, 
 I will implement it as [Extensions](http://kotlinlang.org/docs/reference/extensions.html) to the current interface. And
 maybe, as an optimization, I will introduce a second/extended interface `PromisePlus` which will define this methods to 
 which the extension function can delegate if the current promise is of the second/extended type. This will keep the 
@@ -49,7 +49,7 @@ which the extension function can delegate if the current promise is of the secon
 
 ###I need it now!
 Still, if you desperately need such functionality already it's easy to implement on the Jvm as shown by 
-[get.kt](https://github.com/mplatvoet/kovenant/blob/master/src/test/kotlin/examples/get.kt). It basically
+[get.kt](https://github.com/mplatvoet/kovenant/blob/master/projects/core/src/test/kotlin/examples/get.kt). It basically
  comes down to this:
 
 ```kt
