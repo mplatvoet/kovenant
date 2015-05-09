@@ -19,22 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.delegates
+package nl.mplatvoet.komponents.kovenant.properties
 
 import nl.mplatvoet.komponents.kovenant.Context
-import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.async
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadOnlyProperty
-import kotlin.properties.ReadWriteProperty
 
 
-public fun lazyPromise<R, T>(context: Context = Kovenant.context, initializer: () -> T)
-        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromiseVal(context, initializer)
-
-public fun varLazyPromise<R, T>(context: Context = Kovenant.context, initializer: () -> T)
-        : ReadWriteProperty<R, Promise<T, Exception>> = LazyPromiseVar(context, initializer)
-
-
+public fun lazyPromise<R, T>(context: Context? = null, initializer: () -> T)
+        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromise(context, initializer)

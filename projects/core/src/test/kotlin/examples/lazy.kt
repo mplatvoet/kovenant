@@ -22,7 +22,7 @@
 
 package examples.lazy
 
-import nl.mplatvoet.komponents.kovenant.delegates.lazyPromise
+import nl.mplatvoet.komponents.kovenant.properties.lazyPromise
 import nl.mplatvoet.komponents.kovenant.use
 
 val expensiveResource by lazyPromise {
