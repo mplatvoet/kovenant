@@ -14,7 +14,7 @@ async {
 }
 ```
 
-Developed with the following [goals](goals.md) in mind.
+Developed with the following [goals](misc/goals.md) in mind.
 
 * **Easy to use**: Function above anything else
 * **Runtime agnostic**: API layer must be pure Kotlin
