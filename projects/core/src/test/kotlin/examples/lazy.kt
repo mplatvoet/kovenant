@@ -23,7 +23,7 @@
 package examples.lazy
 
 import nl.mplatvoet.komponents.kovenant.properties.lazyPromise
-import nl.mplatvoet.komponents.kovenant.use
+import nl.mplatvoet.komponents.kovenant.thenUse
 
 val expensiveResource by lazyPromise {
     println("init promise")
@@ -33,7 +33,7 @@ val expensiveResource by lazyPromise {
 fun main(args: Array<String>) {
     println("start program")
 
-    expensiveResource use {
+    expensiveResource thenUse {
         "Got [$value]"
     } success {
         println(it)

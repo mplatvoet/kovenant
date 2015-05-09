@@ -14,7 +14,7 @@ async {
 }
 ```
 
-Developed with the following [goals](goals.md) in mind.
+Developed with the following [goals](misc/goals.md) in mind.
 
 * **Easy to use**: Function above anything else
 * **Runtime agnostic**: API layer must be pure Kotlin
@@ -41,6 +41,9 @@ dependencies {
 	<version>[1.0.0,1.1.0)</version>
 </dependency>
 ```
+
+###Android Demo app
+Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android

@@ -9,14 +9,13 @@ Normally this is just fine but on Android it's quite common to do some work on u
 a constant creation and destruction of threads. That's not good for responsiveness nor for battery life.
  
 So we need to keep our threads alive. That also implies we need to tell when to shut them down again. Kovenant
-introduces a convenience function `configureKovenant()` to keep threads alive and provides a handle to shut them 
-down again.
+introduces two convenience functions, `startKovenant()` and `stopKovenant()`, to keep threads alive and shut them 
+down at the proper time again.
 
 So it all comes down to this:
 
 ```kt
 public class MainActivity : ... {
-    var disposable : Disposable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(...)
@@ -24,7 +23,7 @@ public class MainActivity : ... {
         // Configure Kovenant with standard dispatchers
         // obtain a reference to a Disposable to shutdown
         // the thread pools on exit.
-        disposable = configureKovenant()
+        startKovenant()
 
     }
 
@@ -35,9 +34,14 @@ public class MainActivity : ... {
         // for quicker shutdown you could use
         // force=true, which ignores all current
         // scheduled tasks
-        disposable?.close()
+        stopKovenant()
         super.onDestroy()
     }
 }
 ```
 
+Note that `stopKovenant(force: Boolean = false)` also has a `force` parameter that defaults to `false`. So by default 
+all the queues are depleted. If you don't want this you can always use `force = true` to immediately shutdown the 
+Dispatchers. `stopKovenant` never blocks though.
+
+And just as a reminder, these are just convenience functions. You can always [configure Kovenant manually](../api/core_config.md).

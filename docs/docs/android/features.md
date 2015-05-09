@@ -2,10 +2,9 @@
 part of [`kovenant-android`](../index.md#artifacts)
 
 ---
-
 While Kovenant is perfectly usable on Android as-is, there are a couple things that are specific to the platform.
 One is that Android applications can only interact with the interface through the main thread. By default
-Kovenant operates on its own maintained pool of threads.
+Kovenant operates on its own maintained pool of threads and thus can't update the UI.
 
 There are two ways we can achieve interacting with the main thread, besides the standard Android facilities of course.
 One is by specific extensions methods and the other is by a specific `Dispatcher`.
@@ -13,17 +12,21 @@ One is by specific extensions methods and the other is by a specific `Dispatcher
 ##UI callbacks
 The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-android` 
 library provides `successUi`, `failUi` and `alwaysUi`. They operate just like their 
-[regular counterparts](../api/callbacks.md) except their bodies are executed on the Android main thread. Both type of 
+[regular counterparts](../api/core_usage.md#callbacks) except their bodies are executed on the Android main thread. Both type of 
 callbacks can be mixed freely.
 
 ```kt
-async {
+val promise = async {
     foo() //produces 'bar'
-} success {
+} 
+
+promise success {
     //no need to do this on the
     //main thread
     bar -> writeLog(bar)
-} successUi {
+} 
+
+promise successUi {
     //also update the interface
     bar -> updateUI(bar)
 }
@@ -73,5 +76,8 @@ the `FULL` has all the methods, like `stop` and `cancel` implemented where `BASI
 distinction is that keeping track of what is running and can be cancelled just uses a lot more resources. This might
 not be an issue for background threads but can most certainly be an issue for the main/UI thread.
 
-If you want to [convert](../api/interopJvm.md) back and forth between `Executor`s and `Dispatcher`s you probably 
+If you want to [convert](../api/jvm_usage.md) back and forth between `Executor`s and `Dispatcher`s you probably 
 want to use a `FULL` `DispatcherType`, otherwise you are better of with a `BASIC` one.
+
+##Demo app
+For a workable demo please checkout the [Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
