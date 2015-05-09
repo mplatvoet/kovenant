@@ -16,13 +16,17 @@ library provides `successUi`, `failUi` and `alwaysUi`. They operate just like th
 callbacks can be mixed freely.
 
 ```kt
-async {
+val promise = async {
     foo() //produces 'bar'
-} success {
+} 
+
+promise success {
     //no need to do this on the
     //main thread
     bar -> writeLog(bar)
-} successUi {
+} 
+
+promise successUi {
     //also update the interface
     bar -> updateUI(bar)
 }

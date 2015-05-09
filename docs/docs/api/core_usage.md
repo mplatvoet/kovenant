@@ -176,7 +176,7 @@ as an extension function. The previous exaxmple would thus be:
 ```kt
 async {
     fib(20)
-} then {
+} thenUse {
     "fib(20) = $this, and fib(21) = (${fib(21)})"
 } success {
     println(it)
