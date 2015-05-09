@@ -21,7 +21,6 @@
 
 package nl.mplatvoet.komponents.kovenant.android
 
-import android.app.Activity
 import nl.mplatvoet.komponents.kovenant.Dispatcher
 import nl.mplatvoet.komponents.kovenant.Kovenant
 import nl.mplatvoet.komponents.kovenant.buildDispatcher
@@ -42,7 +41,7 @@ public fun startKovenant() {
 public fun stopKovenant(force: Boolean = false) {
     val dispose = disposable.get()
     if (dispose != null && disposable.compareAndSet(dispose, null)) {
-        dispose.close(false)
+        dispose.close(force)
         initCount.set(0)
     }
 }

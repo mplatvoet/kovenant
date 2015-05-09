@@ -26,10 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> {
+private fun concreteAll<V, E>(context: Context, vararg promises: Promise<V, E>): Promise<List<V>, E> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
-    val deferred = deferred<List<V>, E>()
+    val deferred = deferred<List<V>, E>(context)
     val results = AtomicReferenceArray<V>(promises.size())
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
@@ -53,10 +53,10 @@ private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, 
     return deferred.promise
 }
 
-private fun concreteAny<V, E>(vararg promises: Promise<V, E>): Promise<V, List<E>> {
+private fun concreteAny<V, E>(context: Context, vararg promises: Promise<V, E>): Promise<V, List<E>> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
-    val deferred = deferred<V, List<E>>()
+    val deferred = deferred<V, List<E>>(context)
     val results = AtomicReferenceArray<E>(promises.size())
     val successCount = AtomicInteger(0)
     val failCount = AtomicInteger(promises.size())
