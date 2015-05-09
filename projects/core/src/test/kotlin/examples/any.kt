@@ -19,8 +19,22 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package examples.any
 
-public fun all<V, E>(vararg promise: Promise<V, E>): Promise<List<V>, E> = concreteAll(*promise)
+import nl.mplatvoet.komponents.kovenant.any
+import nl.mplatvoet.komponents.kovenant.async
+import support.fib
 
-public fun any<V, E>(vararg promise: Promise<V, E>): Promise<V, List<E>> = concreteAny(*promise)
+fun main(args: Array<String>) {
+    val promises = Array(10) { n ->
+        async {
+            Pair(n, fib(n))
+        }
+    }
+
+    any (*promises) success {
+        pair ->
+        println("fib(${pair.first}) = ${pair.second}")
+    }
+}
+

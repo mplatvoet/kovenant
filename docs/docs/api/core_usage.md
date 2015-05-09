@@ -213,3 +213,49 @@ class ExpensiveResource {
 }
 ```
 
+---
+
+##All
+Sometimes you want to make sure that multiple promises are done before proceeding. With `all` this can be achieved.
+`all<V,E>` takes a `vararg` of `Promise<V,E>`s and returns a `Promise<List<V>, E>`. The returned `Promise` is considered a
+success if all of the provided `Promise`s are successful. If any fail the whole promise fails. The returned `List<V>`
+contains the items in the same order as the `Promise`s provided to `all`. If you want to mix promises of different types
+you probably want to take a look at [combine](combine_usage.md)
+
+```kt
+val promises = Array(10) { n ->
+	async {
+		Pair(n, fib(n))
+	}
+}
+
+all(*promises) success {
+	it forEach { pair -> println("fib(${pair.first}) = ${pair.second}") }
+} always {
+	println("All ${promises.size()} promises are done.")
+}
+```
+
+
+---
+
+##Any
+Sometimes you want to make sure that at least one of multiple promises is done before proceeding. With `any` this can be achieved.
+`any<V,E>` takes a `vararg` of `Promise<V,E>`s and returns a `Promise<V, List<E>>`. The returned `Promise` is considered a
+success if any of the provided `Promise`s is successful. If all fail the whole promise fails. The returned `List<E>`
+contains the items in the same order as the `Promise`s provided to `any`.
+ 
+>NOTE Any doesn't cancel the other promises yet. [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) describes
+>this
+
+```kt
+val promises = Array(10) { n ->
+	async {
+		Pair(n, fib(n))
+	}
+}
+
+any (*promises) success {
+	 pair -> println("fib(${pair.first}) = ${pair.second}")
+} 
+```

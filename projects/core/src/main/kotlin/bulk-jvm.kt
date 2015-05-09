@@ -27,8 +27,9 @@ import java.util.concurrent.atomic.AtomicReferenceArray
 
 
 private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, E> {
-    val deferred = deferred<List<V>, E>()
+    if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
+    val deferred = deferred<List<V>, E>()
     val results = AtomicReferenceArray<V>(promises.size())
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
@@ -52,6 +53,32 @@ private fun concreteAll<V, E>(vararg promises: Promise<V, E>): Promise<List<V>, 
     return deferred.promise
 }
 
+private fun concreteAny<V, E>(vararg promises: Promise<V, E>): Promise<V, List<E>> {
+    if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
+
+    val deferred = deferred<V, List<E>>()
+    val results = AtomicReferenceArray<E>(promises.size())
+    val successCount = AtomicInteger(0)
+    val failCount = AtomicInteger(promises.size())
+
+    promises.forEachIndexed {
+        i, promise ->
+        promise.success { v ->
+            if (successCount.incrementAndGet() == 1) {
+                deferred.resolve(v)
+            }
+        }
+        promise.fail { e ->
+            results[i] = e
+            if (failCount.decrementAndGet() == 0) {
+                deferred.reject(results.asList())
+            }
+        }
+
+    }
+
+    return deferred.promise
+}
 
 private fun <V> AtomicReferenceArray<V>.asList(): List<V> {
     val list = ArrayList<V>()
@@ -60,11 +87,3 @@ private fun <V> AtomicReferenceArray<V>.asList(): List<V> {
     }
     return list
 }
-
-
-
-
-
-
-
-
