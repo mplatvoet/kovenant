@@ -1,15 +1,49 @@
-#Configuration
+#Kovenant Core Configuration
 part of [`kovenant-core`](../index.md#artifacts)
 
 ---
 
+##Context
+The `Context` object is basically the current configuration. It can be obtained from `Kovenant.context` and configured
+by `Kovenant.configure{...}`. Refer to the [configuration](#configuration) section for the options. To create 
+a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.configure{...}`.
+
+Functions like [`deferred`](core_usage.md#deferred) and [`async`](core_usage.md#async) have a first parameter which
+is actually a `Context` instance. By default this is `Kovenant.context` so normally you don't have worry about this.
+Just for that case you want to work with multiple configurations at once you have the possibility.
+ 
+
+```kt
+fun main(args: Array<String>) {
+    val ctx = Kovenant.createContext {
+        callbackDispatcher = buildDispatcher { name = "cb-new" }
+        workerDispatcher = buildDispatcher { name = "work-new" }
+    }
+
+    async {
+        println("default async $threadName")
+    } success {
+        println("default success $threadName")
+    }
+
+    async(ctx) {
+        println("ctx async $threadName")
+    } success {
+        println("ctx success $threadName")
+    }
+}
+
+private val threadName : String get() = Thread.currentThread().getName()
+```
+
+##Configuration
 Configuration of Kovenant is done entirely in code and any changes to the [`Context`](context.md) are completely 
 threadsafe, so Kovenant can be reconfigured during a running application from multiple threads. But you probably want 
 to do this when your application starts. 
 
 Configuring is done by simply calling `Kovenant.configure { ... }`. 
 
-##Dispatchers
+###Dispatchers
 Kovenant operates with two `Dispatcher`s, a worker and callback `Dispatcher`. They are configured as follows:
 
 ```kt
@@ -24,7 +58,7 @@ use `buildDispatcher` (Jvm) to create configure the build in `Dispatcher`.
 >CONFIGURE **ONE** THREAD FOR THE CALLBACK DISPATCHER
 >understand the [implications](callbacks.md#execution-order) when using more then one thread
 
-###buildDispatcher
+####buildDispatcher
 Let me state upfront that this method is *not threadsafe*.
 
 ```kt
@@ -81,7 +115,7 @@ val dispatcher = buildDispatcher {
 
 What's best for your situation depends on your needs. So like always with concurrency: test instead of guess.
 
-##Full example
+###Common example
 
 ```kt
 Kovenant.configure {

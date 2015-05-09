@@ -1,9 +1,53 @@
-#Callbacks
+#Kovenant Core Usage
 part of [`kovenant-core`](../index.md#artifacts)
 
 ---
 
-##The bare basics
+##Async
+The easiest way to create a `Promise` is by using `async`, e.g.
+```kt
+val promise = async { foo() }
+```
+This will execute function `foo()` asynchronously and immediately returns a `Promise<V, Exception>` where `V` is
+the inferred return type of `foo()`. If `foo()` completes successful the `Promise` is resolved as successful. Any 
+`Exception` from `foo()` is considered a failure.
+
+`async` dispatches the work on the [`workerDispatcher`](configuration.md). 
+
+---
+
+##Deferred
+With a `Deferred<V,E>` you can take matters in your own hand. Instead of relying on [`async`](async.md) for resolving
+or rejecting a promise it's up to the developer. You obtain a deferred object by simply calling `deferred<V, E>()`.
+From there you can either `resolve(V)` or `reject(E)` the deferred. This can only be set once and by default trying
+to resolve or reject multiple times throws an Exception. The behaviour can be [configured](configuration.md) though.
+ 
+From a `Deferred<V,E>` we can obtain the companion `Promise<V, E>` as easy as `deferred.promise`. This promise can
+of course passed around as much as you want, just like any promise. Just keep the deferred to yourself. 
+
+###Example
+
+```kt
+fun foo() {
+    val deferred = deferred<String,Exception>()
+    handlePromise(deferred.promise)
+    
+    deferred.resolve("Hello World")
+//    deferred.reject(Exception("Hello exceptional World"))
+}
+fun handlePromise(promise: Promise<String, Exception>) {
+    promise success {
+        msg -> println(msg)
+    }
+    promise fail {
+        e -> println(e)
+    }
+}
+```
+
+---
+
+##Callbacks
 A `Promise<V, E>` allows you to add 3 types of callbacks:
 
 * `success` of type `(V) -> Unit`
@@ -39,7 +83,7 @@ promise always {
 }
 ```
 
-##Chaining
+###Chaining
 All callback registering functions return `this` Promise, thus previous example can be written without those intermediate variables
 
 ```kt
@@ -58,7 +102,7 @@ async {
 ```
 
 
-##Multiple Success stories
+###Multiple Success stories
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `fail` and `always` actions to one single promise. 
 Thus a promise can be passed around and anybody who's interested can get notified. Previously registered callbacks don't get overwritten. 
 Every callback will be called once and only once upon completion.
@@ -75,7 +119,7 @@ async {
 }
 ```
 
-##Execution order
+###Execution order
 The order of execution of the callbacks depends greatly on the underlying callback `Dispatcher`. Kovenant guarantees
 that callbacks are offered to the `Dispatcher` in the same order they were added to the `Promise`. The default
 callback Dispatcher also maintains this order. So by default all callbacks are executed in the same order they were 
@@ -104,3 +148,21 @@ If we don't have guarantees about the order of the callbacks the above example s
 the `all` function also relies on callbacks on the `first` and `second` promise. So without order guarantees the
 `success`callback of `all` might just execute before the `success` callbacks of the `first` and `second` promise. 
 So don't just blindly change the callback `Dispatcher` without actually understanding what you are doing.
+
+---
+
+##Then
+`then` operates similar to [`async`](#async) except that it takes the output from a previous `Promise` as it's input.
+This allows you to chain units of work.
+
+```kt
+async {
+    fib(20)
+} then {
+    "fib(20) = $it, and fib(21) = (${fib(21)})"
+} success {
+    println(it)
+}
+```
+Any `Exception` thrown from any of the steps in the chain of promises results in every next promises to be resolved as
+failed. The work of `then` is executed by the worker `Dispatcher`. 
