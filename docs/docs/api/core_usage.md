@@ -152,7 +152,7 @@ So don't just blindly change the callback `Dispatcher` without actually understa
 ---
 
 ##Then
-`then` operates similar to [`async`](#async) except that it takes the output from a previous `Promise` as it's input.
+`then` operates similar to [`async`](#async) except that it takes the output from a previous `Promise` as its input.
 This allows you to chain units of work.
 
 ```kt
@@ -166,3 +166,50 @@ async {
 ```
 Any `Exception` thrown from any of the steps in the chain of promises results in every next promises to be resolved as
 failed. The work of `then` is executed by the worker `Dispatcher`. 
+
+---
+
+##Then Use
+`thenUse` operates similar to [`then`](#then) except that it takes the output from a previous `Promise` as its input
+as an extension function. The previous exaxmple would thus be:
+
+```kt
+async {
+    fib(20)
+} then {
+    "fib(20) = $this, and fib(21) = (${fib(21)})"
+} success {
+    println(it)
+}
+```
+
+---
+
+##Lazy Promise
+Kovenant provides a `lazyPromise` property delegate similar to Kotlin's standard library `Delegates.lazy {}`. 
+The difference with the standard library version is that initialization happens by an [`async`](#async) operation and
+thus effectively on a background thread. This is particularly useful on platforms like Android where you want to avoid
+initialization on the UI Thread. 
+
+```kt
+val expensiveResource by lazyPromise {
+    println("init promise")
+    ExpensiveResource()
+}
+
+fun main(args: Array<String>) {
+    println("start program")
+
+    expensiveResource thenUse {
+        "Got [$value]"
+    } success {
+        println(it)
+    }
+}
+
+
+class ExpensiveResource {
+    val value :String = "result"
+}
+```
+

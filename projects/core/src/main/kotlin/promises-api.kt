@@ -21,11 +21,6 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.RejectedExecutionException
-import kotlin.InlineOption.ONLY_LOCAL_RETURN
-
 
 /**
  * Deferred is the private part of the [Promise]
@@ -144,7 +139,7 @@ public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Excepti
     return deferred.promise
 }
 
-public fun <V, R> Promise<V, Exception>.use(bind: V.() -> R): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.thenUse(bind: V.() -> R): Promise<R, Exception> {
     val context = when (this) {
         is ContextAware -> this.context
         else -> Kovenant.context
