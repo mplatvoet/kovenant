@@ -50,11 +50,12 @@ private class ExecutingPromise<V>(callable: () -> V, context: Context) :
         if (wrapper != null) {
             task = null //avoid memory leaking
             context.workerDispatcher.tryCancel(wrapper)
-        }
 
-        if (trySetFailResult(error)) {
-            fireFail(error)
-            return true
+
+            if (trySetFailResult(error)) {
+                fireFail(error)
+                return true
+            }
         }
 
         return false
@@ -78,7 +79,7 @@ private class ExecutingPromise<V>(callable: () -> V, context: Context) :
 
 }
 
-//TODO, do we need to make this cancelable to, does it make sense?
+//TODO, do we need to make this cancelable to0, does it make sense?
 private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
