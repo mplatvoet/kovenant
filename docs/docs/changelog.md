@@ -13,7 +13,7 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 * restructured documentation, ordered by artifact
 * added [Any](api/core_usage.md#any) functionality
 * added [All](api/core_usage.md#all) functionality
-* [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) added cancellation ability to promises 
+* [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) added [cancellation](api/core_usage.md#cancel) ability to promises 
 * [KOV-9](http://komponents.myjetbrains.com/youtrack/issue/KOV-9) added [lazyPromise](api/core_usage.md#lazy-promise) property delegate
 * [KOV-10](http://komponents.myjetbrains.com/youtrack/issue/KOV-10) added easier [Android configuration](android/config.md)
 

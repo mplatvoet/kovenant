@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
     val promises = Array(10) { n ->
         async {
             while (!Thread.currentThread().isInterrupted()) {
-                val luckyNumber = Random(System.currentTimeMillis() * n).nextInt(100)
+                val luckyNumber = Random(System.currentTimeMillis() * (n + 1)).nextInt(100)
                 if (luckyNumber == 7) break
             }
             "Promise number $n won!"

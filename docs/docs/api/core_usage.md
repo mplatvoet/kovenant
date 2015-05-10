@@ -222,6 +222,8 @@ The returned `Promise` is considered a success if all of the provided `Promise`s
 promise fails. The returned `List<V>` contains the items in the same order as the `Promise`s provided to `all`. 
 If you want to mix promises of different types you probably want to take a look at [combine](combine_usage.md)
 
+By default `all` tries to cancel all provided promises if one fails. If you don't want your promises to be cancelled
+you can set `cancelOthersOnFail = false`. See [cancel](#cancel) for more on this topic.
 
 ```kt
 val promises = Array(10) { n ->
@@ -246,6 +248,8 @@ Sometimes you want to make sure that at least one of multiple promises is done b
 success if any of the provided `Promise`s is successful. If all fail the whole promise fails. The returned `List<Exception>`
 contains the items in the same order as the `Promise`s provided to `any`.
 
+By default `any` tries to cancel all provided promises if one succeeds. If you don't want your promises to be cancelled
+you can set `cancelOthersOnSuccess = false`. See [cancel](#cancel) for more on this topic.
 
 ```kt
 val promises = Array(10) { n ->
@@ -268,3 +272,13 @@ any (*promises) success { msg ->
 	}
 } 
 ```
+
+---
+
+##Cancel
+Any `Promise` that implements `CancelablePromise` allows itself to be cancelled. By default the promises returned
+from [`async`](#async), [`then`](#then) and [`thenUse`](#thenUse) are `CancelablePromise`s.
+
+Cancelling a promises is quite similar to [`Deferred.reject`](#deferred) as it finishes the promises as failed. Thus
+the callbacks `fail` and `always` are still executed. Cancel does also try to prevent the promised work from ever being 
+ scheduled. If the promised work is already running it gets [interrupted](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupt()) (when using default dispatchers).

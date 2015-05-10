@@ -26,7 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-private fun concreteAll<V>(context: Context, cancelOthersOnError: Boolean, vararg promises: Promise<V, Exception>): Promise<List<V>, Exception> {
+private fun concreteAll<V>(vararg promises: Promise<V, Exception>,
+                           context: Context,
+                           cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
     val deferred = deferred<List<V>, Exception>(context)
@@ -60,7 +62,9 @@ private fun concreteAll<V>(context: Context, cancelOthersOnError: Boolean, varar
     return deferred.promise
 }
 
-private fun concreteAny<V>(context: Context, cancelOthersOnSuccess: Boolean, vararg promises: Promise<V, Exception>): Promise<V, List<Exception>> {
+private fun concreteAny<V>(vararg promises: Promise<V, Exception>,
+                           context: Context,
+                           cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
     val deferred = deferred<V, List<Exception>>(context)
