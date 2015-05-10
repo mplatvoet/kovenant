@@ -34,7 +34,7 @@ package nl.mplatvoet.komponents.kovenant
  * resolved or rejected multiple times. It may simply be ignored or throw
  * an Exception.
  */
-public trait Deferred<V, E> {
+public trait Deferred<V : Any, E : Any> {
     /**
      * Resolves this deferred with the provided value
      *
@@ -83,7 +83,7 @@ public trait ContextAware {
  * What cancelling exactly means is up to the implementor.
  * But the intention is stopping.
  */
-public trait Cancelable<E> {
+public trait Cancelable<V : Any, E : Any> : Promise<V, E> {
     fun cancel(error: E): Boolean
 }
 
@@ -93,14 +93,14 @@ public trait Cancelable<E> {
  * A Promise can either resolve in [success] or get rejected and [fail].
  * Either way, it will [always] let you know.
  */
-public trait Promise<V, E> {
+public trait Promise<V : Any, E : Any> {
     fun success(callback: (value: V) -> Unit): Promise<V, E>
     fun fail(callback: (error: E) -> Unit): Promise<V, E>
     fun always(callback: () -> Unit): Promise<V, E>
 }
 
 
-public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
+public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
 private fun Context.tryDispatch(fn: () -> Unit) = callbackDispatcher.offer (fn, callbackError)
 
@@ -114,7 +114,7 @@ private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
     }
 }
 
-public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
+public fun async<V : Any>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
     val deferred = deferred<V, Exception>(context)
     context.tryWork {
         try {
@@ -127,7 +127,7 @@ public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise
     return deferred.promise
 }
 
-public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     val context = when (this) {
         is ContextAware -> this.context
         else -> Kovenant.context
@@ -150,6 +150,6 @@ public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Excepti
     return deferred.promise
 }
 
-public inline fun <V, R> Promise<V, Exception>.thenUse(
+public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
         inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R
 ): Promise<R, Exception> = then { it.bind() }
