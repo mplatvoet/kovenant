@@ -9,17 +9,23 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 ###v1.2.0
 * [KOV-8](http://komponents.myjetbrains.com/youtrack/issue/KOV-8) Progress tracking support
 
+---
+
+##Released
+
 ###v1.1.0
+
+general:
 * restructured documentation, ordered by artifact
+
+kovenant-core:
 * added [Any](api/core_usage.md#any) functionality
 * added [All](api/core_usage.md#all) functionality
 * [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) added [cancellation](api/core_usage.md#cancel) ability to promises 
 * [KOV-9](http://komponents.myjetbrains.com/youtrack/issue/KOV-9) added [lazyPromise](api/core_usage.md#lazy-promise) property delegate
+
+kovenant-android:
 * [KOV-10](http://komponents.myjetbrains.com/youtrack/issue/KOV-10) added easier [Android configuration](android/config.md)
-
----
-
-##Released
 
 ###v1.0.0
 The focus of this release has been on Android support.
