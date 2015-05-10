@@ -21,12 +21,4 @@
 
 package nl.mplatvoet.komponents.kovenant
 
-public fun all<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnError: Boolean = true): Promise<List<V>, Exception>
-        = concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
-
-public fun any<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>>
-        = concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
+class CancelException : Exception()

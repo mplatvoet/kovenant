@@ -23,18 +23,120 @@ package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicReference
 
-private class DeferredPromise<V, E>(override val context: Context) : Promise<V, E>, Deferred<V, E>, ContextAware {
+internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
+        = AsyncPromise(context, callable)
 
-    private val head = AtomicReference<CallbackContextNode<V, E>>(null)
-    private val state = AtomicReference(State.PENDING)
-    private volatile var result: Any? = null
+internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+        = ThenPromise(context, promise, callable)
 
 
+private class ThenPromise<V, R>(context: Context,
+                                promise: Promise<V, Exception>,
+                                callable: (V) -> R) :
+        SelfResolvingPromise<R, Exception>(context),
+        CancelablePromise<R, Exception> {
+    private volatile var task: (() -> Unit)? = null
+
+    init {
+        promise success {
+            val wrapper = {
+                try {
+                    val result = callable(it)
+                    resolve(result)
+                } catch(e: Exception) {
+                    reject(e)
+                } finally {
+                    //avoid leaking memory after a reject/resolve
+                    task = null
+                }
+            }
+            task = wrapper
+            context.workerDispatcher.offer (wrapper, context.workerError)
+        } fail {
+            reject(it)
+        }
+    }
+
+    override fun cancel(error: Exception): Boolean {
+        val wrapper = task
+        if (wrapper != null) {
+            task = null //avoid memory leaking
+            context.workerDispatcher.tryCancel(wrapper)
+
+
+            if (trySetFailResult(error)) {
+                fireFail(error)
+                return true
+            }
+        }
+
+        return false
+    }
+
+}
+
+private class AsyncPromise<V>(context: Context, callable: () -> V) :
+        SelfResolvingPromise<V, Exception>(context),
+        CancelablePromise<V, Exception> {
+    private volatile var task: (() -> Unit)?
+
+    init {
+        val wrapper = {
+            try {
+                val result = callable()
+                resolve(result)
+            } catch(e: Exception) {
+                reject(e)
+            } finally {
+                //avoid leaking memory after a reject/resolve
+                task = null
+            }
+        }
+        task = wrapper
+        context.workerDispatcher.offer (wrapper, context.workerError)
+    }
+
+    override fun cancel(error: Exception): Boolean {
+        val wrapper = task
+        if (wrapper != null) {
+            task = null //avoid memory leaking
+            context.workerDispatcher.tryCancel(wrapper)
+
+
+            if (trySetFailResult(error)) {
+                fireFail(error)
+                return true
+            }
+        }
+
+        return false
+    }
+}
+
+private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPromise<V, E>(context) {
+    protected fun resolve(value: V) {
+        if (trySetSuccessResult(value)) {
+            fireSuccess(value)
+        }
+        //no need to report multiple completion here.
+        //manage this ourselves, can't happen
+    }
+
+    protected fun reject(error: E) {
+        if (trySetFailResult(error)) {
+            fireFail(error)
+        }
+        //no need to report multiple completion here.
+        //manage this ourselves, can't happen
+    }
+}
+
+private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
         } else {
-            throw IllegalStateException("Promise already resolved")
+            multipleCompletion(value)
         }
     }
 
@@ -42,11 +144,27 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
         if (trySetFailResult(error)) {
             fireFail(error)
         } else {
-            throw IllegalStateException("Promise already resolved")
+            multipleCompletion(error)
         }
     }
 
+    //Only call this method if we know resolving is eminent.
+    private fun multipleCompletion(newValue: Any) {
+        while (!isDone()) {
+            Thread.yield()
+        }
+        context.multipleCompletion(rawValue(), newValue)
+    }
+
     override val promise: Promise<V, E> = this
+
+    private fun isDone() = isSuccessResult() || isFailResult()
+}
+
+private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E>, ContextAware {
+    private val state = AtomicReference(State.PENDING)
+    private val head = AtomicReference<CallbackContextNode<V, E>>(null)
+    private volatile var result: Any? = null
 
 
     override fun success(callback: (value: V) -> Unit): Promise<V, E> {
@@ -84,14 +202,14 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
     }
 
 
-    private fun fireSuccess(value: V) = popAllSuccessAndAlways {
+    fun fireSuccess(value: V) = popAllSuccessAndAlways {
         node ->
         context.tryDispatch {
             node.runSuccess(value)
         }
     }
 
-    private fun fireFail(value: E) = popAllFailAndAlways {
+    fun fireFail(value: E) = popAllFailAndAlways {
         node ->
         context.tryDispatch {
             node.runFail(value)
@@ -133,8 +251,8 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
         return false
     }
 
-    private fun isSuccessResult(): Boolean = state.get() == State.SUCCESS
-    private fun isFailResult(): Boolean = state.get() == State.FAIL
+    protected fun isSuccessResult(): Boolean = state.get() == State.SUCCESS
+    protected fun isFailResult(): Boolean = state.get() == State.FAIL
 
 
     //For internal use only! Method doesn't check anything, just casts.
@@ -145,6 +263,7 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
     suppress("UNCHECKED_CAST")
     private fun getAsFailResult(): E = result as E
 
+    protected fun rawValue(): Any = result as Any
 
     private fun addSuccessCb(cb: (V) -> Unit) = addValueNode(SuccessCallbackContextNode<V, E>(cb))
 
@@ -274,9 +393,3 @@ private class DeferredPromise<V, E>(override val context: Context) : Promise<V, 
     }
 
 }
-
-
-
-
-
-

@@ -14,7 +14,7 @@ async {
 }
 ```
 
-Developed with the following [goals](goals.md) in mind.
+Developed with the following [goals](misc/goals.md) in mind.
 
 * **Easy to use**: Function above anything else
 * **Runtime agnostic**: API layer must be pure Kotlin
@@ -23,13 +23,13 @@ Developed with the following [goals](goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-This version is build against `Java 8` and `kotlin-stdlib:0.11.91`.
+This version is build against `Java 8` and `kotlin-stdlib:0.11.91.2`.
 Source and target compatibility is `Java 6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:1.0.+'
+    compile 'nl.mplatvoet.komponents:kovenant:1.1.+'
 }
 ```
 
@@ -38,9 +38,12 @@ dependencies {
 <dependency>
 	<groupId>nl.mplatvoet.komponents</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[1.0.0,1.1.0)</version>
+	<version>[1.1.0,1.2.0)</version>
 </dependency>
 ```
+
+###Android Demo app
+Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
@@ -58,4 +61,4 @@ it's needed to keep class and method count low.
 Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
 
 ##Release notes
-Release notes can be found on [Github](https://github.com/mplatvoet/kovenant/releases)
+See [Changelog](changelog.md) for release notes

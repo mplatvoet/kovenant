@@ -19,14 +19,31 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package examples.any
 
-public fun all<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnError: Boolean = true): Promise<List<V>, Exception>
-        = concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
+import nl.mplatvoet.komponents.kovenant.any
+import nl.mplatvoet.komponents.kovenant.async
+import java.util.Random
 
-public fun any<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>>
-        = concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
+fun main(args: Array<String>) {
+    val promises = Array(10) { n ->
+        async {
+            while (!Thread.currentThread().isInterrupted()) {
+                val luckyNumber = Random(System.currentTimeMillis() * (n + 1)).nextInt(100)
+                if (luckyNumber == 7) break
+            }
+            "Promise number $n won!"
+        }
+    }
+
+    any (*promises) success { msg ->
+        println(msg)
+        println()
+
+        promises forEachIndexed { n, p ->
+            p.fail { println("promise[$n] was canceled") }
+            p.success { println("promise[$n] finished") }
+        }
+    }
+}
+

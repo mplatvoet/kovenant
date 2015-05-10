@@ -16,17 +16,33 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package examples.lazy
 
-public fun all<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnError: Boolean = true): Promise<List<V>, Exception>
-        = concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
+import nl.mplatvoet.komponents.kovenant.properties.lazyPromise
+import nl.mplatvoet.komponents.kovenant.thenUse
 
-public fun any<V>(vararg promises: Promise<V, Exception>,
-                  context: Context = Kovenant.context,
-                  cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>>
-        = concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
+val expensiveResource by lazyPromise {
+    println("init promise")
+    ExpensiveResource()
+}
+
+fun main(args: Array<String>) {
+    println("start program")
+
+    expensiveResource thenUse {
+        "Got [$value]"
+    } success {
+        println(it)
+    }
+}
+
+
+class ExpensiveResource {
+    val value :String = "result"
+}
+
+

@@ -12,13 +12,13 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `Java 7` and `kotlin-stdlib:0.11.91`.
+This version is build against `Java 8` and `kotlin-stdlib:0.11.91.2`.
 Source and target compatibility is `Java 6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:1.0.+'
+    compile 'nl.mplatvoet.komponents:kovenant:1.1.+'
 }
 ```
 
@@ -27,7 +27,7 @@ dependencies {
 <dependency>
 	<groupId>nl.mplatvoet.komponents</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[1.0.0,1.1.0)</version>
+	<version>[1.1.0,1.2.0)</version>
 </dependency>
 ```
 
