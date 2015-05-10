@@ -114,18 +114,8 @@ private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
     }
 }
 
-public fun async<V : Any>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
-    val deferred = deferred<V, Exception>(context)
-    context.tryWork {
-        try {
-            val result = body()
-            deferred.resolve(result)
-        } catch(e: Exception) {
-            deferred.reject(e)
-        }
-    }
-    return deferred.promise
-}
+public fun async<V : Any>(context: Context = Kovenant.context,
+                          body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     val context = when (this) {
@@ -133,23 +123,8 @@ public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promis
         else -> Kovenant.context
     }
 
-    val deferred = deferred<R, Exception>(context)
-    success {
-        context.tryWork {
-            try {
-                val result = bind(it)
-                deferred.resolve(result)
-            } catch(e: Exception) {
-                deferred.reject(e)
-            }
-        }
-    }
-    fail {
-        deferred.reject(it)
-    }
-    return deferred.promise
+    return concretePromise(context, this, bind)
 }
 
 public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
-        inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R
-): Promise<R, Exception> = then { it.bind() }
+        inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R): Promise<R, Exception> = then { it.bind() }

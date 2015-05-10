@@ -23,9 +23,60 @@ package nl.mplatvoet.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicReference
 
+internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
+        = AsyncPromise(context, callable)
 
-private class ExecutingPromise<V>(callable: () -> V, context: Context) :
-        AbstractPromise<V, Exception>(context),
+internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+        = ThenPromise(context, promise, callable)
+
+
+private class ThenPromise<V, R>(context: Context,
+                                promise: Promise<V, Exception>,
+                                callable: (V) -> R) :
+        SelfResolvingPromise<R, Exception>(context),
+        CancelablePromise<R, Exception> {
+    private volatile var task: (() -> Unit)? = null
+
+    init {
+        promise success {
+            val wrapper = {
+                try {
+                    val result = callable(it)
+                    resolve(result)
+                } catch(e: Exception) {
+                    reject(e)
+                } finally {
+                    //avoid leaking memory after a reject/resolve
+                    task = null
+                }
+            }
+            task = wrapper
+            context.workerDispatcher.offer (wrapper, context.workerError)
+        } fail {
+            reject(it)
+        }
+    }
+
+    override fun cancel(error: Exception): Boolean {
+        val wrapper = task
+        if (wrapper != null) {
+            task = null //avoid memory leaking
+            context.workerDispatcher.tryCancel(wrapper)
+
+
+            if (trySetFailResult(error)) {
+                fireFail(error)
+                return true
+            }
+        }
+
+        return false
+    }
+
+}
+
+private class AsyncPromise<V>(context: Context, callable: () -> V) :
+        SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private volatile var task: (() -> Unit)?
 
@@ -60,8 +111,10 @@ private class ExecutingPromise<V>(callable: () -> V, context: Context) :
 
         return false
     }
+}
 
-    private fun resolve(value: V) {
+private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPromise<V, E>(context) {
+    protected fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
         }
@@ -69,17 +122,15 @@ private class ExecutingPromise<V>(callable: () -> V, context: Context) :
         //manage this ourselves, can't happen
     }
 
-    private fun reject(error: Exception) {
+    protected fun reject(error: E) {
         if (trySetFailResult(error)) {
             fireFail(error)
         }
         //no need to report multiple completion here.
         //manage this ourselves, can't happen
     }
-
 }
 
-//TODO, do we need to make this cancelable to0, does it make sense?
 private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
