@@ -83,7 +83,7 @@ public trait ContextAware {
  * What cancelling exactly means is up to the implementor.
  * But the intention is stopping.
  */
-public trait Cancelable<V : Any, E : Any> : Promise<V, E> {
+public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
     fun cancel(error: E): Boolean
 }
 

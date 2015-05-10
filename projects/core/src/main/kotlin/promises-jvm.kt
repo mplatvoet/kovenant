@@ -24,9 +24,9 @@ package nl.mplatvoet.komponents.kovenant
 import java.util.concurrent.atomic.AtomicReference
 
 
-private class ExecutingDeferredPromise<V>(callable: () -> V, context: Context) :
+private class ExecutingPromise<V>(callable: () -> V, context: Context) :
         AbstractPromise<V, Exception>(context),
-        Cancelable<V, Exception> {
+        CancelablePromise<V, Exception> {
     private volatile var task: (() -> Unit)?
 
     init {
@@ -48,34 +48,37 @@ private class ExecutingDeferredPromise<V>(callable: () -> V, context: Context) :
     override fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
-            task = null
+            task = null //avoid memory leaking
             context.workerDispatcher.tryCancel(wrapper)
         }
-        //TODO
-        //if casState to new CANCEL state succeeds return true and reject with provided value.
-        //This way any latches based on callbacks will succeed
 
-        return false //if we are changing the state, return true
+        if (trySetFailResult(error)) {
+            fireFail(error)
+            return true
+        }
+
+        return false
     }
 
     private fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
-        } else {
-            throw IllegalStateException("Promise already resolved")
         }
+        //no need to report multiple completion here.
+        //manage this ourselves, can't happen
     }
 
     private fun reject(error: Exception) {
         if (trySetFailResult(error)) {
             fireFail(error)
-        } else {
-            throw IllegalStateException("Promise already resolved")
         }
+        //no need to report multiple completion here.
+        //manage this ourselves, can't happen
     }
 
 }
 
+//TODO, do we need to make this cancelable to, does it make sense?
 private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
