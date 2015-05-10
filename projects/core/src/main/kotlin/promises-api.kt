@@ -104,8 +104,6 @@ public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Defe
 
 private fun Context.tryDispatch(fn: () -> Unit) = callbackDispatcher.offer (fn, callbackError)
 
-private fun Context.tryWork(fn: () -> Unit) = workerDispatcher.offer (fn, workerError)
-
 private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
     try {
         this.offer(fn)

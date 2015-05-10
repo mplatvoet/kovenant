@@ -19,31 +19,6 @@
  * THE SOFTWARE.
  */
 
-package examples.any
+package nl.mplatvoet.komponents.kovenant
 
-import nl.mplatvoet.komponents.kovenant.any
-import nl.mplatvoet.komponents.kovenant.async
-import java.util.Random
-
-fun main(args: Array<String>) {
-    val promises = Array(10) { n ->
-        async {
-            while (!Thread.currentThread().isInterrupted()) {
-                val luckyNumber = Random(System.currentTimeMillis() * n).nextInt(100)
-                if (luckyNumber == 7) break
-            }
-            "Promise number $n won!"
-        }
-    }
-
-    any (*promises) success { msg ->
-        println(msg)
-        println()
-
-        promises forEachIndexed { n, p ->
-            p.fail { println("promise[$n] was canceled") }
-            p.success { println("promise[$n] finished") }
-        }
-    }
-}
-
+class CancelException : Exception()
