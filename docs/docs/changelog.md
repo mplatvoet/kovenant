@@ -6,8 +6,11 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
+###v1.2.0
+* [KOV-8](http://komponents.myjetbrains.com/youtrack/issue/KOV-8) Progress tracking support
+
 ###v1.1.0
-* restructured documentation, structured by artifact
+* restructured documentation, ordered by artifact
 * added [Any](api/core_usage.md#any) functionality
 * added [All](api/core_usage.md#all) functionality
 * [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) added cancellation ability to promises 
