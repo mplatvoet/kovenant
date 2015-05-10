@@ -26,10 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-private fun concreteAll<V, E>(context: Context, vararg promises: Promise<V, E>): Promise<List<V>, E> {
+private fun concreteAll<V>(context: Context, cancelOthersOnError: Boolean, vararg promises: Promise<V, Exception>): Promise<List<V>, Exception> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
-    val deferred = deferred<List<V>, E>(context)
+    val deferred = deferred<List<V>, Exception>(context)
     val results = AtomicReferenceArray<V>(promises.size())
     val successCount = AtomicInteger(promises.size())
     val failCount = AtomicInteger(0)
@@ -45,6 +45,13 @@ private fun concreteAll<V, E>(context: Context, vararg promises: Promise<V, E>):
         promise.fail { e ->
             if (failCount.incrementAndGet() == 1) {
                 deferred.reject(e)
+                if (cancelOthersOnError) {
+                    promises.forEach {
+                        if (it != promise && it is CancelablePromise) {
+                            it.cancel(CancelException())
+                        }
+                    }
+                }
             }
         }
 
@@ -53,11 +60,11 @@ private fun concreteAll<V, E>(context: Context, vararg promises: Promise<V, E>):
     return deferred.promise
 }
 
-private fun concreteAny<V, E>(context: Context, vararg promises: Promise<V, E>): Promise<V, List<E>> {
+private fun concreteAny<V>(context: Context, cancelOthersOnSuccess: Boolean, vararg promises: Promise<V, Exception>): Promise<V, List<Exception>> {
     if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
 
-    val deferred = deferred<V, List<E>>(context)
-    val results = AtomicReferenceArray<E>(promises.size())
+    val deferred = deferred<V, List<Exception>>(context)
+    val errors = AtomicReferenceArray<Exception>(promises.size())
     val successCount = AtomicInteger(0)
     val failCount = AtomicInteger(promises.size())
 
@@ -66,12 +73,19 @@ private fun concreteAny<V, E>(context: Context, vararg promises: Promise<V, E>):
         promise.success { v ->
             if (successCount.incrementAndGet() == 1) {
                 deferred.resolve(v)
+                if (cancelOthersOnSuccess) {
+                    promises.forEach {
+                        if (it != promise && it is CancelablePromise) {
+                            it.cancel(CancelException())
+                        }
+                    }
+                }
             }
         }
         promise.fail { e ->
-            results[i] = e
+            errors[i] = e
             if (failCount.decrementAndGet() == 0) {
-                deferred.reject(results.asList())
+                deferred.reject(errors.asList())
             }
         }
 

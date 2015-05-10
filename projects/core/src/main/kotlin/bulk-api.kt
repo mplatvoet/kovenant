@@ -22,11 +22,11 @@
 package nl.mplatvoet.komponents.kovenant
 
 //Can't use default values because type inference breaks
-public fun all<V, E>(vararg promise: Promise<V, E>): Promise<List<V>, E> = concreteAll(Kovenant.context, *promise)
+public fun all<V>(vararg promise: Promise<V, Exception>): Promise<List<V>, Exception> = concreteAll(Kovenant.context, true, *promise)
 
-public fun all<V, E>(context: Context, vararg promise: Promise<V, E>): Promise<List<V>, E> = concreteAll(context, *promise)
+public fun all<V>(context: Context, vararg promise: Promise<V, Exception>): Promise<List<V>, Exception> = concreteAll(context, true, *promise)
 
 //Can't use default values because type inference breaks
-public fun any<V, E>(vararg promise: Promise<V, E>): Promise<V, List<E>> = concreteAny(Kovenant.context, *promise)
+public fun any<V>(vararg promise: Promise<V, Exception>): Promise<V, List<Exception>> = concreteAny(Kovenant.context, true, *promise)
 
-public fun any<V, E>(context: Context, vararg promise: Promise<V, E>): Promise<V, List<E>> = concreteAny(context, *promise)
+public fun any<V>(context: Context, vararg promise: Promise<V, Exception>): Promise<V, List<Exception>> = concreteAny(context, true, *promise)

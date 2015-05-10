@@ -217,10 +217,10 @@ class ExpensiveResource {
 
 ##All
 Sometimes you want to make sure that multiple promises are done before proceeding. With `all` this can be achieved.
-`all<V,E>` takes a `vararg` of `Promise<V,E>`s and returns a `Promise<List<V>, E>`. The returned `Promise` is considered a
-success if all of the provided `Promise`s are successful. If any fail the whole promise fails. The returned `List<V>`
-contains the items in the same order as the `Promise`s provided to `all`. If you want to mix promises of different types
-you probably want to take a look at [combine](combine_usage.md)
+`all<V,Exception>` takes a `vararg` of `Promise<V,Exception>`s and returns a `Promise<List<V>, Exception>`. 
+The returned `Promise` is considered a success if all of the provided `Promise`s are successful. If any fail the whole 
+promise fails. The returned `List<V>` contains the items in the same order as the `Promise`s provided to `all`. 
+If you want to mix promises of different types you probably want to take a look at [combine](combine_usage.md)
 
 ```kt
 val promises = Array(10) { n ->
@@ -241,21 +241,29 @@ all(*promises) success {
 
 ##Any
 Sometimes you want to make sure that at least one of multiple promises is done before proceeding. With `any` this can be achieved.
-`any<V,E>` takes a `vararg` of `Promise<V,E>`s and returns a `Promise<V, List<E>>`. The returned `Promise` is considered a
-success if any of the provided `Promise`s is successful. If all fail the whole promise fails. The returned `List<E>`
+`any<V,Exception>` takes a `vararg` of `Promise<V,Exception>`s and returns a `Promise<V, List<Exception>>`. The returned `Promise` is considered a
+success if any of the provided `Promise`s is successful. If all fail the whole promise fails. The returned `List<Exception>`
 contains the items in the same order as the `Promise`s provided to `any`.
- 
->NOTE Any doesn't cancel the other promises yet. [KOV-11](http://komponents.myjetbrains.com/youtrack/issue/KOV-11) describes
->this
+
 
 ```kt
 val promises = Array(10) { n ->
 	async {
-		Pair(n, fib(n))
+		while(!Thread.currentThread().isInterrupted()) {
+			val luckyNumber = Random(System.currentTimeMillis() * n).nextInt(100)
+			if (luckyNumber == 7) break
+		}
+		"Promise number $n won!"
 	}
 }
 
-any (*promises) success {
-	 pair -> println("fib(${pair.first}) = ${pair.second}")
+any (*promises) success { msg ->
+	println(msg)
+	println()
+
+	promises forEachIndexed { n, p ->
+		p.fail { println("promise[$n] was canceled") }
+		p.success { println("promise[$n] finished") }
+	}
 } 
 ```
