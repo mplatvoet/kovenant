@@ -222,6 +222,7 @@ The returned `Promise` is considered a success if all of the provided `Promise`s
 promise fails. The returned `List<V>` contains the items in the same order as the `Promise`s provided to `all`. 
 If you want to mix promises of different types you probably want to take a look at [combine](combine_usage.md)
 
+
 ```kt
 val promises = Array(10) { n ->
 	async {
