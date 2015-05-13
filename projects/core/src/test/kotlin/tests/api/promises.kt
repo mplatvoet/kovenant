@@ -28,7 +28,7 @@ import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
-class PromiseTest {
+class PromiseCallbackTest {
 
     Before fun setup() {
         Kovenant.configure {
@@ -87,6 +87,122 @@ class PromiseTest {
         async { throw Exception() } fail { fails++ } always  { always++ } fail { fails++ }
         assertEquals(2, fails, "fail should be called 2 times")
         assertEquals(1, always, "always should be called once")
+    }
+
+    Test fun eitherFail() {
+        var fails = 0
+        var success = 0
+        async { throw Exception() } fail { fails++ } success { success++ }
+        assertEquals(1, fails, "fail should be called 1 time")
+        assertEquals(0, success, "success shouldn't be called")
+    }
+
+    Test fun eitherSuccess() {
+        var fails = 0
+        var success = 0
+        async { 13 } fail { fails++ } success { success++ }
+        assertEquals(0, fails, "fail shouldn't be called")
+        assertEquals(1, success, "success should be called 1 time")
+    }
+}
+
+class PromiseCallbackOrderTest {
+
+    Before fun setup() {
+        Kovenant.configure {
+            callbackDispatcher = ImmediateDispatcher()
+            workerDispatcher = ImmediateDispatcher()
+        }
+    }
+
+    Test fun orderAlwaysSuccessAlways() {
+        var calls = 0
+        async { 13 } always {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } success  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } always {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
+    }
+
+    Test fun orderSuccessSuccessAlways() {
+        var calls = 0
+        async { 13 } success {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } success  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } always {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
+    }
+
+    Test fun orderAlwaysSuccessSuccess() {
+        var calls = 0
+        async { 13 } always {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } success  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } success  {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
+    }
+
+    Test fun orderAlwaysFailAlways() {
+        var calls = 0
+        async { throw Exception() } always {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } fail  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } always  {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
+    }
+
+    Test fun orderFailFailAlways() {
+        var calls = 0
+        async { throw Exception() } fail {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } fail  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } always  {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
+    }
+
+    Test fun orderAlwaysFailFail() {
+        var calls = 0
+        async { throw Exception() } always {
+            calls++
+            assertEquals(1, calls, "Should be first")
+        } fail  {
+            calls++
+            assertEquals(2, calls, "Should be second")
+        } fail  {
+            calls++
+            assertEquals(3, calls, "Should be third")
+        }
+        assertEquals(3, calls, "All should be called")
     }
 
 }
