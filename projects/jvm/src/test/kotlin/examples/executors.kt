@@ -27,7 +27,7 @@ import support.fib
 import java.util.concurrent.Callable
 
 fun main(args: Array<String>) {
-    val executorService = Kovenant.context.workerDispatcher.asExecutorService()
+    val executorService = Kovenant.context.workerContext.dispatcher.asExecutorService()
 
     val tasks = listOf(*(Array(5) { FibCallable(25 - it) }))
 

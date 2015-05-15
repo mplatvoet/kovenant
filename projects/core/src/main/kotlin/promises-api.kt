@@ -94,23 +94,18 @@ public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  * Either way, it will [always] let you know.
  */
 public trait Promise<V : Any, E : Any> {
-    fun success(callback: (value: V) -> Unit): Promise<V, E>
-    fun fail(callback: (error: E) -> Unit): Promise<V, E>
-    fun always(callback: () -> Unit): Promise<V, E>
+    fun success(callback: (value: V) -> Unit): Promise<V, E> = success(null, callback)
+    fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(null, callback)
+    fun always(callback: () -> Unit): Promise<V, E> = always(null, callback)
+
+    fun success(context: DispatcherContext?, callback: (value: V) -> Unit): Promise<V, E>
+    fun fail(context: DispatcherContext?, callback: (error: E) -> Unit): Promise<V, E>
+    fun always(context: DispatcherContext?, callback: () -> Unit): Promise<V, E>
 }
 
 
 public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
-private fun Context.tryDispatch(fn: () -> Unit) = callbackDispatcher.offer (fn, callbackError)
-
-private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
-    try {
-        this.offer(fn)
-    } catch (e: Exception) {
-        errorFn(e)
-    }
-}
 
 public fun async<V : Any>(context: Context = Kovenant.context,
                           body: () -> V): Promise<V, Exception> = concretePromise(context, body)

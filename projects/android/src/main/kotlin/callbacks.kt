@@ -30,37 +30,29 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): 
     return deferred.promise
 }
 
-public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = success {
-    LooperExecutor.main submit Param1Callback(ctx, it, body)
+
+//TODO cache dispatcherContext?
+public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> {
+    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    return success(dispatcherContext, body)
 }
 
-public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = fail {
-    LooperExecutor.main submit Param1Callback(ctx, it, body)
+//TODO cache dispatcherContext?
+public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> {
+    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    return fail(dispatcherContext, body)
 }
 
-public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = always {
-    LooperExecutor.main submit Param0Callback(ctx, body)
+//TODO cache dispatcherContext?
+public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> {
+    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    return always(dispatcherContext, body)
 }
 
 
-private class Param1Callback<V>(private val context: Context, private val value: V, private val body: (value: V) -> Unit) : Runnable {
-    override fun run() {
-        try {
-            body(value)
-        } catch(e: Exception) {
-            context.callbackError(e)
-        }
-    }
-}
-
-private class Param0Callback(private val context: Context, private val body: () -> Unit) : Runnable {
-    override fun run() {
-        try {
-            body()
-        } catch(e: Exception) {
-            context.callbackError(e)
-        }
-    }
+private class DelegatingDispatcherContext(private val base: DispatcherContext, override val dispatcher: Dispatcher) : DispatcherContext {
+    override val errorHandler: (Exception) -> Unit
+        get() = base.errorHandler
 }
 
 private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,

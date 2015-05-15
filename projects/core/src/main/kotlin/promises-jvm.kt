@@ -51,7 +51,7 @@ private class ThenPromise<V, R>(context: Context,
                 }
             }
             task = wrapper
-            context.workerDispatcher.offer (wrapper, context.workerError)
+            context.workerContext offer wrapper
         } fail {
             reject(it)
         }
@@ -61,7 +61,7 @@ private class ThenPromise<V, R>(context: Context,
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
-            context.workerDispatcher.tryCancel(wrapper)
+            context.workerContext.dispatcher.tryCancel(wrapper)
 
 
             if (trySetFailResult(error)) {
@@ -93,14 +93,14 @@ private class AsyncPromise<V>(context: Context, callable: () -> V) :
             }
         }
         task = wrapper
-        context.workerDispatcher.offer (wrapper, context.workerError)
+        context.workerContext offer wrapper
     }
 
     override fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
-            context.workerDispatcher.tryCancel(wrapper)
+            context.workerContext.dispatcher.tryCancel(wrapper)
 
 
             if (trySetFailResult(error)) {
@@ -167,10 +167,10 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     private volatile var result: Any? = null
 
 
-    override fun success(callback: (value: V) -> Unit): Promise<V, E> {
+    override fun success(context: DispatcherContext?, callback: (value: V) -> Unit): Promise<V, E> {
         if (isFailResult()) return this
 
-        addSuccessCb(callback)
+        addSuccessCb(context?:this.context.callbackContext, callback)
 
         //possibly resolved already
         if (isSuccessResult()) fireSuccess(getAsValueResult())
@@ -178,10 +178,10 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-    override fun fail(callback: (error: E) -> Unit): Promise<V, E> {
+    override fun fail(context: DispatcherContext?, callback: (error: E) -> Unit): Promise<V, E> {
         if (isSuccessResult()) return this
 
-        addFailCb(callback)
+        addFailCb(context?:this.context.callbackContext, callback)
 
         //possibly rejected already
         if (isFailResult()) fireFail(getAsFailResult())
@@ -189,8 +189,8 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-    override fun always(callback: () -> Unit): Promise<V, E> {
-        addAlwaysCb(callback)
+    override fun always(context: DispatcherContext?, callback: () -> Unit): Promise<V, E> {
+        addAlwaysCb(context?:this.context.callbackContext, callback)
 
         //possibly completed already
         when {
@@ -201,19 +201,14 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-
     fun fireSuccess(value: V) = popAllSuccessAndAlways {
         node ->
-        context.tryDispatch {
-            node.runSuccess(value)
-        }
+        node.runSuccess(value)
     }
 
     fun fireFail(value: E) = popAllFailAndAlways {
         node ->
-        context.tryDispatch {
-            node.runFail(value)
-        }
+        node.runFail(value)
     }
 
     private enum class State {
@@ -265,11 +260,11 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
     protected fun rawValue(): Any = result as Any
 
-    private fun addSuccessCb(cb: (V) -> Unit) = addValueNode(SuccessCallbackContextNode<V, E>(cb))
+    private fun addSuccessCb(context: DispatcherContext, cb: (V) -> Unit) = addValueNode(SuccessCallbackContextNode<V, E>(context, cb))
 
-    private fun addFailCb(cb: (E) -> Unit) = addValueNode(FailCallbackContextNode<V, E>(cb))
+    private fun addFailCb(context: DispatcherContext, cb: (E) -> Unit) = addValueNode(FailCallbackContextNode<V, E>(context, cb))
 
-    private fun addAlwaysCb(cb: () -> Unit) = addValueNode(AlwaysCallbackContextNode<V, E>(cb))
+    private fun addAlwaysCb(context: DispatcherContext, cb: () -> Unit) = addValueNode(AlwaysCallbackContextNode<V, E>(context, cb))
 
     private inline fun popAllSuccessAndAlways(fn: (CallbackContext<V, E>) -> Unit) {
         popAll {
@@ -368,28 +363,31 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         }
     }
 
-    private class AlwaysCallbackContextNode<V, E>(private val fn: () -> Unit) : CallbackContextNode<V, E>() {
-        override fun runSuccess(value: V) = fn()
+    private class AlwaysCallbackContextNode<V, E>(private val context: DispatcherContext,
+                                                  private val fn: () -> Unit) : CallbackContextNode<V, E>() {
+        override fun runSuccess(value: V) = context.offer { fn() }
 
-        override fun runFail(value: E) = fn()
+        override fun runFail(value: E) = context.offer { fn() }
     }
 
-    private class SuccessCallbackContextNode<V, E>(private val fn: (V) -> Unit) : CallbackContextNode<V, E>() {
+    private class SuccessCallbackContextNode<V, E>(private val context: DispatcherContext,
+                                                   private val fn: (V) -> Unit) : CallbackContextNode<V, E>() {
 
-        override fun runSuccess(value: V) = fn(value)
+        override fun runSuccess(value: V) = context.offer { fn(value) }
 
         override fun runFail(value: E) {
             //ignore
         }
     }
 
-    private class FailCallbackContextNode<V, E>(private val fn: (E) -> Unit) : CallbackContextNode<V, E>() {
+    private class FailCallbackContextNode<V, E>(private val context: DispatcherContext,
+                                                private val fn: (E) -> Unit) : CallbackContextNode<V, E>() {
 
         override fun runSuccess(value: V) {
             //ignore
         }
 
-        override fun runFail(value: E) = fn(value)
+        override fun runFail(value: E) = context.offer { fn(value) }
     }
 
 }

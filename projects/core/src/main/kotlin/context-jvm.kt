@@ -96,20 +96,39 @@ class ConcreteKovenant {
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
+
+        override val callbackContext: DispatcherContext = CallbackDispatcherContext()
+        override val workerContext: DispatcherContext = WorkerDispatcherContext()
+
+        private inner class CallbackDispatcherContext : DispatcherContext {
+            override val dispatcher: Dispatcher
+                get() = callbackDispatcher
+            override val errorHandler: (Exception) -> Unit
+                get() = callbackError
+
+        }
+
+        private inner class WorkerDispatcherContext : DispatcherContext {
+            override val dispatcher: Dispatcher
+                get() = workerDispatcher
+            override val errorHandler: (Exception) -> Unit
+                get() = workerError
+
+        }
     }
 
     private class TrackingContext(private val currentConfig: Context) : MutableContext {
-        private val callbackDispatcherDelegate = TrackChangesVar { currentConfig.callbackDispatcher }
-        private val workerDispatcherDelegate = TrackChangesVar { currentConfig.workerDispatcher }
+        private val callbackDispatcherDelegate = TrackChangesVar { currentConfig.callbackContext.dispatcher }
+        private val workerDispatcherDelegate = TrackChangesVar { currentConfig.workerContext.dispatcher }
 
 
         override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
         override var workerDispatcher: Dispatcher by workerDispatcherDelegate
 
-        private val callbackErrorDelegate = TrackChangesVar { currentConfig.callbackError }
+        private val callbackErrorDelegate = TrackChangesVar { currentConfig.callbackContext.errorHandler }
         override var callbackError: (Exception) -> Unit by callbackErrorDelegate
 
-        private val workerErrorDelegate = TrackChangesVar { currentConfig.workerError }
+        private val workerErrorDelegate = TrackChangesVar { currentConfig.workerContext.errorHandler }
         override var workerError: (Exception) -> Unit by workerErrorDelegate
 
         private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
@@ -121,6 +140,25 @@ class ConcreteKovenant {
             if (callbackErrorDelegate.written) config.callbackError = callbackError
             if (workerErrorDelegate.written) config.workerError = workerError
             if (multipleCompletionDelegate.written) config.multipleCompletion = multipleCompletion
+        }
+
+        override val callbackContext: DispatcherContext = CallbackDispatcherContext()
+        override val workerContext: DispatcherContext = WorkerDispatcherContext()
+
+        private inner class CallbackDispatcherContext : DispatcherContext {
+            override val dispatcher: Dispatcher
+                get() = callbackDispatcher
+            override val errorHandler: (Exception) -> Unit
+                get() = callbackError
+
+        }
+
+        private inner class WorkerDispatcherContext : DispatcherContext {
+            override val dispatcher: Dispatcher
+                get() = workerDispatcher
+            override val errorHandler: (Exception) -> Unit
+                get() = workerError
+
         }
     }
 
