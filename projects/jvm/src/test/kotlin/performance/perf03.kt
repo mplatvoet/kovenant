@@ -71,12 +71,11 @@ fun main(args: Array<String>) {
     }
 
 
-    val futureDeltas = ArrayList<Long>(attempts)
-    val promiseDeltas = ArrayList<Long>(attempts)
+    var futureDeltas = ArrayList<Long>(attempts)
+    var promiseDeltas = ArrayList<Long>(attempts)
 
-    validateFutures(warmupRounds)
     for (i in 1..attempts) {
-
+        validateFutures(warmupRounds)
         val startExc = System.currentTimeMillis()
         validateFutures(performanceRounds)
         val deltaExc = System.currentTimeMillis() - startExc
@@ -84,25 +83,40 @@ fun main(args: Array<String>) {
         println("Futures attempt $i took $deltaExc ms")
         futureDeltas add deltaExc
 
-        napTime()
-    }
 
-    val factors = ArrayList<Double>(attempts)
-    validatePromises(warmupRounds)
+    }
+    napTime()
+
     for (i in 1..attempts) {
+        validatePromises(warmupRounds)
         val startDis = System.currentTimeMillis()
         validatePromises(performanceRounds)
         val deltaDis = System.currentTimeMillis() - startDis
 
         println("Promises attempt $i took $deltaDis ms")
         promiseDeltas add deltaDis
-        napTime()
+        //napTime()
 
     }
 
-    //    val averageFactor = factors.sum() / attempts.toDouble()
-    //    println("On average with ${attempts} attempts, " +
-    //            "Promises where a factor ${fasterOrSlower(averageFactor)}")
+    val quarter = attempts / 4
+    if (quarter > 0) {
+        fun ArrayList<Long>.firstQR(): ArrayList<Long> {
+            sort { a, b -> (b - a).toInt() }
+            val maxIdx = size() - quarter
+            return ArrayList(subList(quarter, maxIdx))
+        }
+        futureDeltas = futureDeltas.firstQR()
+        promiseDeltas = promiseDeltas.firstQR()
+    }
+
+    fun ArrayList<Long>.avarage(): Long = sum() / size()
+    val avarageMsPromise = promiseDeltas.avarage()
+    val avarageMsFutures = futureDeltas.avarage()
+    val factor = avarageMsFutures.toDouble() / avarageMsPromise.toDouble()
+
+    println("On average with ${futureDeltas.size()} samples of the 1QR, " +
+            "Promises where a factor ${fasterOrSlower(factor)}")
 
     executorService.shutdownNow()
     workDispatch.stop()
