@@ -33,19 +33,19 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): 
 
 //TODO cache dispatcherContext?
 public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
     return success(dispatcherContext, body)
 }
 
 //TODO cache dispatcherContext?
 public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
     return fail(dispatcherContext, body)
 }
 
 //TODO cache dispatcherContext?
 public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(ctx.callbackContext, androidUiDispatcher())
+    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
     return always(dispatcherContext, body)
 }
 
