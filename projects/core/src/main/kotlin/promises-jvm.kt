@@ -170,6 +170,13 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     override fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
         if (isFailResult()) return this
 
+        //Bypass the queue if this promise is resolved and the queue is empty
+        //no need to create excess nodes
+        if (isSuccessResult() && isEmptyCallbacks()) {
+            context offer { callback(getAsValueResult()) }
+            return this
+        }
+
         addSuccessCb(context, callback)
 
         //possibly resolved already
@@ -181,6 +188,13 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     override fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E> {
         if (isSuccessResult()) return this
 
+        //Bypass the queue if this promise is resolved and the queue is empty
+        //no need to create excess nodes
+        if (isFailResult() && isEmptyCallbacks()) {
+            context offer { callback(getAsFailResult()) }
+            return this
+        }
+
         addFailCb(context, callback)
 
         //possibly rejected already
@@ -190,6 +204,13 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     }
 
     override fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E> {
+        //Bypass the queue if this promise is resolved and the queue is empty
+        //no need to create excess nodes
+        if ((isSuccessResult() || isFailResult()) && isEmptyCallbacks()) {
+            context offer { callback() }
+            return this
+        }
+
         addAlwaysCb(context, callback)
 
         //possibly completed already
@@ -301,6 +322,11 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
             }
             tail = next
         }
+    }
+
+    private fun isEmptyCallbacks(): Boolean {
+        val headNode = head.get()
+        return headNode == null || headNode.next == null
     }
 
 
