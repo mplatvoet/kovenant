@@ -66,16 +66,6 @@ public trait Deferred<V : Any, E : Any> {
     val promise: Promise<V, E>
 }
 
-/**
- * Marks a class to be aware of the context
- *
- * Used by [then] to obtain the current context from a [Promise]
- *
- */
-public trait ContextAware {
-    val context: Context
-}
-
 
 /**
  * Mark a class to be cancelable
@@ -96,9 +86,8 @@ public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  * Any implementation must ensure that **all** callbacks are executed in the order
  * they where added.
  */
-public trait Promise<V : Any, E : Any> : ContextAware {
-    private val ctx: Context
-        get() = if (this is ContextAware) context else Kovenant.context
+public trait Promise<V : Any, E : Any> {
+    val context: Context
 
     /**
      * Adds a success callback to this Promise
@@ -124,11 +113,10 @@ public fun async<V : Any>(context: Context = Kovenant.context,
                           body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
-    val context = when (this) {
-        is ContextAware -> this.context
-        else -> Kovenant.context
-    }
+    return concretePromise(context, this, bind)
+}
 
+public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 

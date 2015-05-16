@@ -161,7 +161,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     private fun isDone() = isSuccessResult() || isFailResult()
 }
 
-private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E>, ContextAware {
+private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
     private val state = AtomicReference(State.PENDING)
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
     private volatile var result: Any? = null

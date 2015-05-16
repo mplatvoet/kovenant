@@ -64,10 +64,3 @@ private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
         deferred.reject(e)
     }
 }
-
-
-private val <V, E> Promise<V, E>.ctx: Context
-    get() = when (this) {
-        is ContextAware -> this.context
-        else -> Kovenant.context
-    }
