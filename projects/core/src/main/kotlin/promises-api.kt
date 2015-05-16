@@ -67,7 +67,7 @@ public trait Deferred<V : Any, E : Any> {
 }
 
 /**
- * Mark an class to be aware of the context
+ * Marks a class to be aware of the context
  *
  * Used by [then] to obtain the current context from a [Promise]
  *
@@ -92,15 +92,28 @@ public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  *
  * A Promise can either resolve in [success] or get rejected and [fail].
  * Either way, it will [always] let you know.
+ *
+ * Any implementation must ensure that **all** callbacks are executed in the order
+ * they where added.
  */
-public trait Promise<V : Any, E : Any> {
-    fun success(callback: (value: V) -> Unit): Promise<V, E> = success(null, callback)
-    fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(null, callback)
-    fun always(callback: () -> Unit): Promise<V, E> = always(null, callback)
+public trait Promise<V : Any, E : Any> : ContextAware {
+    private val ctx: Context
+        get() = if (this is ContextAware) context else Kovenant.context
 
-    fun success(context: DispatcherContext?, callback: (value: V) -> Unit): Promise<V, E>
-    fun fail(context: DispatcherContext?, callback: (error: E) -> Unit): Promise<V, E>
-    fun always(context: DispatcherContext?, callback: () -> Unit): Promise<V, E>
+    /**
+     * Adds a success callback to this Promise
+     *
+     * Adds a success callback that gets executed when this Promise gets successfully resolved.
+     *
+     */
+    fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
+
+    fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+    fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
+
+    fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
+    fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
+    fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 }
 
 
