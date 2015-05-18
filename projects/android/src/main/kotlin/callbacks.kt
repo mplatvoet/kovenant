@@ -79,6 +79,7 @@ private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
  *
  * If we come across a cleared node we discard the cache
  */
+//TODO, don't strongly reference context
 private object CallbackContextCache {
     private val head = AtomicReference<CacheNode>(null)
 
