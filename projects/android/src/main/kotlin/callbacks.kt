@@ -22,6 +22,8 @@
 package nl.mplatvoet.komponents.kovenant.android
 
 import nl.mplatvoet.komponents.kovenant.*
+import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicReference
 
 
 public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
@@ -31,21 +33,20 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): 
 }
 
 
-//TODO cache dispatcherContext?
 public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
+    val dispatcherContext = CallbackContextCache forContext context
     return success(dispatcherContext, body)
 }
 
-//TODO cache dispatcherContext?
+
 public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
+    val dispatcherContext = CallbackContextCache forContext context
     return fail(dispatcherContext, body)
 }
 
-//TODO cache dispatcherContext?
+
 public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> {
-    val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
+    val dispatcherContext = CallbackContextCache forContext context
     return always(dispatcherContext, body)
 }
 
@@ -63,4 +64,97 @@ private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
     } catch(e: Exception) {
         deferred.reject(e)
     }
+}
+
+/* A lot of assumptions are made for this class.
+ * Assuming that during the lifetime of the Android app the creation of different contexts is sparse. Therefor
+ * the number of active contexts will be limited. At most a couple of context die during the lifetime of the
+ * Android app, thus the leftovers aren't in the way. Assuming that iteration is faster than using a concurrent
+ * hashmap for this particular case since we mostly hit our target on first or second iteration.
+ *
+ * Not using ConcurrentLinkedQueue since iteration creates a new Iterator instance every single time. Then we would
+ * rather just create a new DelegatingDispatcherContext every single call.
+ *
+ * Also, this cache does not guard for duplicates.
+ *
+ * If we come across a cleared node we discard the cache
+ */
+private object CallbackContextCache {
+    private val head = AtomicReference<CacheNode>(null)
+
+    fun forContext(context: Context): DispatcherContext {
+        iterate {
+            if (it.context identityEquals context) return it.dispatcherContext
+        }
+        val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
+        add(context, dispatcherContext)
+        return dispatcherContext
+    }
+
+    private class CacheNode(cacheItem: CacheItem) {
+        //Use a weak reference, as long as the context lives (e.g. Kovenant.context) we have strong reference.
+        //Android most recent gc uses some eager cleaning so discarded context get cleaned up pretty quickly
+        val next = AtomicReference<CacheNode>(null)
+        private val reference = WeakReference(cacheItem)
+        val cacheItem: CacheItem? get() = reference.get()
+    }
+
+    // Let the Storm Troopers that call themselves Software Craftsmen go berserk
+    // over this next piece. For Jedi eyes only.
+    //
+    // This does not only iterate but also clears the cache is we hit
+    // a cleared reference.
+    private inline fun iterate(fn: (CacheItem) -> Unit) {
+        val headNode = head.get()
+        if (headNode != null) {
+            var node = headNode
+            while (true) {
+                val cacheItem = node.cacheItem
+                if (cacheItem == null) {
+                    //one of the cache items is null
+                    //discard the whole cache and rebuild
+                    head.set(null)
+                    break
+                }
+
+                fn(cacheItem)
+
+                val next = node.next.get()
+                if (next == null) break
+                node = next
+            }
+        }
+    }
+
+    fun add(context: Context, dispatcherContext: DispatcherContext) {
+        val item = CacheItem(context, dispatcherContext)
+        add(CacheNode(item))
+    }
+
+    private fun add(node: CacheNode) {
+        while (true) {
+            val headNode = head.get()
+            if (headNode == null) {
+                if (head.compareAndSet(null, node)) break
+            } else {
+                do {
+                    val tail = tailNode(headNode)
+                } while (!tail.next.compareAndSet(null, node))
+                break
+            }
+        }
+    }
+
+    private fun tailNode(head: CacheNode): CacheNode {
+        var tail = head
+        while (true) {
+            val next = tail.next.get()
+            if (next == null) {
+                return tail
+            }
+            tail = next
+        }
+    }
+
+    private class CacheItem(val context: Context, val dispatcherContext: DispatcherContext)
 }
