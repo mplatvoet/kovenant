@@ -77,31 +77,97 @@ public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
     fun cancel(error: E): Boolean
 }
 
+
 /**
  * A construct for receiving a notification of an asynchronous job
  *
  * A Promise can either resolve in [success] or get rejected and [fail].
  * Either way, it will [always] let you know.
  *
- * Any implementation must ensure that **all** callbacks are executed in the order
- * they where added.
+ * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
+ * they where added to this Promise.
  */
 public trait Promise<V : Any, E : Any> {
+    /**
+     * The context that is associated with this Promise. By default all callbacks are executed on the callback
+     * `DispatcherContext` of this context.
+     *
+     * Functions like `then`use this to base there returned promises on this to keep promises bound to a
+     * desired context.
+     */
     val context: Context
 
     /**
      * Adds a success callback to this Promise
      *
-     * Adds a success callback that gets executed when this Promise gets successfully resolved.
+     * Adds a success callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets successfully resolved.
      *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback that gets executed on successful completion
      */
     fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
 
+    /**
+     * Adds a fail callback to this Promise
+     *
+     * Adds a fail callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets rejected with an error or cancelled if this is a [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on failure or cancellation
+     */
     fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+
+    /**
+     * Adds a always callback to this Promise
+     *
+     * Adds a always callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets resolved successfully, rejected with an error or cancelled if this is a
+     * [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on success, failure or cancellation
+     */
     fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
 
+    /**
+     * Adds a success callback to this Promise
+     *
+     * Adds a success callback that gets executed on the provided callbackContext when this Promise gets successfully
+     * resolved.
+     *
+     * @param callback the callback that gets executed on successful completion
+     * @param context the DispatcherContext on which this callback is executed
+     */
     fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
+
+
+    /**
+     * Adds a fail callback to this Promise
+     *
+     * Adds a fail callback that gets executed on the provided callbackContext when this Promise gets rejected with an
+     * error or cancelled if this is a [CancelablePromise].
+     *
+     * @param callback the callback to be executed on failure or cancellation
+     * @param context the DispatcherContext on which this callback is executed
+     */
     fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
+
+    /**
+     * Adds a always callback to this Promise
+     *
+     * Adds a always callback that gets executed on the provided callbackContext when this Promise gets resolved
+     * successfully, rejected with an error or cancelled if this is a [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on success, failure or cancellation
+     * @param context the DispatcherContext on which this callback is executed
+     */
     fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 }
 
