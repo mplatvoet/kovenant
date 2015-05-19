@@ -66,59 +66,61 @@ private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
     }
 }
 
-/* A lot of assumptions are made for this class.
+/* A lot of assumptions are made by the creation of this class.
  * Assuming that during the lifetime of the Android app the creation of different contexts is sparse. Therefor
  * the number of active contexts will be limited. At most a couple of context die during the lifetime of the
  * Android app, thus the leftovers aren't in the way. Assuming that iteration is faster than using a concurrent
- * hashmap for this particular case since we mostly hit our target on first or second iteration.
+ * HashMap for this particular case since we mostly hit our target on first or second iteration.
  *
  * Not using ConcurrentLinkedQueue since iteration creates a new Iterator instance every single time. Then we would
  * rather just create a new DelegatingDispatcherContext every single call.
  *
- * Also, this cache does not guard for duplicates.
+ * Also, this cache does not guard against duplicates, and we don't really care either.
  *
- * If we come across a cleared node we discard the cache
+ * Cleanup is done in a rather simple yet radical way: If we come across a cleared node we discard the whole cache.
  */
-//TODO, don't strongly reference context
 private object CallbackContextCache {
     private val head = AtomicReference<CacheNode>(null)
 
     fun forContext(context: Context): DispatcherContext {
         iterate {
-            if (it.context identityEquals context) return it.dispatcherContext
+            ctx, dpCtx ->
+            if (ctx == context) return dpCtx
         }
         val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, androidUiDispatcher())
         add(context, dispatcherContext)
         return dispatcherContext
     }
 
-    private class CacheNode(cacheItem: CacheItem) {
-        //Use a weak reference, as long as the context lives (e.g. Kovenant.context) we have strong reference.
-        //Android most recent gc uses some eager cleaning so discarded context get cleaned up pretty quickly
+    private class CacheNode(context: Context, val dispatcherContext: DispatcherContext) {
+        // Use a weak reference, as long as the context lives (e.g. Kovenant.context) we have strong reference.
+        // Android most recent gc strategies uses more aggresive cleaning so discarded contexts will get finalized
+        // pretty quickly
         val next = AtomicReference<CacheNode>(null)
-        private val reference = WeakReference(cacheItem)
-        val cacheItem: CacheItem? get() = reference.get()
+        private val contextRef = WeakReference(context)
+
+        val context: Context? get() = contextRef.get()
     }
 
     // Let the Storm Troopers that call themselves Software Craftsmen go berserk
-    // over this next piece. For Jedi eyes only.
+    // over this next piece. So, for Jedi eyes only. ;-)
     //
     // This does not only iterate but also clears the cache is we hit
     // a cleared reference.
-    private inline fun iterate(fn: (CacheItem) -> Unit) {
+    private inline fun iterate(fn: (Context, DispatcherContext) -> Unit) {
         val headNode = head.get()
         if (headNode != null) {
             var node = headNode
             while (true) {
-                val cacheItem = node.cacheItem
-                if (cacheItem == null) {
-                    //one of the cache items is null
-                    //discard the whole cache and rebuild
+                val ctx = node.context
+                if (ctx == null) {
+                    // one of the cache items is null
+                    // discard the whole cache and rebuild
                     head.set(null)
                     break
                 }
 
-                fn(cacheItem)
+                fn(ctx, node.dispatcherContext)
 
                 val next = node.next.get()
                 if (next == null) break
@@ -128,8 +130,7 @@ private object CallbackContextCache {
     }
 
     fun add(context: Context, dispatcherContext: DispatcherContext) {
-        val item = CacheItem(context, dispatcherContext)
-        add(CacheNode(item))
+        add(CacheNode(context, dispatcherContext))
     }
 
     private fun add(node: CacheNode) {
@@ -156,6 +157,4 @@ private object CallbackContextCache {
             tail = next
         }
     }
-
-    private class CacheItem(val context: Context, val dispatcherContext: DispatcherContext)
 }
