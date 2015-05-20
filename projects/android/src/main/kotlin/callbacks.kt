@@ -66,7 +66,8 @@ private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
     }
 }
 
-/* A lot of assumptions are made by the creation of this class.
+/* A lot of assumptions are made during the creation of this class.
+ *
  * Assuming that during the lifetime of the Android app the creation of different contexts is sparse. Therefor
  * the number of active contexts will be limited. At most a couple of context die during the lifetime of the
  * Android app, thus the leftovers aren't in the way. Assuming that iteration is faster than using a concurrent
