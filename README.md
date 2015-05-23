@@ -9,7 +9,7 @@ async { "world" } and async { "Hello" } success {
 }
 ```
 
-Please refer to the [Kovenant](http://kovenant.mplatvoet.nl) site for API usage and more.
+Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
 This version is build against `Java 8` and `kotlin-stdlib:0.11.91.2`.
