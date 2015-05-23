@@ -30,24 +30,44 @@ public object Kovenant {
 
     public fun configure(body: MutableContext.() -> Unit): Unit = concrete.configure(body)
 
-    public fun createContext(body: MutableContext.() -> Unit) : Context = concrete.createContext(body)
+    public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = concrete.deferred(context)
+    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
 }
 
 public trait Context {
-    val callbackDispatcher: Dispatcher
-    val workerDispatcher: Dispatcher
-    val callbackError: (Exception) -> Unit
-    val workerError: (Exception) -> Unit
     val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+
+    val callbackContext: DispatcherContext
+    val workerContext: DispatcherContext
 }
 
 public trait MutableContext : Context {
-    override var callbackDispatcher: Dispatcher
-    override var workerDispatcher: Dispatcher
-    override var callbackError: (Exception) -> Unit
-    override var workerError: (Exception) -> Unit
+    var callbackDispatcher: Dispatcher
+    var workerDispatcher: Dispatcher
+    var callbackError: (Exception) -> Unit
+    var workerError: (Exception) -> Unit
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
 }
+
+public trait DispatcherContext {
+    val dispatcher: Dispatcher
+    val errorHandler: (Exception) -> Unit
+
+    public fun offer(fn: () -> Unit): Unit {
+        try {
+            dispatcher.offer(fn)
+        } catch (e: Exception) {
+            errorHandler(e)
+        }
+    }
+}
+
+//public trait MutableDispatcherContext : DispatcherContext {
+//    override var dispatcher: Dispatcher
+//    override var errorHandler: (Exception) -> Unit
+//}
+
+
+
