@@ -21,11 +21,8 @@
 
 package examples.order
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadPoolExecutor
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicReference
 
 fun main(args: Array<String>) {

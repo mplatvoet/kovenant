@@ -1,5 +1,7 @@
 [![CircleCI branch](https://img.shields.io/circleci/project/mplatvoet/kovenant/master.svg)](https://circleci.com/gh/mplatvoet/kovenant/tree/master) [![Maven Central](https://img.shields.io/maven-central/v/nl.mplatvoet.komponents/kovenant.svg)](http://search.maven.org/#browse%7C-339523586) [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/mplatvoet/kovenant/blob/master/LICENSE)
 
+>**NOTE** this is the development branch. 2.0.x doesn't exist yet.
+
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
 
@@ -18,14 +20,14 @@ Source and target compatibility is `Java 6`
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.mplatvoet.komponents:kovenant:1.1.+'
+    compile 'nl.komponents.kovenant:kovenant:1.1.+'
 }
 ```
 
 ###Maven
 ```xml
 <dependency>
-	<groupId>nl.mplatvoet.komponents</groupId>
+	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
 	<version>[1.1.0,1.2.0)</version>
 </dependency>
@@ -44,4 +46,4 @@ it's needed to keep class and method count low.
 |kovenant-android  |Extensions for Android specific needs                                                              | 
 
 ##Issues
-Issues are tracked in [Youtrack](http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant)
+Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)

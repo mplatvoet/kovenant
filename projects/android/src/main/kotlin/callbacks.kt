@@ -19,9 +19,9 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.android
+package nl.komponents.kovenant.android
 
-import nl.mplatvoet.komponents.kovenant.*
+import nl.komponents.kovenant.*
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 

@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.properties
+package nl.komponents.kovenant.properties
 
-import nl.mplatvoet.komponents.kovenant.Context
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.async
+import nl.komponents.kovenant.Context
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.ReadOnlyProperty
 

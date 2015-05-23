@@ -21,9 +21,9 @@
 
 package tests.api.then
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.then
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.then
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher

@@ -18,13 +18,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.android
+package nl.komponents.kovenant.android
 
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
-import nl.mplatvoet.komponents.kovenant.Dispatcher
-import nl.mplatvoet.komponents.kovenant.DispatcherContext
 import java.util.concurrent.atomic.AtomicInteger
 
 

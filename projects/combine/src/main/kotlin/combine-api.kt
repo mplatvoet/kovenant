@@ -18,9 +18,9 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.combine
+package nl.komponents.kovenant.combine
 
-import nl.mplatvoet.komponents.kovenant.Promise
+import nl.komponents.kovenant.Promise
 
 
 public fun <V1, V2, E> Promise<V1, E>.and(other: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> = combine(this, other)

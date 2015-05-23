@@ -21,8 +21,8 @@
 
 package examples.executors
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.jvm.asExecutorService
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.jvm.asExecutorService
 import support.fib
 import java.util.concurrent.Callable
 

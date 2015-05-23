@@ -21,8 +21,8 @@
 
 package examples.configuration
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.buildDispatcher
 
 
 fun main (args: Array<String>) {

@@ -21,10 +21,10 @@
 
 package validate.reconfigure
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.buildDispatcher
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger

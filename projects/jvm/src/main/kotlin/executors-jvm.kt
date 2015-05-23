@@ -19,9 +19,9 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.jvm
+package nl.komponents.kovenant.jvm
 
-import nl.mplatvoet.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Dispatcher
 import java.lang.ref.Reference
 import java.lang.ref.WeakReference
 import java.util.ArrayList

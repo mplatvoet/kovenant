@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
 public fun all<V>(vararg promises: Promise<V, Exception>,
                   context: Context = Kovenant.context,

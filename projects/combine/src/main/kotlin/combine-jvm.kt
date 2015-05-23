@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.combine
+package nl.komponents.kovenant.combine
 
-import nl.mplatvoet.komponents.kovenant.Deferred
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.deferred
+import nl.komponents.kovenant.Deferred
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.deferred
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
