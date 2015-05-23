@@ -302,7 +302,7 @@ private class NonBlockingDispatcher(val name: String,
                 try {
                     pollResult = if (keepAlive) pollStrategy.get() else workQueue.poll(block = false)
                     if (!keepAlive || pollResult == null) {
-                        //not interested in keeping alive and no work left. Die.
+                        // not interested in keeping alive and no work left. Die.
                         if (deRegisterRequest(this)) {
                             //de register succeeded, shutdown this context.
                             interrupt()
@@ -310,25 +310,21 @@ private class NonBlockingDispatcher(val name: String,
                     }
 
                 } catch(e: InterruptedException) {
-                    if (!alive) {
-                        //only set the interrupted flag again if thread is interrupted via this context.
-                        //otherwise either user code has interrupted the thread and we can ignore that
-                        //or this thread has become kamikaze and we can ignore that too
-                        thread.interrupt()
-                    }
+                    // we need to catch it for graceful shutdown and can ignore it
+                    // because this can only mean polling has failed and therefor pollResult == null
                 } finally {
                     changeState(polling, pending)
                     if (!keepAlive && alive) {
-                        //if at this point keepAlive is false but the context itself is alive
-                        //the thread might be in an interrupted state, we need to clear that because
-                        //we are probably in graceful shutdown mode and we don't want to interfere with any
-                        //tasks that need to be executed
+                        // if at this point keepAlive is false but the context itself is alive
+                        // the thread might be in an interrupted state, we need to clear that because
+                        // we are probably in graceful shutdown mode and we don't want to interfere with any
+                        // tasks that need to be executed
                         Thread.interrupted()
 
                         if (!alive) {
-                            //oh you concurrency, you tricky bastard. We might just cleared that interrupted flag
-                            //but it can be the case that after checking all the flags this context was interrupted
-                            //for a full shutdown and we just cleared that. So interrupt again.
+                            // oh you concurrency, you tricky bastard. We might just cleared that interrupted flag
+                            // but it can be the case that after checking all the flags this context was interrupted
+                            // for a full shutdown and we just cleared that. So interrupt again.
                             thread.interrupt()
                         }
                     }
@@ -341,38 +337,46 @@ private class NonBlockingDispatcher(val name: String,
                         try {
                             fn()
                         } finally {
-                            //Need to switch back to pending as soon as possible
-                            //otherwise funny things might happen when we use cancel.
-                            //cancel may only interrupt during running state.
+                            // Need to switch back to pending as soon as possible
+                            // otherwise funny things might happen when we use cancel.
+                            // cancel may only interrupt during running state.
                             changeState(running, pending)
                         }
                     } catch(e: InterruptedException) {
-                        if (!alive) {
-                            //only set the interrupted flag again if thread is interrupted via this context.
-                            //otherwise user code has interrupted the thread, we can ignore that.
-                            thread.interrupt()
+                        // we only want to report unexpected interrupted exception. The expected
+                        // cases are cancellation of a task or a total shutdown of the dispatcher.
+                        // `pollResult == null` means the task has been cancelled.
+                        if (pollResult != null && alive) {
+                            exceptionHandler(e)
                         }
+
                     } catch(e: Exception) {
                         exceptionHandler(e)
                     } catch(t: Throwable) {
-                        //Okay this can be anything. Most likely out of memory errors, so everything can go haywire
-                        //from here. Let's try to gracefully dismiss this thread by un registering from the pool and die.
-                        deRegisterRequest(this, force = true)
-
-                        errorHandler(t)
-                    } finally {
-                        if (pollResult == null && alive) {
-                            //thread is interrupted due to cancellation
-                            //so clear the interrupted flag because it may still be there
-                            Thread.interrupted()
-
-                            if (!alive) {
-                                //oh again you concurrency, you tricky bastard. We might just cleared that interrupted flag
-                                //but it can be the case that after checking all the flags this context was interrupted
-                                //for a full shutdown and we just cleared that. So interrupt again.
-                                thread.interrupt()
-                            }
+                        // I think the StackOverFlowError is the only one we can reasonably recover from since the
+                        // complete stack has been unwound at this point.
+                        if (t !is StackOverflowError) {
+                            // This can be anything. Most likely out of memory errors, so everything can go haywire
+                            // from here. Let's *try* to gracefully dismiss this thread by un registering from the pool and
+                            // die.
+                            deRegisterRequest(this, force = true)
                         }
+
+                        // Try to report it
+                        errorHandler(t)
+
+
+                    } finally {
+                        // No matter what, we are going to try to clear the interrupted flag if any.
+                        // this is because this thread can be in an interrupted state because of cancellation,
+                        // the fact that we might be dead or simply by user code which has bluntly called interrupt().
+                        // whatever reason we are going to clear it, because it interferes with polling for and running
+                        // the next task.
+                        Thread.interrupted()
+
+                        // the only state that may keep the thread in interrupted state is when alive == false.
+                        // but since we are the last statement the loop is going to end anyway because it checks
+                        // whether we're still alive.
                     }
                 }
             }
