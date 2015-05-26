@@ -37,8 +37,8 @@ apply from: "${rootProject.projectDir}/gradle/versions.gradle"
 
 allprojects {
     ext {
-        appVersion = '1.1.0'
-        appGroup = 'nl.mplatvoet.komponents'
+        appVersion = '2.0.0'
+        appGroup = 'nl.komponents.kovenant'
 
 
         junitVersion = '4.12'
@@ -135,8 +135,7 @@ subprojects {
                     name project.name
                     packaging(pomOnlyProject ? 'pom' : 'jar')
                     description project.description
-                    println("hurray $project.description")
-                    url 'http://kovenant.mplatvoet.nl'
+                    url 'http://kovenant.komponents.nl'
                     inceptionYear '2015'
 
                     scm {
@@ -163,7 +162,7 @@ subprojects {
 
                     issueManagement {
                         system = "YouTrack"
-                        url = "http://komponents.myjetbrains.com/youtrack/issues?q=project%3A+Kovenant"
+                        url = "http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant"
                     }
                 }
             }
@@ -175,7 +174,7 @@ subprojects {
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
+    if (false && !'master'.equals(branchName) && !taskGraph.hasTask(release)) {
         enrichVersion()
     } else {
         allprojects*.version = appVersion
