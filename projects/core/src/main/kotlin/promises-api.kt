@@ -61,7 +61,7 @@ public trait Deferred<V : Any, E : Any> {
      * Holds the accompanied [Promise]
      *
      * The accompanied [Promise] for this deferred. Multiple invocations
-     * must lead to the some instance of the Promise.
+     * must lead to the same instance of the Promise.
      */
     val promise: Promise<V, E>
 }
@@ -171,10 +171,23 @@ public trait Promise<V : Any, E : Any> {
     fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 }
 
-
+/**
+ * Creates a new [Deferred] instance.
+ *
+ * @param context the context on which the associated [Promise] operates on
+ * @return newly created [Deferred]
+ */
 public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
 
+/**
+ * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
+ * Any Ecxeption is considered a failure.
+ *
+ * @param body the task to be executed
+ * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
+ * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
+ */
 public fun async<V : Any>(context: Context = Kovenant.context,
                           body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
