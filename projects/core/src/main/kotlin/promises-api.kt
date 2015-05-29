@@ -34,7 +34,7 @@ package nl.komponents.kovenant
  * resolved or rejected multiple times. It may simply be ignored or throw
  * an Exception.
  */
-public trait Deferred<V : Any, E : Any> {
+public interface Deferred<V : Any, E : Any> {
     /**
      * Resolves this deferred with the provided value
      *
@@ -73,7 +73,7 @@ public trait Deferred<V : Any, E : Any> {
  * What cancelling exactly means is up to the implementor.
  * But the intention is stopping.
  */
-public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
+public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
     fun cancel(error: E): Boolean
 }
 
@@ -87,7 +87,7 @@ public trait CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
  * they where added to this Promise.
  */
-public trait Promise<V : Any, E : Any> {
+public interface Promise<V : Any, E : Any> {
     /**
      * The context that is associated with this Promise. By default all callbacks are executed on the callback
      * `DispatcherContext` of this context.

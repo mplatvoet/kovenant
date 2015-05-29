@@ -33,7 +33,7 @@ public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
     return builder.build()
 }
 
-trait DispatcherBuilder {
+interface DispatcherBuilder {
     var name: String
     var numberOfThreads: Int
     var exceptionHandler: (Exception) -> Unit
@@ -96,7 +96,7 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 
 }
 
-trait PollStrategyBuilder {
+interface PollStrategyBuilder {
     fun yielding(numberOfPolls: Int = 1000)
     fun busy(numberOfPolls: Int = 1000)
     fun blocking()
@@ -513,18 +513,18 @@ private class WorkQueue<V : Any>() : Offerable<V>, Pollable<V> {
     }
 }
 
-private trait Offerable<V : Any> {
+private interface Offerable<V : Any> {
     fun offer(elem: V): Boolean
 }
 
-private trait Pollable<V : Any> {
-    throws(javaClass<InterruptedException>())
+private interface Pollable<V : Any> {
+    throws(InterruptedException::class)
     fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
 }
 
 
-private trait PollStrategy<V : Any> {
-    throws(javaClass<InterruptedException>())
+private interface PollStrategy<V : Any> {
+    throws(InterruptedException::class)
     fun get(): V?
 }
 

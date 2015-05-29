@@ -82,7 +82,7 @@ public fun configureKovenant(): Disposable {
  * Disposes of a resource.
  *
  */
-public trait Disposable {
+public interface Disposable {
     fun close(force: Boolean = false)
 }
 

@@ -233,15 +233,15 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     }
 
     private enum class State {
-        PENDING
-        MUTATING
-        SUCCESS
+        PENDING,
+        MUTATING,
+        SUCCESS,
         FAIL
     }
 
     private enum class NodeState {
-        CHAINED
-        POPPING
+        CHAINED,
+        POPPING,
         APPENDING
     }
 
@@ -351,7 +351,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         }
     }
 
-    private trait CallbackContext<V, E> {
+    private interface CallbackContext<V, E> {
         public fun runSuccess(value: V)
 
         public fun runFail(value: E)

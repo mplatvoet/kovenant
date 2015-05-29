@@ -21,10 +21,7 @@
 
 package validate.reconfigure
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.all
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.*
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
@@ -66,7 +63,7 @@ fun validate(n:Int) {
     }
 
 
-    val promises = array(*firstBatch, *secondBatch)
+    val promises = arrayOf(*firstBatch, *secondBatch)
 
     all(*promises) always {
         println("validate with ${n*2} attempts, errors: ${errors.get()}, successes: ${successes.get()}")

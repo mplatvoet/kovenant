@@ -166,7 +166,7 @@ class ConcreteKovenant {
 }
 
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
     private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
     private volatile var initializer: (() -> T)?
@@ -204,7 +204,7 @@ private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any
     val initialized: Boolean get() = value != null
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 private class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
     private volatile var value: Any? = null
 

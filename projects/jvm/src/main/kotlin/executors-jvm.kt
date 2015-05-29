@@ -279,7 +279,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
 }
 
 
-private trait CancelHandle {
+private interface CancelHandle {
     fun <V> cancel(future: FutureFunction<V>): Boolean
 }
 
@@ -301,13 +301,13 @@ private class WeakRefCancelHandle(dispatcher: Dispatcher) : CancelHandle {
 
 private class FutureFunction<V>(private val cancelHandle: CancelHandle, val callable: Callable<V>,
                                 private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
-    enum class State {PENDING SUCCESS ERROR }
+    enum class State {PENDING, SUCCESS, ERROR }
 
     private volatile var state = State.PENDING
     private volatile var result: Any? = null
     private volatile var queue = 0
 
-    [suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")]
+    @suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val mutex: Object = Object()
 
 
@@ -315,10 +315,10 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
 
     override fun get(timeout: Long, unit: TimeUnit): V = get(TimeUnit.MILLISECONDS.convert(timeout, unit))
 
-    [suppress("UNREACHABLE_CODE")]
+    @suppress("UNREACHABLE_CODE")
     private fun get(timeout: Long): V {
         do {
-            [suppress("UNCHECKED_CAST")]
+            @suppress("UNCHECKED_CAST")
             when (state) {
                 State.SUCCESS -> return result as V
                 State.ERROR -> throw result as Exception
@@ -333,6 +333,7 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
                 }
             }
         } while (true)
+        throw Exception("unreachable")
     }
 
     override fun cancel(mayInterruptIfRunning: Boolean): Boolean = cancelHandle.cancel(this)
