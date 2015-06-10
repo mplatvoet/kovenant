@@ -70,7 +70,7 @@ buildDispatcher {
     numberOfThreads = 1 
     exceptionHandler = ...// (Exception) -> Unit
     errorHandler = ... // (Throwable) -> Unit
-    configurePollStrategy { ... }
+    pollStrategy { ... }
 }
 ```
 **name**
@@ -106,7 +106,7 @@ val dispatcher = buildDispatcher {
     name = "Bob the builder"
     numberOfThreads = 1
     
-    configurePollStrategy {                
+    pollStrategy {                
         yielding(numberOfPolls = 1000)
         
         sleeping(numberOfPolls = 100, 
@@ -128,7 +128,7 @@ Kovenant.configure {
     // then functions so this is basically
     // work that is expected to run a bit
     // longer
-    workerContext.dispatcher = buildDispatcher {
+    workerContext.dispatcher {
         // Name this dispatcher, threads
         // created by this dispatcher will
         // get this name with a number
@@ -151,7 +151,7 @@ Kovenant.configure {
         // applied in order of configuration and
         // resets after a thread executes any
         // new task.
-        configurePollStrategy {
+        pollStrategy {
             // A busy poll strategy simple polls
             // the provided amount of polls
             // without interrupting the thread.
@@ -164,23 +164,27 @@ Kovenant.configure {
         }
     }
 
-    //Specify a new callback dispatcher.
-    //this dispatcher is responsible for
-    //callbacks like success, fail and always.
-    //it is expected that these callback do
-    //very little work and never block
-    callbackContext.dispatcher = buildDispatcher {
-        name = "Tank"
-        numberOfThreads = 1
+
+    callbackContext {
+        // Specify a new callback dispatcher.
+        // this dispatcher is responsible for
+        // callbacks like success, fail and always.
+        // it is expected that these callback do
+        // very little work and never block
+        dispatcher {
+            name = "Tank"
+            numberOfThreads = 1
+        }
+        // route internal errors when invoking
+        // callbacks. This is also the place to
+        // route this to a preferred logging
+        // framework
+        errorHandler =
+                fun(e: Exception)
+                        = e.printStackTrace(System.err)
     }
 
-    // route internal errors when invoking
-    //callbacks. This is also the place to
-    //route this to a preferred logging
-    //framework
-    callbackContext.errorHandler =
-            fun (e: Exception): Unit
-                    = e.printStackTrace(System.err)
+
 
     // when promises are being resolved
     // multiple time, which is misuse of
@@ -188,7 +192,7 @@ Kovenant.configure {
     // can for instance choose to throw
     // an Exception here
     multipleCompletion =
-            fun (a: Any, b: Any): Unit
+            fun(a: Any, b: Any): Unit
                     = System.err.println(
                     "Tried resolving with $b, but is $a")
 }

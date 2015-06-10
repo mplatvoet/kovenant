@@ -38,7 +38,11 @@ interface DispatcherBuilder {
     var numberOfThreads: Int
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
-    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit)
+
+    fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
+
+    @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
+    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -79,7 +83,7 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
         }
 
 
-    override fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) {
+    override fun pollStrategy(body: PollStrategyBuilder.() -> Unit) {
         pollStrategyBuilder.clear()
         pollStrategyBuilder.body()
     }

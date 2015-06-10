@@ -56,7 +56,7 @@ public fun configureKovenant(): Disposable {
         name = "kovenant-callback"
         numberOfThreads = 1
 
-        configurePollStrategy {
+        pollStrategy {
             yielding(numberOfPolls = 100)
             blocking()
         }
@@ -64,7 +64,7 @@ public fun configureKovenant(): Disposable {
     val workerDispatcher = buildDispatcher {
         name = "kovenant-worker"
 
-        configurePollStrategy {
+        pollStrategy {
             yielding(numberOfPolls = 100)
             blocking()
         }
