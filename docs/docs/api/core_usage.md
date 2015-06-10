@@ -12,7 +12,7 @@ This will execute function `foo()` asynchronously and immediately returns a `Pro
 the inferred return type of `foo()`. If `foo()` completes successful the `Promise` is resolved as successful. Any 
 `Exception` from `foo()` is considered a failure.
 
-`async` dispatches the work on the [`workerDispatcher`](core_config.md). 
+`async` dispatches the work on the [`workerContext`](core_config.md). 
 
 ---
 
@@ -180,13 +180,13 @@ async {
 }
 ```
 Any `Exception` thrown from any of the steps in the chain of promises results in every next promises to be resolved as
-failed. The work of `then` is executed by the worker `Dispatcher`. 
+failed. The work of `then` is executed by the `workerContext`. 
 
 ---
 
 ##Then Use
 `thenUse` operates similar to [`then`](#then) except that it takes the output from a previous `Promise` as its input
-as an extension function. The previous exaxmple would thus be:
+as an extension function. The previous example would thus be:
 
 ```kt
 async {

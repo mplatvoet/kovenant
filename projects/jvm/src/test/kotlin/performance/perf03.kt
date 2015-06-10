@@ -66,8 +66,8 @@ fun main(args: Array<String>) {
 """)
 
     Kovenant.configure {
-        callbackDispatcher = cbDispatch
-        workerDispatcher = workDispatch
+        callbackContext.dispatcher = cbDispatch
+        workerContext.dispatcher = workDispatch
     }
 
 

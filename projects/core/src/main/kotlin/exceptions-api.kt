@@ -21,4 +21,4 @@
 
 package nl.komponents.kovenant
 
-class CancelException : Exception()
+public open class CancelException : Exception()

@@ -35,13 +35,17 @@ class AsyncTest {
 
     Before fun setup() {
         Kovenant.configure {
-            callbackDispatcher = defaultDispatcher
-            workerDispatcher = defaultDispatcher
+            callbackContext {
+                dispatcher = defaultDispatcher
+            }
+            workerContext {
+                dispatcher = defaultDispatcher
+            }
         }
 
         context = Kovenant.createContext {
-            callbackDispatcher = alternateDispatcher
-            workerDispatcher = alternateDispatcher
+            callbackContext.dispatcher = alternateDispatcher
+            workerContext.dispatcher = alternateDispatcher
         }
     }
 

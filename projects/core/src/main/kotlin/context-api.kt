@@ -44,11 +44,18 @@ public interface Context {
 }
 
 public interface MutableContext : Context {
-    var callbackDispatcher: Dispatcher
-    var workerDispatcher: Dispatcher
-    var callbackError: (Exception) -> Unit
-    var workerError: (Exception) -> Unit
+    override val callbackContext: MutableDispatcherContext
+    override val workerContext: MutableDispatcherContext
+
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+
+    fun callbackContext(body: MutableDispatcherContext.() -> Unit) {
+        callbackContext.body()
+    }
+
+    fun workerContext(body: MutableDispatcherContext.() -> Unit) {
+        workerContext.body()
+    }
 }
 
 public interface DispatcherContext {
@@ -64,10 +71,10 @@ public interface DispatcherContext {
     }
 }
 
-//public trait MutableDispatcherContext : DispatcherContext {
-//    override var dispatcher: Dispatcher
-//    override var errorHandler: (Exception) -> Unit
-//}
+public interface MutableDispatcherContext : DispatcherContext {
+    override var dispatcher: Dispatcher
+    override var errorHandler: (Exception) -> Unit
+}
 
 
 

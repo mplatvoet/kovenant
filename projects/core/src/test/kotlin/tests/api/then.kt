@@ -33,8 +33,8 @@ class ThenTest {
 
     Before fun setup() {
         Kovenant.configure {
-            callbackDispatcher = ImmediateDispatcher()
-            workerDispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = ImmediateDispatcher()
+            workerContext.dispatcher = ImmediateDispatcher()
         }
     }
 

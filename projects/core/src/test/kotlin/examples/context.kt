@@ -27,8 +27,8 @@ import nl.komponents.kovenant.buildDispatcher
 
 fun main(args: Array<String>) {
     val ctx = Kovenant.createContext {
-        callbackDispatcher = buildDispatcher { name = "cb-new" }
-        workerDispatcher = buildDispatcher { name = "work-new" }
+        callbackContext.dispatcher = buildDispatcher { name = "cb-new" }
+        workerContext.dispatcher = buildDispatcher { name = "work-new" }
     }
 
     async {

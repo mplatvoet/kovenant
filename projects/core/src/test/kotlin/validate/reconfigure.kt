@@ -21,7 +21,10 @@
 
 package validate.reconfigure
 
-import nl.komponents.kovenant.*
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.buildDispatcher
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
@@ -47,8 +50,8 @@ fun validate(n:Int) {
     }
 
     Kovenant.configure {
-        workerDispatcher = buildDispatcher { numberOfThreads = 2; }
-        callbackDispatcher = buildDispatcher { numberOfThreads = 1 }
+        workerContext.dispatcher = buildDispatcher { numberOfThreads = 2 }
+        callbackContext.dispatcher = buildDispatcher { numberOfThreads = 1 }
     }
 
     val secondBatch = Array(n) { n ->

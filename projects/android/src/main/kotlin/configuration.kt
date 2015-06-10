@@ -71,8 +71,12 @@ public fun configureKovenant(): Disposable {
     }
 
     Kovenant.configure {
-        this.callbackDispatcher = callbackDispatcher
-        this.workerDispatcher = workerDispatcher
+        callbackContext {
+            dispatcher = callbackDispatcher
+        }
+        workerContext {
+            dispatcher = workerDispatcher
+        }
     }
     return DispatchersDisposable(workerDispatcher, callbackDispatcher)
 }
