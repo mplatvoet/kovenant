@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
 import java.util.ArrayList
 import java.util.concurrent.atomic.AtomicInteger

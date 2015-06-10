@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package performance.perf02
+package performance.perf03
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
@@ -71,33 +71,52 @@ fun main(args: Array<String>) {
     }
 
 
-    val factors = ArrayList<Double>(attempts)
+    var futureDeltas = ArrayList<Long>(attempts)
+    var promiseDeltas = ArrayList<Long>(attempts)
+
     for (i in 1..attempts) {
         validateFutures(warmupRounds)
-
         val startExc = System.currentTimeMillis()
         validateFutures(performanceRounds)
         val deltaExc = System.currentTimeMillis() - startExc
-        napTime()
 
+        println("Futures attempt $i took $deltaExc ms")
+        futureDeltas add deltaExc
+
+
+    }
+    napTime()
+
+    for (i in 1..attempts) {
         validatePromises(warmupRounds)
-
         val startDis = System.currentTimeMillis()
         validatePromises(performanceRounds)
         val deltaDis = System.currentTimeMillis() - startDis
 
-
-        val factor = deltaExc.toDouble() / deltaDis.toDouble()
-        factors add factor
-        println("[$i/$attempts] Callables: ${deltaExc}ms, Promises: ${deltaDis}ms. " +
-                "Promises are a factor ${fasterOrSlower(factor)}")
-        napTime()
+        println("Promises attempt $i took $deltaDis ms")
+        promiseDeltas add deltaDis
+        //napTime()
 
     }
 
-    val averageFactor = factors.sum() / attempts.toDouble()
-    println("On average with ${attempts} attempts, " +
-            "Promises where a factor ${fasterOrSlower(averageFactor)}")
+    val quarter = attempts / 4
+    if (quarter > 0) {
+        fun ArrayList<Long>.firstQR(): ArrayList<Long> {
+            sort { a, b -> (b - a).toInt() }
+            val maxIdx = size() - quarter
+            return ArrayList(subList(quarter, maxIdx))
+        }
+        futureDeltas = futureDeltas.firstQR()
+        promiseDeltas = promiseDeltas.firstQR()
+    }
+
+    fun ArrayList<Long>.avarage(): Long = sum() / size()
+    val avarageMsPromise = promiseDeltas.avarage()
+    val avarageMsFutures = futureDeltas.avarage()
+    val factor = avarageMsFutures.toDouble() / avarageMsPromise.toDouble()
+
+    println("On average with ${futureDeltas.size()} samples of the 1QR, " +
+            "Promises where a factor ${fasterOrSlower(factor)}")
 
     executorService.shutdownNow()
     workDispatch.stop()

@@ -21,11 +21,11 @@
 
 package performance.perf01
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
-import nl.mplatvoet.komponents.kovenant.jvm.asDispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.jvm.asDispatcher
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -84,15 +84,15 @@ fun main(args: Array<String>) {
 
 fun configureExecutor() {
     Kovenant.configure {
-        workerDispatcher = excWorkDispatcher
-        callbackDispatcher = excCallbackDispatcher
+        workerContext.dispatcher = excWorkDispatcher
+        callbackContext.dispatcher = excCallbackDispatcher
     }
 }
 
 fun configureDispatcher() {
     Kovenant.configure {
-        workerDispatcher = workDispatcher
-        callbackDispatcher = callDispatcher
+        workerContext.dispatcher = workDispatcher
+        callbackContext.dispatcher = callDispatcher
     }
 }
 

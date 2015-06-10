@@ -21,8 +21,8 @@
 
 package examples.deferred
 
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.deferred
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.deferred
 
 fun main(args: Array<String>) {
     val deferred = deferred<String,Exception>()

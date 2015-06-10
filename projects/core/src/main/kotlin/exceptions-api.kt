@@ -19,6 +19,6 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
-class CancelException : Exception()
+public open class CancelException : Exception()

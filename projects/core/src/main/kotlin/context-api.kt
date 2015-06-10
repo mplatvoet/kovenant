@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
 
 public object Kovenant {
@@ -30,24 +30,51 @@ public object Kovenant {
 
     public fun configure(body: MutableContext.() -> Unit): Unit = concrete.configure(body)
 
-    public fun createContext(body: MutableContext.() -> Unit) : Context = concrete.createContext(body)
+    public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = concrete.deferred(context)
+    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
 }
 
-public trait Context {
-    val callbackDispatcher: Dispatcher
-    val workerDispatcher: Dispatcher
-    val callbackError: (Exception) -> Unit
-    val workerError: (Exception) -> Unit
+public interface Context {
     val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+
+    val callbackContext: DispatcherContext
+    val workerContext: DispatcherContext
 }
 
-public trait MutableContext : Context {
-    override var callbackDispatcher: Dispatcher
-    override var workerDispatcher: Dispatcher
-    override var callbackError: (Exception) -> Unit
-    override var workerError: (Exception) -> Unit
+public interface MutableContext : Context {
+    override val callbackContext: MutableDispatcherContext
+    override val workerContext: MutableDispatcherContext
+
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+
+    fun callbackContext(body: MutableDispatcherContext.() -> Unit) {
+        callbackContext.body()
+    }
+
+    fun workerContext(body: MutableDispatcherContext.() -> Unit) {
+        workerContext.body()
+    }
 }
+
+public interface DispatcherContext {
+    val dispatcher: Dispatcher
+    val errorHandler: (Exception) -> Unit
+
+    public fun offer(fn: () -> Unit): Unit {
+        try {
+            dispatcher.offer(fn)
+        } catch (e: Exception) {
+            errorHandler(e)
+        }
+    }
+}
+
+public interface MutableDispatcherContext : DispatcherContext {
+    override var dispatcher: Dispatcher
+    override var errorHandler: (Exception) -> Unit
+}
+
+
+

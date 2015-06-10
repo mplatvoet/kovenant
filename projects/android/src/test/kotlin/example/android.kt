@@ -21,8 +21,8 @@
 
 package example.android
 
-import nl.mplatvoet.komponents.kovenant.android.successUi
-import nl.mplatvoet.komponents.kovenant.async
+import nl.komponents.kovenant.android.successUi
+import nl.komponents.kovenant.async
 
 fun main(args: Array<String>) {
 

@@ -22,8 +22,8 @@
 
 package examples.lazy
 
-import nl.mplatvoet.komponents.kovenant.properties.lazyPromise
-import nl.mplatvoet.komponents.kovenant.thenUse
+import nl.komponents.kovenant.properties.lazyPromise
+import nl.komponents.kovenant.thenUse
 
 val expensiveResource by lazyPromise {
     println("init promise")

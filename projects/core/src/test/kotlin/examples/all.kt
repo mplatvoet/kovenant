@@ -21,10 +21,9 @@
 
 package examples.all
 
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
 import support.fib
-import java.util.concurrent.atomic.AtomicReference
 
 
 fun main(args: Array<String>) {

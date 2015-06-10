@@ -16,5 +16,6 @@ deployment:
     branch: master
     commands:
       - sudo pip install mkdocs
+      - sudo pip install awscli
       - ./publish.sh
 

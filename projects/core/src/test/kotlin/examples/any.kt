@@ -21,8 +21,8 @@
 
 package examples.any
 
-import nl.mplatvoet.komponents.kovenant.any
-import nl.mplatvoet.komponents.kovenant.async
+import nl.komponents.kovenant.any
+import nl.komponents.kovenant.async
 import java.util.Random
 
 fun main(args: Array<String>) {

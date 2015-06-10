@@ -21,8 +21,8 @@
 
 package examples.configuration
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.buildDispatcher
 
 
 fun main (args: Array<String>) {
@@ -33,7 +33,7 @@ fun main (args: Array<String>) {
         // then functions so this is basically
         // work that is expected to run a bit
         // longer
-        workerDispatcher = buildDispatcher {
+        workerContext.dispatcher = buildDispatcher {
             // Name this dispatcher, threads
             // created by this dispatcher will
             // get this name with a number
@@ -74,7 +74,7 @@ fun main (args: Array<String>) {
         //callbacks like success, fail and always.
         //it is expected that these callback do
         //very little work and never block
-        callbackDispatcher = buildDispatcher {
+        callbackContext.dispatcher = buildDispatcher {
             name = "Tank"
             numberOfThreads = 1
         }
@@ -83,7 +83,7 @@ fun main (args: Array<String>) {
         //callbacks. This is also the place to
         //route this to a preferred logging
         //framework
-        callbackError =
+        callbackContext.errorHandler =
                 fun (e: Exception): Unit
                         = e.printStackTrace(System.err)
 

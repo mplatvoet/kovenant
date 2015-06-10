@@ -19,10 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.properties
+package nl.komponents.kovenant.properties
 
-import nl.mplatvoet.komponents.kovenant.Context
-import nl.mplatvoet.komponents.kovenant.Promise
+import nl.komponents.kovenant.Context
+import nl.komponents.kovenant.Promise
 import kotlin.properties.ReadOnlyProperty
 
 

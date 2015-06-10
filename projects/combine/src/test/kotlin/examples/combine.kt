@@ -21,8 +21,8 @@
 
 package examples.combine
 
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.combine.and
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.combine.and
 import support.fib
 
 fun main(args: Array<String>) {

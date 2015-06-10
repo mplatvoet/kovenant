@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.android
+package nl.komponents.kovenant.android
 
-import nl.mplatvoet.komponents.kovenant.Dispatcher
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.buildDispatcher
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
@@ -71,8 +71,12 @@ public fun configureKovenant(): Disposable {
     }
 
     Kovenant.configure {
-        this.callbackDispatcher = callbackDispatcher
-        this.workerDispatcher = workerDispatcher
+        callbackContext {
+            dispatcher = callbackDispatcher
+        }
+        workerContext {
+            dispatcher = workerDispatcher
+        }
     }
     return DispatchersDisposable(workerDispatcher, callbackDispatcher)
 }
@@ -82,7 +86,7 @@ public fun configureKovenant(): Disposable {
  * Disposes of a resource.
  *
  */
-public trait Disposable {
+public interface Disposable {
     fun close(force: Boolean = false)
 }
 

@@ -18,10 +18,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.android
+package nl.komponents.kovenant.android
 
 import android.os.Looper
-import nl.mplatvoet.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Dispatcher
 import java.util.ArrayList
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -29,8 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 public enum class DispatcherType {
-    FULL BASIC
+    FULL, BASIC
 }
+
 
 public fun androidUiDispatcher(): Dispatcher = BasicAndroidDispatcher.uiDispatcher
 
@@ -43,6 +44,9 @@ public fun buildLooperDispatcher(looper: Looper,
         DispatcherType.FULL -> FullAndroidDispatcher(executor)
     }
 }
+
+
+
 
 private class BasicAndroidDispatcher(private val looperExecutor: LooperExecutor) : Dispatcher {
     public companion object {

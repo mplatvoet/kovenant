@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
 
 /**
@@ -27,7 +27,7 @@ package nl.mplatvoet.komponents.kovenant
  * that is way to similar to java's Executors. This way it's more obvious to distinct the two types. The reason why
  * I don't use java's Executor directly is because it pollutes the API, I want to keep this platform agnostic.
  */
-trait Dispatcher {
+interface Dispatcher {
 
     /**
      *

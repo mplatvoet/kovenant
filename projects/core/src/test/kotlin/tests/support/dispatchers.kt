@@ -21,10 +21,11 @@
 
 package tests.support
 
-import nl.mplatvoet.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Dispatcher
 
-public class ImmediateDispatcher : Dispatcher {
+public class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
     override fun offer(task: () -> Unit): Boolean {
+        onOffered(task)
         task()
         return true
     }

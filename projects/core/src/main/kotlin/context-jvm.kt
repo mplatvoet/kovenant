@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
+package nl.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -56,71 +56,81 @@ class ConcreteKovenant {
 
     private class ThreadSafeContext() : MutableContext {
 
-        private val callbackErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
-            { e: Exception -> throw e }
-        }
-        override var callbackError: (Exception) -> Unit by callbackErrorDelegate
-
-        private val workerErrorDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
-            { e: Exception -> throw e }
-        }
-        override var workerError: (Exception) -> Unit by workerErrorDelegate
-
-
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
         }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
-
-        private val callbackDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+        val threadSafeCallbackContext = ThreadSafeMutableDispatcherContext() {
             buildDispatcher {
                 name = "kovenant-callback"
                 numberOfThreads = 1
             }
         }
-        private val workerDispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar {
+
+        private val threadSafeWorkerContext = ThreadSafeMutableDispatcherContext() {
             buildDispatcher {
                 name = "kovenant-worker"
             }
         }
-        override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
-        override var workerDispatcher: Dispatcher by workerDispatcherDelegate
+
+        override val callbackContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeCallbackContext {}
+        override val workerContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeWorkerContext {}
 
         fun copy(): ThreadSafeContext {
             val copy = ThreadSafeContext()
-            if (callbackErrorDelegate.initialized) copy.callbackError = callbackError
-            if (workerErrorDelegate.initialized) copy.workerError = workerError
-            if (callbackDispatcherDelegate.initialized) copy.callbackDispatcher = callbackDispatcher
-            if (workerDispatcherDelegate.initialized) copy.workerDispatcher = workerDispatcher
+            threadSafeCallbackContext copyTo copy.callbackContext
+            threadSafeWorkerContext copyTo copy.workerContext
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }
+
+
+        private class ThreadSafeMutableDispatcherContext(factory: () -> Dispatcher) : MutableDispatcherContext {
+            private val dispatcherDelegate: ThreadSafeLazyVar<Dispatcher> = ThreadSafeLazyVar(factory)
+            private val errorHandlerDelegate = ThreadSafeLazyVar<(Exception) -> Unit> {
+                { e: Exception -> throw e }
+            }
+
+            override var dispatcher: Dispatcher by dispatcherDelegate
+            override var errorHandler: (Exception) -> Unit by errorHandlerDelegate
+
+            fun copyTo(context: MutableDispatcherContext) {
+                if (dispatcherDelegate.initialized) context.dispatcher = dispatcher
+                if (errorHandlerDelegate.initialized) context.errorHandler = errorHandler
+            }
+        }
     }
 
-    private class TrackingContext(private val currentConfig: Context) : MutableContext {
-        private val callbackDispatcherDelegate = TrackChangesVar { currentConfig.callbackDispatcher }
-        private val workerDispatcherDelegate = TrackChangesVar { currentConfig.workerDispatcher }
-
-
-        override var callbackDispatcher: Dispatcher by callbackDispatcherDelegate
-        override var workerDispatcher: Dispatcher by workerDispatcherDelegate
-
-        private val callbackErrorDelegate = TrackChangesVar { currentConfig.callbackError }
-        override var callbackError: (Exception) -> Unit by callbackErrorDelegate
-
-        private val workerErrorDelegate = TrackChangesVar { currentConfig.workerError }
-        override var workerError: (Exception) -> Unit by workerErrorDelegate
-
-        private val multipleCompletionDelegate = TrackChangesVar { currentConfig.multipleCompletion }
+    private class TrackingContext(private val currentContext: Context) : MutableContext {
+        private val multipleCompletionDelegate = TrackChangesVar { currentContext.multipleCompletion }
         override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
 
-        fun applyChanged(config: MutableContext) {
-            if (callbackDispatcherDelegate.written) config.callbackDispatcher = callbackDispatcher
-            if (workerDispatcherDelegate.written) config.workerDispatcher = workerDispatcher
-            if (callbackErrorDelegate.written) config.callbackError = callbackError
-            if (workerErrorDelegate.written) config.workerError = workerError
-            if (multipleCompletionDelegate.written) config.multipleCompletion = multipleCompletion
+        val trackingCallbackContext = TrackingMutableDispatcherContext(currentContext.callbackContext)
+        override val callbackContext: MutableDispatcherContext = object : MutableDispatcherContext by trackingCallbackContext {}
+
+        val trackingWorkerContext = TrackingMutableDispatcherContext(currentContext.workerContext)
+        override val workerContext: MutableDispatcherContext = object : MutableDispatcherContext by trackingWorkerContext {}
+
+        fun applyChanged(context: MutableContext) {
+            trackingCallbackContext.applyChanged(context.callbackContext)
+            trackingWorkerContext.applyChanged(context.workerContext)
+
+            if (multipleCompletionDelegate.written) context.multipleCompletion = multipleCompletion
+        }
+
+
+        private class TrackingMutableDispatcherContext(private val source: DispatcherContext) : MutableDispatcherContext {
+            private val dispatcherDelegate = TrackChangesVar { source.dispatcher }
+            override var dispatcher: Dispatcher by dispatcherDelegate
+
+            private val errorHandlerDelegate = TrackChangesVar { source.errorHandler }
+            override var errorHandler: (Exception) -> Unit by errorHandlerDelegate
+
+            fun applyChanged(context: MutableDispatcherContext) {
+                if (dispatcherDelegate.written) context.dispatcher = dispatcher
+                if (errorHandlerDelegate.written) context.errorHandler = errorHandler
+            }
         }
     }
 
@@ -128,7 +138,7 @@ class ConcreteKovenant {
 }
 
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
     private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
     private volatile var initializer: (() -> T)?
@@ -166,7 +176,7 @@ private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any
     val initialized: Boolean get() = value != null
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 private class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
     private volatile var value: Any? = null
 
