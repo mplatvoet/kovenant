@@ -1,7 +1,5 @@
 [![CircleCI branch](https://img.shields.io/circleci/project/mplatvoet/kovenant/master.svg)](https://circleci.com/gh/mplatvoet/kovenant/tree/master) [![Maven Central](https://img.shields.io/maven-central/v/nl.mplatvoet.komponents/kovenant.svg)](http://search.maven.org/#browse%7C-339523586) [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/mplatvoet/kovenant/blob/master/LICENSE)
 
->**NOTE** this is the development branch. 2.0.x doesn't exist yet.
-
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
 
@@ -14,8 +12,8 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `Java 8` and `kotlin-stdlib:0.12.200`.
-Source and target compatibility is `Java 6`
+This version is build against `kotlin-stdlib:0.12.200`.
+Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
