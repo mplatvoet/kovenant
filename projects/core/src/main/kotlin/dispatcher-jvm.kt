@@ -27,30 +27,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
+private fun concreteBuildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
     builder.body()
     return builder.build()
-}
-
-interface DispatcherBuilder {
-    var name: String
-
-    var concurrentTasks: Int
-    var exceptionHandler: (Exception) -> Unit
-    var errorHandler: (Throwable) -> Unit
-
-    fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
-
-    @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
-    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
-
-    @deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
-    var numberOfThreads: Int
-        get() = concurrentTasks
-        set(value) {
-            concurrentTasks = value
-        }
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -108,13 +88,6 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
 
 }
 
-interface PollStrategyBuilder {
-    fun yielding(numberOfPolls: Int = 1000)
-    fun busy(numberOfPolls: Int = 1000)
-    fun blocking()
-    fun sleeping(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
-    fun blockingSleep(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
-}
 
 class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) : PollStrategyBuilder {
     private val strategies = ArrayList<PollStrategy<() -> Unit>>()
