@@ -50,8 +50,8 @@ fun validate(n:Int) {
     }
 
     Kovenant.configure {
-        workerContext.dispatcher = buildDispatcher { numberOfThreads = 2 }
-        callbackContext.dispatcher = buildDispatcher { numberOfThreads = 1 }
+        workerContext.dispatcher = buildDispatcher { concurrentTasks = 2 }
+        callbackContext.dispatcher = buildDispatcher { concurrentTasks = 1 }
     }
 
     val secondBatch = Array(n) { n ->

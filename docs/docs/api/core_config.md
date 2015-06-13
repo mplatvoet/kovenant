@@ -135,13 +135,11 @@ Kovenant.configure {
         // appended
         name = "Bob the builder"
 
-        // the max number of threads this
+        // the max number tasks this
         // dispatcher keeps running in parallel.
-        // During the lifetime of this
-        // dispatcher the number of threads
-        // created can be far greater because
-        // threads also get destroyed.
-        numberOfThreads = 2
+        // This setting might be ignored on some
+        // platforms
+        concurrentTasks = 2
 
         // Configure the strategy to apply
         // to a thread when there is no work
@@ -173,7 +171,7 @@ Kovenant.configure {
         // very little work and never block
         dispatcher {
             name = "Tank"
-            numberOfThreads = 1
+            concurrentTasks = 1
         }
         // route internal errors when invoking
         // callbacks. This is also the place to

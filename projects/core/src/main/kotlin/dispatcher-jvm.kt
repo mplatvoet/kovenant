@@ -35,7 +35,8 @@ public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
 
 interface DispatcherBuilder {
     var name: String
-    var numberOfThreads: Int
+
+    var concurrentTasks: Int
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
 
@@ -43,6 +44,13 @@ interface DispatcherBuilder {
 
     @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
     fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
+
+    @deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
+    var numberOfThreads: Int
+        get() = concurrentTasks
+        set(value) {
+            concurrentTasks = value
+        }
 }
 
 private class ConcreteDispatcherBuilder : DispatcherBuilder {
@@ -61,7 +69,7 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
         }
 
 
-    override var numberOfThreads: Int
+    override var concurrentTasks: Int
         get() = localNumberOfThreads
         set(value) {
             if (value < 1) {
