@@ -6,13 +6,30 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v1.2.0
+###v2.1.0
+**certain**
+* [KOV-26](http://komponents.myjetbrains.com/youtrack/issue/KOV-26) Smoother configuration
 
+**probably**
 * [KOV-8](http://komponents.myjetbrains.com/youtrack/issue/KOV-8) Progress tracking support
 
 ---
 
 ##Released
+
+###v2.0.0
+[KOV-21](http://komponents.myjetbrains.com/youtrack/issue/KOV-21) Kovenant has a new home which is [komponents.nl](http://komponents.nl) and thus the project is now available as `nl.komponents.kovenant:kovenant:2.0.0`
+
+**general:**
+* [KOV-22](http://komponents.myjetbrains.com/youtrack/issue/KOV-22) Kotlin M12
+
+**kovenant-core:**
+
+Mostly breaking API changes in this release:
+* [KOV-18](http://komponents.myjetbrains.com/youtrack/issue/KOV-18) Configurable Dispatcher per callback which allows for better integration with other platforms and libraries. _Thanks Jayson Minard_ 
+* [KOV-20](http://komponents.myjetbrains.com/youtrack/issue/KOV-20) Internally there is a new work queue for single consumer scenarios (default for callback dispatcher)
+* [KOV-19](http://komponents.myjetbrains.com/youtrack/issue/KOV-19) Fixed an bug where interrupted flags might not be properly cleared by the dispatcher
+* [KOV-24](http://komponents.myjetbrains.com/youtrack/issue/KOV-24) Changed the configuration structure (breaking)
 
 ###v1.1.0
 
