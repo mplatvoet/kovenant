@@ -64,7 +64,7 @@ class ConcreteKovenant {
         val threadSafeCallbackContext = ThreadSafeMutableDispatcherContext() {
             buildDispatcher {
                 name = "kovenant-callback"
-                numberOfThreads = 1
+                concurrentTasks = 1
             }
         }
 

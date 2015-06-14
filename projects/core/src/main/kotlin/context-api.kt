@@ -74,6 +74,10 @@ public interface DispatcherContext {
 public interface MutableDispatcherContext : DispatcherContext {
     override var dispatcher: Dispatcher
     override var errorHandler: (Exception) -> Unit
+
+    fun dispatcher(body: DispatcherBuilder.() -> Unit) {
+        dispatcher = buildDispatcher(body)
+    }
 }
 
 

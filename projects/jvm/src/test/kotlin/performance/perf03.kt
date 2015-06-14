@@ -42,14 +42,14 @@ val napTimeSeconds = 3L
 val fibN = 13
 
 val cbDispatch = buildDispatcher {
-    numberOfThreads = 1
-    configurePollStrategy {
+    concurrentTasks = 1
+    pollStrategy {
         yielding()
         blocking()
     }
 }
 val workDispatch = buildDispatcher {
-    configurePollStrategy {
+    pollStrategy {
         yielding()
         blocking()
     }

@@ -36,8 +36,8 @@ import java.util.concurrent.Executors
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val excWorkDispatcher = Executors.newFixedThreadPool(numberOfWorkerThreads).asDispatcher()
 val excCallbackDispatcher = Executors.newSingleThreadExecutor().asDispatcher()
-val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads}
-val callDispatcher = buildDispatcher { numberOfThreads = 1 }
+val workDispatcher = buildDispatcher { concurrentTasks = numberOfWorkerThreads }
+val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 
 val attempts = 10
 val warmupRounds = 100000
