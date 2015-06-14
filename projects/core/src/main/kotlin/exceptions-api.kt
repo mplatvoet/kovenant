@@ -21,4 +21,12 @@
 
 package nl.komponents.kovenant
 
-public open class CancelException : Exception()
+
+public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+
+public open class CancelException : KovenantException()
+
+public open class ConfigurationException(message: String) : KovenantException(message)
+
+
+

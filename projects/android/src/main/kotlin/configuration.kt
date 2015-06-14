@@ -70,7 +70,7 @@ public fun configureKovenant(): Disposable {
         }
     }
 
-    Kovenant.configure {
+    Kovenant.context {
         callbackContext {
             dispatcher = callbackDispatcher
         }

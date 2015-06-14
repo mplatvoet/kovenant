@@ -25,7 +25,7 @@ import nl.komponents.kovenant.Kovenant
 
 
 fun main(args: Array<String>) {
-    Kovenant.configure {
+    Kovenant.context {
         // Specify a new worker dispatcher.
         // this dispatcher is responsible for
         // work that is executed by async and

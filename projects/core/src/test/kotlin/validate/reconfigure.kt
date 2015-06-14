@@ -49,7 +49,7 @@ fun validate(n:Int) {
         }
     }
 
-    Kovenant.configure {
+    Kovenant.context {
         workerContext.dispatcher = buildDispatcher { concurrentTasks = 2 }
         callbackContext.dispatcher = buildDispatcher { concurrentTasks = 1 }
     }

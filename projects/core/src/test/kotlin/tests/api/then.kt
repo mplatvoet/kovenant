@@ -32,7 +32,7 @@ import kotlin.test.assertEquals
 class ThenTest {
 
     Before fun setup() {
-        Kovenant.configure {
+        Kovenant.context {
             callbackContext.dispatcher = ImmediateDispatcher()
             workerContext.dispatcher = ImmediateDispatcher()
         }

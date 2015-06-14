@@ -83,14 +83,14 @@ fun main(args: Array<String>) {
 }
 
 fun configureExecutor() {
-    Kovenant.configure {
+    Kovenant.context {
         workerContext.dispatcher = excWorkDispatcher
         callbackContext.dispatcher = excCallbackDispatcher
     }
 }
 
 fun configureDispatcher() {
-    Kovenant.configure {
+    Kovenant.context {
         workerContext.dispatcher = workDispatcher
         callbackContext.dispatcher = callDispatcher
     }

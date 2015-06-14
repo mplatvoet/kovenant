@@ -65,7 +65,7 @@ fun main(args: Array<String>) {
 - sleep:        $napTimeSeconds seconds
 """)
 
-    Kovenant.configure {
+    Kovenant.context {
         callbackContext.dispatcher = cbDispatch
         workerContext.dispatcher = workDispatch
     }

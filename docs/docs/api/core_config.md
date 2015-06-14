@@ -5,8 +5,8 @@ part of [`kovenant-core`](../index.md#artifacts)
 
 ##Context
 The `Context` object is basically the current configuration. It can be obtained from `Kovenant.context` and configured
-by `Kovenant.configure{...}`. Refer to the [configuration](#configuration) section for the options. To create 
-a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.configure{...}`.
+by `Kovenant.context {...}`. Refer to the [configuration](#configuration) section for the options. To create 
+a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.context {...}`.
 
 Functions like [`deferred`](core_usage.md#deferred) and [`async`](core_usage.md#async) have a first parameter which
 is actually a `Context` instance. By default this is `Kovenant.context` so normally you don't have worry about this.
@@ -41,13 +41,13 @@ Configuration of Kovenant is done entirely in code and any changes to the [`Cont
 threadsafe, so Kovenant can be reconfigured during a running application from multiple threads. But you probably want 
 to do this when your application starts. 
 
-Configuring is done by simply calling `Kovenant.configure { ... }`. 
+Configuring is done by simply calling `Kovenant.context { ... }`. 
 
 ###Dispatchers
 Kovenant operates with two `Dispatcher`s, a worker and callback `Dispatcher`. They are configured as follows:
 
 ```kt
-Kovenant.configure {
+Kovenant.context {
     workerContext.dispatcher = ...
     // or
     callbackContext {
@@ -121,7 +121,7 @@ What's best for your situation depends on your needs. So like always with concur
 ###Common example
 
 ```kt
-Kovenant.configure {
+Kovenant.context {
     // Specify a new worker dispatcher.
     // this dispatcher is responsible for
     // work that is executed by async and

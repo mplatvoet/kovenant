@@ -25,10 +25,17 @@ package nl.komponents.kovenant
 public object Kovenant {
     private val concrete = ConcreteKovenant()
 
-    val context: Context
+    var context: Context
         get() = concrete.context
+        set(value) {
+            concrete.context = value
+        }
 
-    public fun configure(body: MutableContext.() -> Unit): Unit = concrete.configure(body)
+
+    public fun context(body: MutableContext.() -> Unit): Unit = concrete.context(body)
+
+    @deprecated("use context { ... } instead", ReplaceWith("context(body)"))
+    public fun configure(body: MutableContext.() -> Unit): Unit = context(body)
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
@@ -56,6 +63,10 @@ public interface MutableContext : Context {
     fun workerContext(body: MutableDispatcherContext.() -> Unit) {
         workerContext.body()
     }
+}
+
+public interface ConfigurableContext : MutableContext {
+    fun copy(): ConfigurableContext
 }
 
 public interface DispatcherContext {

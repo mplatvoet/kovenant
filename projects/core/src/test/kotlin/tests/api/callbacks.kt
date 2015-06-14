@@ -31,7 +31,7 @@ import kotlin.test.assertEquals
 class PromiseCallbackTest {
 
     Before fun setup() {
-        Kovenant.configure {
+        Kovenant.context {
             callbackContext.dispatcher = ImmediateDispatcher()
             workerContext.dispatcher = ImmediateDispatcher()
         }
@@ -109,7 +109,7 @@ class PromiseCallbackTest {
 class PromiseCallbackOrderTest {
 
     Before fun setup() {
-        Kovenant.configure {
+        Kovenant.context {
             callbackContext.dispatcher = ImmediateDispatcher()
             workerContext.dispatcher = ImmediateDispatcher()
         }
