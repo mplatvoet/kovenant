@@ -23,12 +23,11 @@ package examples.context
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.buildDispatcher
 
 fun main(args: Array<String>) {
     val ctx = Kovenant.createContext {
-        callbackContext.dispatcher = buildDispatcher { name = "cb-new" }
-        workerContext.dispatcher = buildDispatcher { name = "work-new" }
+        callbackContext.dispatcher { name = "cb-new" }
+        workerContext.dispatcher { name = "work-new" }
     }
 
     async {
@@ -44,4 +43,4 @@ fun main(args: Array<String>) {
     }
 }
 
-private val threadName : String get() = Thread.currentThread().getName()
+private val threadName: String get() = Thread.currentThread().getName()
