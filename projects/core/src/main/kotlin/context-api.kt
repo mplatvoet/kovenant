@@ -65,8 +65,8 @@ public interface MutableContext : Context {
     }
 }
 
-public interface ConfigurableContext : MutableContext {
-    fun copy(): ConfigurableContext
+public interface ReconfigurableContext : MutableContext {
+    fun copy(): ReconfigurableContext
 }
 
 public interface DispatcherContext {

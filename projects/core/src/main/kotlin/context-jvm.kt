@@ -35,24 +35,24 @@ class ConcreteKovenant {
             contextRef.set(value)
         }
 
-    private val configurableContext: ConfigurableContext
+    private val reconfigurableContext: ReconfigurableContext
         get() {
             val ctx = contextRef.get()
-            if (ctx is ConfigurableContext) {
+            if (ctx is ReconfigurableContext) {
                 return ctx
             }
-            throw ConfigurationException("Current context [$ctx] does not implement ConfigurableContext and therefor can't be reconfigured.")
+            throw ConfigurationException("Current context [$ctx] does not implement ReconfigurableContext and therefor can't be reconfigured.")
         }
 
     public fun context(body: MutableContext.() -> Unit) {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
-        val trackingContext = TrackingContext(configurableContext)
+        val trackingContext = TrackingContext(reconfigurableContext)
         trackingContext.body()
 
         do {
-            val current = configurableContext
+            val current = reconfigurableContext
             val newConfig = current.copy()
             trackingContext.applyChanged(newConfig)
         } while (!contextRef.compareAndSet(current, newConfig))
@@ -67,7 +67,7 @@ class ConcreteKovenant {
 
     public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
 
-    private class ThreadSafeContext() : ConfigurableContext {
+    private class ThreadSafeContext() : ReconfigurableContext {
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
@@ -90,7 +90,7 @@ class ConcreteKovenant {
         override val callbackContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeCallbackContext {}
         override val workerContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeWorkerContext {}
 
-        override fun copy(): ConfigurableContext {
+        override fun copy(): ReconfigurableContext {
             val copy = ThreadSafeContext()
             threadSafeCallbackContext copyTo copy.callbackContext
             threadSafeWorkerContext copyTo copy.workerContext
