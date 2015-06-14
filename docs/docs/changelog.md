@@ -10,6 +10,7 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 **certain**
 
 * [KOV-26](http://issues.komponents.nl/youtrack/issue/KOV-26) Smoother configuration
+* [KOV-25](http://issues.komponents.nl/youtrack/issue/KOV-25) Allow for custom context implementations
 
 **probably**
 
