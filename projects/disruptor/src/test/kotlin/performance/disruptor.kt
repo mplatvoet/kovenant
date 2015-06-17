@@ -21,11 +21,11 @@
 
 package performance.disruptor
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
-import nl.mplatvoet.komponents.kovenant.disruptor.buildDisruptor
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.disruptor.disruptor
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -38,9 +38,9 @@ val warmupRounds = 100000
 val timingRounds = 1000000
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-val callDispatcher = buildDispatcher { numberOfThreads = 1 }
+val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 //val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
-val callDisruptor = buildDisruptor { numberOfThreads = 1 }
+val callDisruptor = disruptor { numberOfThreads = 1 }
 //val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 fun main(args: Array<String>) {
@@ -82,15 +82,15 @@ fun main(args: Array<String>) {
 }
 
 fun configureDisruptor() {
-    Kovenant.configure {
-        callbackDispatcher = callDisruptor
+    Kovenant.context {
+        callbackContext.dispatcher = callDisruptor
         //workerDispatcher = workDisruptor
     }
 }
 
 fun configureDispatcher() {
-    Kovenant.configure {
-        callbackDispatcher = callDispatcher
+    Kovenant.context {
+        callbackContext.dispatcher = callDispatcher
         //workerDispatcher = workDispatcher
     }
 }

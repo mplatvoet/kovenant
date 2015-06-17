@@ -21,18 +21,18 @@
 
 package validate.disruptor
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.disruptor.buildDisruptor
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.disruptor.disruptor
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-    val disruptorDispatcher = buildDisruptor { }
-    Kovenant.configure {
-        callbackDispatcher = disruptorDispatcher
+    val disruptorDispatcher = disruptor { }
+    Kovenant.context {
+        callbackContext.dispatcher = disruptorDispatcher
     }
     validate(100000)
 
