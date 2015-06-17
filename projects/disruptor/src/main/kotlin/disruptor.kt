@@ -19,27 +19,27 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.disruptor
+package nl.komponents.kovenant.disruptor
 
 import com.lmax.disruptor.*
 import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor.dsl.ProducerType
-import nl.mplatvoet.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Dispatcher
 import java.util.ArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
-public fun buildDisruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
+public fun disruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDisruptorBuilder()
     builder.body()
     return builder.buildDispatcher()
 }
 
 public enum class Producers {
-    MULTIPLE SINGLE
+    MULTIPLE, SINGLE
 }
 
-public trait DisruptorBuilder {
+public interface DisruptorBuilder {
     var name: String
     var numberOfThreads: Int
     var bufferSize: Int
@@ -247,7 +247,11 @@ private class SingleThreadDisruptorDispatcher() : Dispatcher {
 }
 
 private class FunctionEvent() {
-    public var value: () -> Unit = {}
+    companion object {
+        val emptyFn = {}
+    }
+
+    public var value: () -> Unit = emptyFn
 }
 
 private class FunctionEventHandler : EventHandler<FunctionEvent> {
