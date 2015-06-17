@@ -1,29 +1,32 @@
-#Android
+#Android features
 part of [`kovenant-android`](../index.md#artifacts)
 
 ---
-
 While Kovenant is perfectly usable on Android as-is, there are a couple things that are specific to the platform.
 One is that Android applications can only interact with the interface through the main thread. By default
-Kovenant operates on its own maintained pool of threads.
+Kovenant operates on its own maintained pool of threads and thus can't update the UI.
 
 There are two ways we can achieve interacting with the main thread, besides the standard Android facilities of course.
 One is by specific extensions methods and the other is by a specific `Dispatcher`.
 
-##Extension methods
+##UI callbacks
 The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-android` 
-library provides `successUI`, `failUI` and `alwaysUI`. They operate just like their 
-[regular counterparts](../api/callbacks.md) except their bodies are executed on the Android main thread. Both type of 
+library provides `successUi`, `failUi` and `alwaysUi`. They operate just like their 
+[regular counterparts](../api/core_usage.md#callbacks) except their bodies are executed on the Android main thread. Both type of 
 callbacks can be mixed freely.
 
 ```kt
-async {
+val promise = async {
     foo() //produces 'bar'
-} success {
+} 
+
+promise success {
     //no need to do this on the
     //main thread
     bar -> writeLog(bar)
-} successUI {
+} 
+
+promise successUi {
     //also update the interface
     bar -> updateUI(bar)
 }
@@ -31,17 +34,32 @@ async {
 The huge advantage of this approach is that operations on the main thread are explicitly chosen. So when in doubt,
 this should be the preferred way of interacting with the main thread. 
 
-##Dispatcher
-You can configure Kovenant to dispatch all callbacks on the main thread by using the `androidUIDispatcher()`. 
+##Start on UI thread
+Just like Androids `AsyncTask` you might want to do some preparations on the UI thread before you start your background
+work. This is what `promiseOnUi` does, it schedules a task on the UI thread and returns a `Promise` on which you can 
+chain along.
+ 
+```kt
+promiseOnUi {
+    //prepare the UI
+} then {
+    //do background work
+} successUi {
+    //post the results
+}
+```
 
->Please note, this approach can have a *serious negative* effect *on* Androids UI *performance* since you can delegate
+##Dispatcher
+You can configure Kovenant to dispatch all callbacks on the main thread by using the `androidUiDispatcher()`. 
+
+>Please note, this approach can have a **serious negative effect on Androids UI performance** since you can delegate
 >to much work to the UI thread way too easy.
 
 That all being said. You, of course, know what you are doing.  
 
 ```kt
-Kovenant.configure {
-    callbackDispatcher = androidUIDispatcher()
+Kovenant.context {
+    callbackDispatcher = androidUiDispatcher()
 }
 ```
 
@@ -58,5 +76,8 @@ the `FULL` has all the methods, like `stop` and `cancel` implemented where `BASI
 distinction is that keeping track of what is running and can be cancelled just uses a lot more resources. This might
 not be an issue for background threads but can most certainly be an issue for the main/UI thread.
 
-If you want to [convert](../api/interopJvm.md) back and forth between `Executor`s and `Dispatcher`s you probably 
+If you want to [convert](../api/jvm_usage.md) back and forth between `Executor`s and `Dispatcher`s you probably 
 want to use a `FULL` `DispatcherType`, otherwise you are better of with a `BASIC` one.
+
+##Demo app
+For a workable demo please checkout the [Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).

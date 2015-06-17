@@ -19,12 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant
-
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.RejectedExecutionException
-import kotlin.InlineOption.ONLY_LOCAL_RETURN
+package nl.komponents.kovenant
 
 
 /**
@@ -39,7 +34,7 @@ import kotlin.InlineOption.ONLY_LOCAL_RETURN
  * resolved or rejected multiple times. It may simply be ignored or throw
  * an Exception.
  */
-public trait Deferred<V, E> {
+public interface Deferred<V : Any, E : Any> {
     /**
      * Resolves this deferred with the provided value
      *
@@ -66,80 +61,155 @@ public trait Deferred<V, E> {
      * Holds the accompanied [Promise]
      *
      * The accompanied [Promise] for this deferred. Multiple invocations
-     * must lead to the some instance of the Promise.
+     * must lead to the same instance of the Promise.
      */
     val promise: Promise<V, E>
 }
 
+
 /**
- * Mark an class to be aware of the context
+ * Mark a class to be cancelable
  *
- * Used by [then] to obtain the current context from a [Promise]
- *
+ * What cancelling exactly means is up to the implementor.
+ * But the intention is stopping.
  */
-public trait ContextAware {
-    val context : Context
+public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
+    fun cancel(error: E): Boolean
 }
+
 
 /**
  * A construct for receiving a notification of an asynchronous job
  *
  * A Promise can either resolve in [success] or get rejected and [fail].
  * Either way, it will [always] let you know.
+ *
+ * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
+ * they where added to this Promise.
  */
-public trait Promise<V, E> {
-    fun success(callback: (value: V) -> Unit): Promise<V, E>
-    fun fail(callback: (error: E) -> Unit): Promise<V, E>
-    fun always(callback: () -> Unit): Promise<V, E>
+public interface Promise<V : Any, E : Any> {
+    /**
+     * The context that is associated with this Promise. By default all callbacks are executed on the callback
+     * `DispatcherContext` of this context.
+     *
+     * Functions like `then`use this to base there returned promises on this to keep promises bound to a
+     * desired context.
+     */
+    val context: Context
+
+    /**
+     * Adds a success callback to this Promise
+     *
+     * Adds a success callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets successfully resolved.
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback that gets executed on successful completion
+     */
+    fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
+
+    /**
+     * Adds a fail callback to this Promise
+     *
+     * Adds a fail callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets rejected with an error or cancelled if this is a [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on failure or cancellation
+     */
+    fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+
+    /**
+     * Adds a always callback to this Promise
+     *
+     * Adds a always callback that gets executed on the callbackContext of this promise standard context
+     * when this Promise gets resolved successfully, rejected with an error or cancelled if this is a
+     * [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on success, failure or cancellation
+     */
+    fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
+
+    /**
+     * Adds a success callback to this Promise
+     *
+     * Adds a success callback that gets executed on the provided callbackContext when this Promise gets successfully
+     * resolved.
+     *
+     * @param callback the callback that gets executed on successful completion
+     * @param context the DispatcherContext on which this callback is executed
+     */
+    fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
+
+
+    /**
+     * Adds a fail callback to this Promise
+     *
+     * Adds a fail callback that gets executed on the provided callbackContext when this Promise gets rejected with an
+     * error or cancelled if this is a [CancelablePromise].
+     *
+     * @param callback the callback to be executed on failure or cancellation
+     * @param context the DispatcherContext on which this callback is executed
+     */
+    fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
+
+    /**
+     * Adds a always callback to this Promise
+     *
+     * Adds a always callback that gets executed on the provided callbackContext when this Promise gets resolved
+     * successfully, rejected with an error or cancelled if this is a [CancelablePromise].
+     *
+     * Function added to allow this to be used in infix calls
+     *
+     * @param callback the callback to be executed on success, failure or cancellation
+     * @param context the DispatcherContext on which this callback is executed
+     */
+    fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 }
 
+/**
+ * Creates a new [Deferred] instance.
+ *
+ * @param context the context on which the associated [Promise] operates on
+ * @return newly created [Deferred]
+ */
+public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
-public fun deferred<V, E>(context: Context = Kovenant.context) : Deferred<V, E> = Kovenant.deferred(context)
 
-private fun Context.tryDispatch(fn: () -> Unit) = callbackDispatcher.offer (fn, callbackError)
+/**
+ * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
+ * Any Ecxeption is considered a failure.
+ *
+ * @param body the task to be executed
+ * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
+ * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
+ */
+public fun async<V : Any>(context: Context = Kovenant.context,
+                          body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
-private fun Context.tryWork(fn: () -> Unit) = workerDispatcher.offer (fn, workerError)
-
-private fun Dispatcher.offer(fn: () -> Unit, errorFn: (Exception) -> Unit) {
-    try {
-        this.offer(fn)
-    } catch (e: Exception) {
-        errorFn(e)
-    }
+/**
+ * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
+ *
+ * Transforms Promise A to Promise B. If Promise A resolves successful then [bind] is executed on the
+ * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
+ * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
+ *
+ * If Promise A fails with error E, Promise B will fail with error E too.
+ *
+ *
+ * @param bind the transform function.
+ */
+public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+    return concretePromise(context, this, bind)
 }
 
-public fun async<V>(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
-    val deferred = deferred<V, Exception>(context)
-    context.tryWork {
-        try {
-            val result = body()
-            deferred.resolve(result)
-        } catch(e: Exception) {
-            deferred.reject(e)
-        }
-    }
-    return deferred.promise
+public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
+    return concretePromise(context, this, bind)
 }
 
-public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
-    val context = when (this) {
-        is ContextAware -> this.context
-        else -> Kovenant.context
-    }
-
-    val deferred = deferred<R, Exception>(context)
-    success {
-        context.tryWork {
-            try {
-                val result = bind(it)
-                deferred.resolve(result)
-            } catch(e: Exception) {
-                deferred.reject(e)
-            }
-        }
-    }
-    fail {
-        deferred.reject(it)
-    }
-    return deferred.promise
-}
+public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
+        inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R): Promise<R, Exception> = then { it.bind() }

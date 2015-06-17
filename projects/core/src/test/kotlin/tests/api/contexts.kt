@@ -19,39 +19,48 @@
  * THE SOFTWARE.
  */
 
-package tests.api.then
+package tests.api.contexts
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
-class ThenTest {
+class AsyncTest {
+    val defaultDispatcher = ImmediateDispatcher()
+    val alternateDispatcher = ImmediateDispatcher()
+    var context = Kovenant.context //gets overridden by setup, avoids null checks
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext {
+                dispatcher = defaultDispatcher
+            }
+            workerContext {
+                dispatcher = defaultDispatcher
+            }
+        }
+
+        context = Kovenant.createContext {
+            callbackContext.dispatcher = alternateDispatcher
+            workerContext.dispatcher = alternateDispatcher
         }
     }
 
-    Test fun thenSuccess() {
-        var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
+    Test fun defaultContext() {
+        var calls = 0
+        defaultDispatcher.onOffered = { ++calls }
+        async { 13 }
+        assertEquals(1, calls, "should by called on default dispatcher")
     }
 
-    Test fun thenFail() {
-        var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
-        assertEquals(1, count, "should report a failure")
+    Test fun alternateContext() {
+        var calls = 0
+        alternateDispatcher.onOffered = { ++calls }
+        async(context) { 13 }
+        assertEquals(1, calls, "should by called on default dispatcher")
     }
-
-
 }
-
-
 

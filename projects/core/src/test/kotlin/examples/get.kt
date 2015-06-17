@@ -22,10 +22,8 @@
 package examples.get
 
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.all
-import nl.mplatvoet.komponents.kovenant.async
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
 import support.fib
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference

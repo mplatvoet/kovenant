@@ -1,5 +1,5 @@
 site_name: 'Kovenant'
-site_url: 'http://kovenant.mplatvoet.nl'
+site_url: 'http://kovenant.komponents.nl'
 site_description: 'Kovenant. Promises for Kotlin.'
 site_author: 'Mark Platvoet'
 copyright: '2015'
@@ -9,18 +9,16 @@ repo_name: 'GitHub'
 
 pages:
 - ['index.md', 'Home']
-- ['api/async.md', 'API Documentation', 'Async']
-- ['api/deferred.md', 'API Documentation', 'Deferred']
-- ['api/callbacks.md', 'API Documentation', 'Callbacks']
-- ['api/then.md', 'API Documentation', 'Then']
-- ['api/combine.md', 'API Documentation', 'Combine']
-- ['api/configuration.md', 'API Documentation', 'Configuration']
-- ['api/context.md', 'API Documentation', 'Context']
-- ['api/interopJvm.md', 'API Documentation', 'Executors (JVM)']
-- ['android/android.md', 'Android']
-- ['goals.md', 'Goals']
-- ['performance.md', 'Misc', 'Performance']
-- ['considerations.md','Misc', 'Considerations']
+- ['api/core_usage.md', 'API Documentation', 'Core Usage']
+- ['api/core_config.md', 'API Documentation', 'Core Configuration']
+- ['api/combine_usage.md', 'API Documentation', 'Combine']
+- ['api/jvm_usage.md', 'API Documentation', 'Executors (JVM)']
+- ['android/features.md', 'Android','Features']
+- ['android/config.md', 'Android','Configuring']
+- ['misc/goals.md', 'Misc', 'Goals']
+- ['misc/performance.md', 'Misc', 'Performance']
+- ['misc/considerations.md','Misc', 'Considerations']
+- ['changelog.md', 'Changelog']
 
 #theme: bootstrap
 theme_dir: theme/yeti

@@ -19,16 +19,16 @@
  * THE SOFTWARE.
  */
 
-package nl.mplatvoet.komponents.kovenant.combine
+package nl.komponents.kovenant.combine
 
-import nl.mplatvoet.komponents.kovenant.Deferred
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.deferred
+import nl.komponents.kovenant.Deferred
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.deferred
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> {
@@ -59,7 +59,7 @@ fun concreteCombine<V1, V2, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -93,7 +93,7 @@ fun concreteCombine<V1, V2, V3, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -130,7 +130,7 @@ fun concreteCombine<V1, V2, V3, V4, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -170,7 +170,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -213,7 +213,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -259,7 +259,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -308,7 +308,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -360,7 +360,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -415,7 +415,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -473,7 +473,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -534,7 +534,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -598,7 +598,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -665,7 +665,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -735,7 +735,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -808,7 +808,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -884,7 +884,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -963,7 +963,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -1045,7 +1045,7 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     return deferred.promise
 }
 
-[suppress("UNCHECKED_CAST")]
+@suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,

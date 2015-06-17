@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-package nl.mplatvoet.komponents.kovenant.android
+package nl.komponents.kovenant.android
 
 import android.os.Handler
 import android.os.Looper
@@ -32,17 +32,14 @@ private class LooperExecutor(private val looper: Looper) : Handler.Callback {
     }
 
     private val untrackedId = Int.MIN_VALUE
-    private val handler = Handler(looper)
+    private val handler = Handler(looper, this)
     private val idCounter = AtomicInteger(0)
 
     override fun handleMessage(msg: Message): Boolean {
         val task = msg.obj as Runnable
-        try {
-            task.run()
-        } finally {
-            //not necessary but let's clean quick and swift
-            msg.recycle()
-        }
+
+        task.run()
+
         // signal message was handled
         //no need to try other handlers
         return true
@@ -63,6 +60,6 @@ private class LooperExecutor(private val looper: Looper) : Handler.Callback {
 
     public fun submit(runnable: Runnable, trackingId: Int = untrackedId) {
         val message = handler.obtainMessage(trackingId, runnable)
-        handler.dispatchMessage(message)
+        handler.sendMessage(message)
     }
 }

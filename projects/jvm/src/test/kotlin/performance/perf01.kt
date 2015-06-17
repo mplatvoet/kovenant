@@ -21,11 +21,11 @@
 
 package performance.perf01
 
-import nl.mplatvoet.komponents.kovenant.Kovenant
-import nl.mplatvoet.komponents.kovenant.Promise
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.buildDispatcher
-import nl.mplatvoet.komponents.kovenant.jvm.asDispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.jvm.asDispatcher
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -36,8 +36,8 @@ import java.util.concurrent.Executors
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val excWorkDispatcher = Executors.newFixedThreadPool(numberOfWorkerThreads).asDispatcher()
 val excCallbackDispatcher = Executors.newSingleThreadExecutor().asDispatcher()
-val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads}
-val callDispatcher = buildDispatcher { numberOfThreads = 1 }
+val workDispatcher = buildDispatcher { concurrentTasks = numberOfWorkerThreads }
+val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 
 val attempts = 10
 val warmupRounds = 100000
@@ -83,16 +83,16 @@ fun main(args: Array<String>) {
 }
 
 fun configureExecutor() {
-    Kovenant.configure {
-        workerDispatcher = excWorkDispatcher
-        callbackDispatcher = excCallbackDispatcher
+    Kovenant.context {
+        workerContext.dispatcher = excWorkDispatcher
+        callbackContext.dispatcher = excCallbackDispatcher
     }
 }
 
 fun configureDispatcher() {
-    Kovenant.configure {
-        workerDispatcher = workDispatcher
-        callbackDispatcher = callDispatcher
+    Kovenant.context {
+        workerContext.dispatcher = workDispatcher
+        callbackContext.dispatcher = callDispatcher
     }
 }
 

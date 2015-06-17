@@ -16,42 +16,15 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.properties
 
-package tests.api.then
-
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
-import org.junit.Before
-import org.junit.Test
-import tests.support.ImmediateDispatcher
-import kotlin.test.assertEquals
-
-class ThenTest {
-
-    Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
-        }
-    }
-
-    Test fun thenSuccess() {
-        var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
-    }
-
-    Test fun thenFail() {
-        var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
-        assertEquals(1, count, "should report a failure")
-    }
+import nl.komponents.kovenant.Context
+import nl.komponents.kovenant.Promise
+import kotlin.properties.ReadOnlyProperty
 
 
-}
-
-
-
+public fun lazyPromise<R, T>(context: Context? = null, initializer: () -> T)
+        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromise(context, initializer)

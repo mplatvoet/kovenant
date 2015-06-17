@@ -21,8 +21,8 @@
 
 package examples.then
 
-import nl.mplatvoet.komponents.kovenant.async
-import nl.mplatvoet.komponents.kovenant.then
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.then
 import support.fib
 
 fun main(args: Array<String>) {

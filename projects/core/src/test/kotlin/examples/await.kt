@@ -21,9 +21,9 @@
 
 package examples.await
 
-import nl.mplatvoet.komponents.kovenant.*
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
 import java.util.concurrent.CountDownLatch
-
 
 
 public fun await(vararg promises: Promise<*, *>) {
