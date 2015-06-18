@@ -172,6 +172,13 @@ public interface Promise<V : Any, E : Any> {
 }
 
 /**
+ * Takes any value `V` and wraps it as a successfully resolved promise.
+ *
+ * @param context the DispatcherContext on which this callback is executed
+ */
+public fun <V :Any> V.just(context: Context = Kovenant.context) : Promise<V, Exception> = concretePromise(context, this)
+
+/**
  * Creates a new [Deferred] instance.
  *
  * @param context the context on which the associated [Promise] operates on
