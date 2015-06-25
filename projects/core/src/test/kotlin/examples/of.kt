@@ -20,12 +20,18 @@
  * THE SOFTWARE.
  */
 
-package examples.just
+package examples.of
 
-import nl.komponents.kovenant.just
+import nl.komponents.kovenant.Promise
 
 fun main(args: Array<String>) {
-    1.just() success {
-        println("just: $it")
-    }
+    // Success promise with inferred type
+    Promise.of(13)
+
+    // Failed promise with explicit types
+    Promise.ofFail<String, Int>(13)
+
+    // Successful promise with explicit types
+    Promise.ofSuccess<String, Int>("thirteen")
 }
+

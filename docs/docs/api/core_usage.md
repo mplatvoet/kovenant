@@ -230,6 +230,24 @@ class ExpensiveResource {
 
 ---
 
+##Of
+In order align with existing libraries and code you can create promises of existing values with `of`, `ofSuccess` 
+and `ofFail`.
+ 
+```kt
+// Success promise with inferred value type
+// and Exception as fail type 
+Promise.of(13)
+
+// Failed promise with explicit types
+Promise.ofFail<String, Int>(13)
+
+// Successful promise with explicit types
+Promise.ofSuccess<String, Int>("thirteen")
+```
+
+---
+
 ##All
 Sometimes you want to make sure that multiple promises are done before proceeding. With `all` this can be achieved.
 `all<V,Exception>` takes a `vararg` of `Promise<V,Exception>`s and returns a `Promise<List<V>, Exception>`. 

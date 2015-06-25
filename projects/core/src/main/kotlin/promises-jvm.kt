@@ -29,11 +29,23 @@ internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V,
 internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
 
-internal fun concretePromise<V>(context: Context, value: V) : Promise<V, Exception> = JustPromise(context, value)
+internal fun concreteSuccessfulPromise<V, E>(context: Context, value: V) : Promise<V, E> = SuccessfulPromise(context, value)
 
-private class JustPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
+internal fun concreteFailedPromise<V, E>(context: Context, value: E) : Promise<V, E> = FailedPromise(context, value)
+
+private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
+    }
+
+    // Could override the `fail` methods since there is nothing to add
+    // but any change to those methods might be missed.
+    // the callbacks essentially get ignored anyway
+}
+
+private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<V, E>(context) {
+    init {
+        trySetFailResult(value)
     }
 
     // Could override the `fail` methods since there is nothing to add
