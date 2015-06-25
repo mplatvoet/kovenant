@@ -156,7 +156,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
         context.multipleCompletion(rawValue(), newValue)
     }
 
-    override val promise: Promise<V, E> = this
+    override val promise: Promise<V, E> = object : Promise<V, E> by this {}
 
     private fun isDone() = isSuccessResult() || isFailResult()
 }
