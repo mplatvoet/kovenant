@@ -21,11 +21,12 @@
 
 package nl.komponents.kovenant.disruptor
 
-import com.lmax.disruptor.*
+import com.lmax.disruptor.EventFactory
+import com.lmax.disruptor.EventHandler
+import com.lmax.disruptor.SleepingWaitStrategy
 import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor.dsl.ProducerType
 import nl.komponents.kovenant.Dispatcher
-import java.util.ArrayList
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -41,7 +42,7 @@ public enum class Producers {
 
 public interface DisruptorBuilder {
     var name: String
-    var numberOfThreads: Int
+    var concurrentTasks: Int
     var bufferSize: Int
     var producers: Producers
 }
@@ -52,7 +53,7 @@ private class ConcreteDisruptorBuilder : DisruptorBuilder {
     private var buffer = 1024
 
     override var name = "kovenant-disruptor"
-    override var numberOfThreads: Int
+    override var concurrentTasks: Int
         get() = threads
         set(value) {
             if (value < 1) throw IllegalArgumentException("can't have less then one thread")
@@ -79,8 +80,7 @@ private class ConcreteDisruptorBuilder : DisruptorBuilder {
         }
 
     fun buildDispatcher(): Dispatcher {
-        return SingleThreadDisruptorDispatcher()
-        //return DisruptorDispatcher(name, buffer, threads, producerType)
+        return DisruptorDispatcher(name, buffer, threads, producerType)
     }
 }
 
@@ -162,87 +162,6 @@ private class DisruptorDispatcher(private val name: String,
     override val stopped: Boolean
         get() = throw UnsupportedOperationException()
 
-
-}
-
-
-private class SingleThreadDisruptorDispatcher() : Dispatcher {
-    private val buffer = RingBuffer.createMultiProducer({ FunctionEvent() }, PowerOfTwo.roundUp(1000000), BlockingWaitStrategy())
-
-    private val barrier = buffer.newBarrier()
-    private val thread = Thread({ dispatch() }, "disruptor")
-
-    private volatile var running = true
-
-    init {
-        thread.setDaemon(false)
-        thread.start()
-    }
-
-    override fun offer(task: () -> Unit): Boolean {
-        //TODO if buffer is too small, buffer.next goes beyond read point and makes the whole Disruptor
-        //TODO deadlock. How does blocking work? I probably poorly configured the Disruptor.
-
-        val seq = buffer.next()
-        try {
-            buffer[seq].value = task
-        } finally {
-            buffer.publish(seq)
-        }
-        return true
-    }
-
-
-    //only call from dispatcher thread
-    private fun dispatch() {
-        val callables = ArrayList<() -> Unit>()
-        var seq = 0L
-        while (running) {
-            try {
-                val nextSeq = barrier.waitFor(seq)
-                val batchSize = (nextSeq - seq).toInt() + 1
-                if (batchSize > 0) {
-                    callables.ensureCapacity(batchSize)
-                    callables.clear()
-                    while (seq <= nextSeq) {
-                        callables add buffer[seq].value
-
-                        ++seq
-                    }
-
-                    callables.executeAll()
-                    callables.clear()
-                }
-                //println("seq: $seq, nextSeq: $nextSeq")
-            } catch(e: Exception) {
-                e.printStackTrace(System.err)
-            }
-        }
-    }
-
-    //only call from dispatcher thread
-    private fun ArrayList<() -> Unit>.executeAll() {
-        forEach {
-            fn ->
-            fn.invoke()
-        }
-    }
-
-    //TODO, implement this properly
-    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
-        running = false
-
-        return listOf()
-    }
-
-    override fun tryCancel(task: () -> Unit): Boolean {
-        throw UnsupportedOperationException()
-    }
-
-    override val terminated: Boolean
-        get() = throw UnsupportedOperationException()
-    override val stopped: Boolean
-        get() = throw UnsupportedOperationException()
 
 }
 

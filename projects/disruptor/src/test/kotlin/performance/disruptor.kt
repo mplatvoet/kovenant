@@ -40,7 +40,7 @@ val timingRounds = 1000000
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 //val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
-val callDisruptor = disruptor { numberOfThreads = 1 }
+val callDisruptor = disruptor { concurrentTasks = 1 }
 //val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 fun main(args: Array<String>) {
