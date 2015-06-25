@@ -24,19 +24,22 @@ package validate.disruptor
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.all
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.disruptor.buildDisruptor
+import nl.komponents.kovenant.disruptor.disruptor
 import support.fib
 import java.util.Random
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-    val disruptorDispatcher = buildDisruptor { }
     Kovenant.context {
-        callbackContext.dispatcher = disruptorDispatcher
+        callbackContext {
+            disruptor { name = "disruptor" }
+        }
     }
     validate(100000)
 
-    disruptorDispatcher.stop()
+    val list = Kovenant.stop()
+    println("size: ${list.size()}")
 }
 
 
@@ -54,8 +57,11 @@ fun validate(n: Int) {
         }
     }
 
+    val latch = CountDownLatch(1)
     all(*promises) always {
         println("validate with $n attempts, errors: ${errors.get()}, successes: ${successes.get()}")
+        latch.countDown()
     }
+    //latch.await()
 
 }

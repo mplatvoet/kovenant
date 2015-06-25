@@ -29,6 +29,7 @@ import com.lmax.disruptor.dsl.ProducerType
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.MutableDispatcherContext
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 public fun MutableDispatcherContext.disruptor(body: DisruptorBuilder.() -> Unit) {
@@ -147,19 +148,20 @@ private class DisruptorDispatcher(private val name: String,
 
     //TODO, implement this properly
     override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
-        //        running = false
-        //        while (publishers.get() > 0) {
-        //            //just spin till all the publishers are gone
-        //        }
-        //        disrupter.shutdown()
-        //        executorService.shutdown()
-        //        executorService.awaitTermination(1, TimeUnit.DAYS)
+        running = false
+        while (publishers.get() > 0) {
+            Thread.yield()
+            //just spin till all the publishers are gone
+        }
+        disrupter.shutdown()
+        executorService.shutdown()
+        executorService.awaitTermination(1, TimeUnit.DAYS)
         return listOf()
     }
 
     override fun tryCancel(task: () -> Unit): Boolean {
-
-        throw UnsupportedOperationException()
+        //TODO, try implementing this
+        return false
     }
 
     override val terminated: Boolean

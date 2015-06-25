@@ -39,9 +39,7 @@ val timingRounds = 1000000
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val callDispatcher = buildDispatcher { concurrentTasks = 1 }
-//val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
 val callDisruptor = buildDisruptor { concurrentTasks = 1 }
-//val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 fun main(args: Array<String>) {
     println(
@@ -84,14 +82,12 @@ fun main(args: Array<String>) {
 fun configureDisruptor() {
     Kovenant.context {
         callbackContext.dispatcher = callDisruptor
-        //workerDispatcher = workDisruptor
     }
 }
 
 fun configureDispatcher() {
     Kovenant.context {
         callbackContext.dispatcher = callDispatcher
-        //workerDispatcher = workDispatcher
     }
 }
 
