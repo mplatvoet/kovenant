@@ -27,10 +27,15 @@ import com.lmax.disruptor.SleepingWaitStrategy
 import com.lmax.disruptor.dsl.Disruptor
 import com.lmax.disruptor.dsl.ProducerType
 import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.MutableDispatcherContext
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 
-public fun disruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
+public fun MutableDispatcherContext.disruptor(body: DisruptorBuilder.() -> Unit) {
+    dispatcher = buildDisruptor (body)
+}
+
+public fun buildDisruptor(body: DisruptorBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDisruptorBuilder()
     builder.body()
     return builder.buildDispatcher()

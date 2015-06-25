@@ -25,7 +25,7 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import nl.komponents.kovenant.buildDispatcher
-import nl.komponents.kovenant.disruptor.disruptor
+import nl.komponents.kovenant.disruptor.buildDisruptor
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -40,7 +40,7 @@ val timingRounds = 1000000
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
 val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 //val workDispatcher = buildDispatcher { numberOfThreads = numberOfWorkerThreads }
-val callDisruptor = disruptor { concurrentTasks = 1 }
+val callDisruptor = buildDisruptor { concurrentTasks = 1 }
 //val workDisruptor = buildDisruptor { numberOfThreads = numberOfWorkerThreads }
 
 fun main(args: Array<String>) {

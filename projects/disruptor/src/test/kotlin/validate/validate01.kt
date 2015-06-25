@@ -24,13 +24,13 @@ package validate.disruptor
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.all
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.disruptor.disruptor
+import nl.komponents.kovenant.disruptor.buildDisruptor
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
 
 fun main(args: Array<String>) {
-    val disruptorDispatcher = disruptor { }
+    val disruptorDispatcher = buildDisruptor { }
     Kovenant.context {
         callbackContext.dispatcher = disruptorDispatcher
     }
