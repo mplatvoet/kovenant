@@ -498,11 +498,11 @@ private class WorkQueue<V : Any>() : Offerable<V>, Pollable<V> {
     }
 }
 
-private interface Offerable<V : Any> {
+public interface Offerable<V : Any> {
     fun offer(elem: V): Boolean
 }
 
-private interface Pollable<V : Any> {
+public interface Pollable<V : Any> {
     throws(InterruptedException::class)
     fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
 }
