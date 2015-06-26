@@ -31,27 +31,8 @@ import java.util.concurrent.atomic.AtomicReference
 import com.lmax.disruptor.Sequence as Seq
 
 
-fun main(args: Array<String>) {
-    val queue = DisruptorWorkQueue(0)
-    queue offer 1
-    queue offer 2
-    queue offer 3
 
-    println(queue.size())
-
-    println(queue.remove(1))
-    println(queue.remove(1))
-    println(queue.remove(2))
-    println(queue.remove(3))
-    println(queue.poll())
-    println(queue.poll())
-    println(queue.poll())
-    println(queue.poll())
-
-}
-
-
-class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offerable<V>, Pollable<V> {
+private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offerable<V>, Pollable<V> {
 
     private val buffer = RingBuffer.createMultiProducer(ContainerFactory(initialValue), PowerOfTwo.roundUp(capacity))
     private val seq = Seq()
@@ -62,6 +43,11 @@ class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offer
     //introduces quite a lot of overhead and the semantics
     //are just the same
     private val mutex = Object()
+
+    init {
+        buffer.addGatingSequences(seq)
+        seq.set(buffer.getCursor())
+    }
 
     public fun size(): Int {
         // tail **needs** to be retrieved before head
@@ -76,28 +62,25 @@ class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offer
     public fun isEmpty(): Boolean = size() == 0
     public fun isNotEmpty(): Boolean = !isEmpty()
 
-
-    //TODO can we avoid duplicates? probably seq.get() must be stale...
+//Can't really ensure atomicity on this. So report false for now.
     public fun remove(elem: Any?): Boolean {
-        var idx = buffer.getCursor()
-        while(idx > seq.get()) {
-            val container = buffer[idx]
-            val value = container.value
-            if (value == elem
-                    && buffer.isPublished(idx)
-                    && container.reset(value)) {
-                return true
-            }
-            --idx
-        }
+//        var idx = buffer.getCursor()
+//        while(idx > seq.get()) {
+//            val tail = seq.get()
+//            val container = buffer[idx]
+//            val value = container.value
+//            if (value == elem
+//                    && buffer.isPublished(idx)
+//                    && container.reset(value)) {
+//                return true
+//            }
+//            --idx
+//        }
         return false
     }
 
 
-    init {
-        buffer.addGatingSequences(seq)
-        seq.set(buffer.getCursor())
-    }
+
 
     override fun offer(elem: V): Boolean {
         val idx = buffer.next()
@@ -175,14 +158,17 @@ class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offer
 
 
 private class Container<V>(private val initialValue: V) {
-    private val valueRef = AtomicReference(initialValue)
-    public var value: V
-        get() = valueRef.get()
-        set(newValue) {
-            valueRef.set(newValue)
-        }
+    public var value: V = initialValue
 
-    public fun reset(expected: V) : Boolean = valueRef.compareAndSet(expected, initialValue)
+    /*for deletion*/
+//    private val valueRef = AtomicReference(initialValue)
+//    public var value: V
+//        get() = valueRef.get()
+//        set(newValue) {
+//            valueRef.set(newValue)
+//        }
+//
+//    public fun reset(expected: V) : Boolean = valueRef.compareAndSet(expected, initialValue)
 
 }
 
