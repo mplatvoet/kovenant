@@ -25,7 +25,7 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import nl.komponents.kovenant.buildDispatcher
-import nl.komponents.kovenant.disruptor.buildDisruptor
+import nl.komponents.kovenant.disruptor.queue.disruptorWorkQueue
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
@@ -35,11 +35,16 @@ import java.util.concurrent.CountDownLatch
 
 val attempts = 10
 val warmupRounds = 100000
-val timingRounds = 1000000
+val timingRounds = 3000000
 
 val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-val callDispatcher = buildDispatcher { concurrentTasks = 1 }
-val callDisruptor = buildDisruptor { concurrentTasks = 1 }
+val callDispatcher = buildDispatcher {
+    concurrentTasks = 1
+}
+val callDisruptor = buildDispatcher {
+    concurrentTasks = 1
+    workQueue = disruptorWorkQueue()
+}
 
 fun main(args: Array<String>) {
     println(
@@ -76,7 +81,6 @@ fun main(args: Array<String>) {
     println("On average with ${attempts} attempts, " +
             "Dispatcher was a factor ${fasterOrSlower(averageFactor)}")
 
-    callDisruptor.stop(force = true)
 }
 
 fun configureDisruptor() {

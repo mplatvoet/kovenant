@@ -39,8 +39,8 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
     private var localExceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
     private var localErrorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
 
-    private val workQueue = WorkQueue<() -> Unit>()
-    private val pollStrategyBuilder = ConcretePollStrategyBuilder(workQueue)
+    private var localWorkQueue: WorkQueue<() -> Unit> = NonBlockingWorkQueue()
+    private val pollStrategyBuilder = ConcretePollStrategyBuilder()
 
     override var name: String
         get() = localName
@@ -70,6 +70,12 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
             localErrorHandler = value
         }
 
+    override var workQueue: WorkQueue<() -> Unit>
+        get() = localWorkQueue
+        set(value) {
+            localWorkQueue = value
+        }
+
 
     override fun pollStrategy(body: PollStrategyBuilder.() -> Unit) {
         pollStrategyBuilder.clear()
@@ -81,47 +87,46 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
                 numberOfThreads = localNumberOfThreads,
                 exceptionHandler = localExceptionHandler,
                 errorHandler = localErrorHandler,
-                workQueue = workQueue,
-                pollStrategy = pollStrategyBuilder.build())
+                workQueue = localWorkQueue,
+                pollStrategy = pollStrategyBuilder.build(localWorkQueue))
     }
-
-
 }
 
 
-class ConcretePollStrategyBuilder(private val workQueue: WorkQueue<() -> Unit>) : PollStrategyBuilder {
-    private val strategies = ArrayList<PollStrategy<() -> Unit>>()
+class ConcretePollStrategyBuilder() : PollStrategyBuilder {
+    private val factories = ArrayList<PollStrategyFactory<() -> Unit>>()
 
-    fun clear() = strategies.clear()
+    fun clear() = factories.clear()
 
     override fun yielding(numberOfPolls: Int) {
-        strategies add YieldingPollStrategy(pollable = workQueue, attempts = numberOfPolls)
+        factories add YieldingPollStrategyFactory(attempts = numberOfPolls)
     }
 
     override fun sleeping(numberOfPolls: Int, sleepTimeInMs: Long) {
-        strategies add SleepingPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+        factories add SleepingPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
     override fun busy(numberOfPolls: Int) {
-        strategies add BusyPollStrategy(pollable = workQueue, attempts = numberOfPolls)
+        factories add BusyPollStrategyFactory(attempts = numberOfPolls)
     }
 
     override fun blocking() {
-        strategies add BlockingPollStrategy(pollable = workQueue)
+        factories add BlockingPollStrategyFactory()
     }
 
     override fun blockingSleep(numberOfPolls: Int, sleepTimeInMs: Long) {
-        strategies add BlockingSleepPollStrategy(pollable = workQueue, attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+        factories add BlockingSleepPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
     }
 
-    private fun buildDefaultStrategy(): PollStrategy<() -> Unit> {
-        return ChainPollStrategy(listOf(YieldingPollStrategy(workQueue), SleepingPollStrategy(workQueue)))
+    private fun buildDefaultStrategy(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> {
+        val defaultFactories = listOf(YieldingPollStrategyFactory<() -> Unit>(), SleepingPollStrategyFactory<() -> Unit>())
+        return ChainPollStrategyFactory(defaultFactories).build(pollable)
     }
 
-    fun build(): PollStrategy<() -> Unit> = if (strategies.isEmpty()) {
-        buildDefaultStrategy()
+    fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
+        buildDefaultStrategy(pollable)
     } else {
-        ChainPollStrategy(strategies)
+        ChainPollStrategyFactory(factories).build(pollable)
     }
 }
 
@@ -214,8 +219,7 @@ private class NonBlockingDispatcher(val name: String,
     private fun depleteQueue(): List<() -> Unit> {
         val remains = ArrayList<() -> Unit>()
         do {
-            val function = workQueue.poll()
-            if (function == null) return remains
+            val function = workQueue.poll() ?: return remains
             remains.add(function)
         } while (true)
         throw IllegalStateException("unreachable")
@@ -424,94 +428,21 @@ private class NonBlockingDispatcher(val name: String,
 }
 
 
-private class WorkQueue<V : Any>() : Offerable<V>, Pollable<V> {
-    private val queue = ConcurrentLinkedQueue<V>()
-    private val waitingThreads = AtomicInteger(0)
-
-    //yes I could also use a ReentrantLock with a Condition but
-    //introduces quite a lot of overhead and the semantics
-    //are just the same
-    private val mutex = Object()
-
-    public fun size(): Int = queue.size()
-
-    public fun isEmpty(): Boolean = queue.isEmpty()
-    public fun isNotEmpty(): Boolean = !isEmpty()
-
-    public fun remove(elem: Any?): Boolean = queue.remove(elem)
-
-    override fun offer(elem: V): Boolean {
-        val added = queue offer elem
-
-        if (added && waitingThreads.get() > 0) {
-            synchronized(mutex) {
-                //maybe there aren't any threads waiting or
-                //there isn't anything in the queue anymore
-                //just notify, we've got this far
-                mutex.notifyAll()
-            }
-        }
-
-        return added
-    }
-
-    override fun poll(block: Boolean, timeoutMs: Long): V? {
-        if (!block) return queue.poll()
-
-        val elem = queue.poll()
-        if (elem != null) return elem
-
-        waitingThreads.incrementAndGet()
-        try {
-            return if (timeoutMs > -1L) {
-                blockingPoll(timeoutMs)
-            } else {
-                blockingPoll()
-            }
-        } finally {
-            waitingThreads.decrementAndGet()
-        }
-
-    }
-
-    private fun blockingPoll(): V? {
-        synchronized(mutex) {
-            while (true) {
-                val retry = queue.poll()
-                if (retry != null) return retry
-                mutex.wait()
-            }
-        }
-        throw IllegalStateException("unreachable")
-    }
-
-    private fun blockingPoll(timeoutMs: Long): V? {
-        val deadline = System.currentTimeMillis() + timeoutMs
-        synchronized(mutex) {
-            while (true) {
-                val retry = queue.poll()
-                if (retry != null || System.currentTimeMillis() >= deadline) return retry
-                mutex.wait(timeoutMs)
-            }
-        }
-        throw IllegalStateException("unreachable")
-    }
-}
-
-public interface Offerable<V : Any> {
-    fun offer(elem: V): Boolean
-}
-
-public interface Pollable<V : Any> {
-    throws(InterruptedException::class)
-    fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
-}
-
-
 private interface PollStrategy<V : Any> {
-    throws(InterruptedException::class)
     fun get(): V?
 }
+
+private interface PollStrategyFactory<V : Any> {
+    fun build(pollable: Pollable<V>): PollStrategy<V>
+}
+
+private class ChainPollStrategyFactory<V : Any>(private val factories: List<PollStrategyFactory<V>>) : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        val strategies = factories map { it.build(pollable) }
+        return ChainPollStrategy(strategies)
+    }
+}
+
 
 private class ChainPollStrategy<V : Any>(private val strategies: List<PollStrategy<V>>) : PollStrategy<V> {
     override fun get(): V? {
@@ -523,8 +454,15 @@ private class ChainPollStrategy<V : Any>(private val strategies: List<PollStrate
     }
 }
 
+private class YieldingPollStrategyFactory<V : Any>(private val attempts: Int = 1000) : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        return YieldingPollStrategy(pollable, attempts)
+    }
+
+}
+
 private class YieldingPollStrategy<V : Any>(private val pollable: Pollable<V>,
-                                            private val attempts: Int = 1000) : PollStrategy<V> {
+                                            private val attempts: Int) : PollStrategy<V> {
     override fun get(): V? {
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
@@ -535,8 +473,16 @@ private class YieldingPollStrategy<V : Any>(private val pollable: Pollable<V>,
     }
 }
 
+
+private class BusyPollStrategyFactory<V : Any>(private val attempts: Int = 1000) : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        return BusyPollStrategy(pollable, attempts)
+    }
+
+}
+
 private class BusyPollStrategy<V : Any>(private val pollable: Pollable<V>,
-                                        private val attempts: Int = 1000) : PollStrategy<V> {
+                                        private val attempts: Int) : PollStrategy<V> {
     override fun get(): V? {
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
@@ -546,9 +492,18 @@ private class BusyPollStrategy<V : Any>(private val pollable: Pollable<V>,
     }
 }
 
+
+private class SleepingPollStrategyFactory<V : Any>(private val attempts: Int = 100,
+                                                   private val sleepTimeMs: Long = 10) : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        return SleepingPollStrategy(pollable, attempts, sleepTimeMs)
+    }
+
+}
+
 private class SleepingPollStrategy<V : Any>(private val pollable: Pollable<V>,
-                                            private val attempts: Int = 100,
-                                            private val sleepTimeMs: Long = 10) : PollStrategy<V> {
+                                            private val attempts: Int,
+                                            private val sleepTimeMs: Long) : PollStrategy<V> {
     override fun get(): V? {
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
@@ -557,6 +512,14 @@ private class SleepingPollStrategy<V : Any>(private val pollable: Pollable<V>,
         }
         return null
     }
+}
+
+private class BlockingSleepPollStrategyFactory<V : Any>(private val attempts: Int = 100,
+                                                        private val sleepTimeMs: Long = 10) : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        return BlockingSleepPollStrategy(pollable, attempts, sleepTimeMs)
+    }
+
 }
 
 private class BlockingSleepPollStrategy<V : Any>(private val pollable: Pollable<V>,
@@ -568,6 +531,12 @@ private class BlockingSleepPollStrategy<V : Any>(private val pollable: Pollable<
             if (value != null) return value
         }
         return null
+    }
+}
+
+private class BlockingPollStrategyFactory<V : Any>() : PollStrategyFactory<V> {
+    override fun build(pollable: Pollable<V>): PollStrategy<V> {
+        return BlockingPollStrategy(pollable)
     }
 }
 

@@ -24,32 +24,26 @@ package nl.komponents.kovenant.disruptor.queue
 
 import com.lmax.disruptor.EventFactory
 import com.lmax.disruptor.RingBuffer
-import nl.komponents.kovenant.Offerable
-import nl.komponents.kovenant.Pollable
-import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
+import nl.komponents.kovenant.BlockingSupportWorkQueue
+import nl.komponents.kovenant.WorkQueue
 import com.lmax.disruptor.Sequence as Seq
 
 
+public fun disruptorWorkQueue(capacity: Int = 1024): WorkQueue<() -> Unit> {
+    return DisruptorWorkQueue({ -> Unit }, capacity)
+}
 
-private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024) : Offerable<V>, Pollable<V> {
+private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : BlockingSupportWorkQueue<V>() {
 
     private val buffer = RingBuffer.createMultiProducer(ContainerFactory(initialValue), PowerOfTwo.roundUp(capacity))
     private val seq = Seq()
-
-    private val waitingThreads = AtomicInteger(0)
-
-    //yes I could also use a ReentrantLock with a Condition but
-    //introduces quite a lot of overhead and the semantics
-    //are just the same
-    private val mutex = Object()
 
     init {
         buffer.addGatingSequences(seq)
         seq.set(buffer.getCursor())
     }
 
-    public fun size(): Int {
+    public override fun size(): Int {
         // tail **needs** to be retrieved before head
         // because in highly concurrent scenario's if retrieved
         // the other way around, the tail might be beyond the head
@@ -59,30 +53,25 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024)
         return (head - tail).toInt()
     }
 
-    public fun isEmpty(): Boolean = size() == 0
-    public fun isNotEmpty(): Boolean = !isEmpty()
-
-//Can't really ensure atomicity on this. So report false for now.
-    public fun remove(elem: Any?): Boolean {
-//        var idx = buffer.getCursor()
-//        while(idx > seq.get()) {
-//            val tail = seq.get()
-//            val container = buffer[idx]
-//            val value = container.value
-//            if (value == elem
-//                    && buffer.isPublished(idx)
-//                    && container.reset(value)) {
-//                return true
-//            }
-//            --idx
-//        }
+    //Can't really ensure atomicity on this. So report false for now.
+    public override fun remove(elem: Any?): Boolean {
+        //        var idx = buffer.getCursor()
+        //        while(idx > seq.get()) {
+        //            val tail = seq.get()
+        //            val container = buffer[idx]
+        //            val value = container.value
+        //            if (value == elem
+        //                    && buffer.isPublished(idx)
+        //                    && container.reset(value)) {
+        //                return true
+        //            }
+        //            --idx
+        //        }
         return false
     }
 
 
-
-
-    override fun offer(elem: V): Boolean {
+    override fun tryOffer(elem: V): Boolean {
         val idx = buffer.next()
         try {
             buffer[idx].value = elem
@@ -92,25 +81,8 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024)
         return true
     }
 
-    override fun poll(block: Boolean, timeoutMs: Long): V? {
-        if (!block) return tryPoll()
 
-        val elem = tryPoll()
-        if (elem != null) return elem
-
-        waitingThreads.incrementAndGet()
-        try {
-            return if (timeoutMs > -1L) {
-                blockingPoll(timeoutMs)
-            } else {
-                blockingPoll()
-            }
-        } finally {
-            waitingThreads.decrementAndGet()
-        }
-    }
-
-    private fun tryPoll(): V? {
+    override fun tryPoll(): V? {
         while (true) {
             // Determine if the next sequence is a published
             // one. Otherwise this queue can be considered
@@ -130,30 +102,6 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int = 1024)
             }
         }
     }
-
-
-    private fun blockingPoll(): V? {
-        synchronized(mutex) {
-            while (true) {
-                val retry = tryPoll()
-                if (retry != null) return retry
-                mutex.wait()
-            }
-        }
-        throw IllegalStateException("unreachable")
-    }
-
-    private fun blockingPoll(timeoutMs: Long): V? {
-        val deadline = System.currentTimeMillis() + timeoutMs
-        synchronized(mutex) {
-            while (true) {
-                val retry = tryPoll()
-                if (retry != null || System.currentTimeMillis() >= deadline) return retry
-                mutex.wait(timeoutMs)
-            }
-        }
-        throw IllegalStateException("unreachable")
-    }
 }
 
 
@@ -161,14 +109,14 @@ private class Container<V>(private val initialValue: V) {
     public var value: V = initialValue
 
     /*for deletion*/
-//    private val valueRef = AtomicReference(initialValue)
-//    public var value: V
-//        get() = valueRef.get()
-//        set(newValue) {
-//            valueRef.set(newValue)
-//        }
-//
-//    public fun reset(expected: V) : Boolean = valueRef.compareAndSet(expected, initialValue)
+    //    private val valueRef = AtomicReference(initialValue)
+    //    public var value: V
+    //        get() = valueRef.get()
+    //        set(newValue) {
+    //            valueRef.set(newValue)
+    //        }
+    //
+    //    public fun reset(expected: V) : Boolean = valueRef.compareAndSet(expected, initialValue)
 
 }
 
