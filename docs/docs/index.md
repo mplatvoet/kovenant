@@ -57,6 +57,7 @@ it's needed to keep class and method count low.
 |kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |
 |kovenant-android  |Extensions for Android specific needs                                                              | 
 |kovenant-disruptor|LMAX Disruptor work queues                                                                         | 
+|kovenant-progress |Progress configuration helper                                                                         | 
 
 ##Issues
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)

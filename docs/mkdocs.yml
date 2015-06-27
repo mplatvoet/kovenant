@@ -16,6 +16,7 @@ pages:
 - ['android/features.md', 'Android','Features']
 - ['android/config.md', 'Android','Configuring']
 - ['addons/disruptor.md', 'Add-ons','Disruptor']
+- ['addons/progress.md', 'Add-ons','Progress']
 - ['misc/goals.md', 'Misc', 'Goals']
 - ['misc/performance.md', 'Misc', 'Performance']
 - ['misc/considerations.md','Misc', 'Considerations']
