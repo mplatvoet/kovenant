@@ -25,14 +25,25 @@ package nl.komponents.kovenant
 public object Kovenant {
     private val concrete = ConcreteKovenant()
 
-    val context: Context
+    var context: Context
         get() = concrete.context
+        set(value) {
+            concrete.context = value
+        }
 
-    public fun configure(body: MutableContext.() -> Unit): Unit = concrete.configure(body)
+
+    public fun context(body: MutableContext.() -> Unit): Unit = concrete.context(body)
+
+    @deprecated("use context { ... } instead", ReplaceWith("context(body)"))
+    public fun configure(body: MutableContext.() -> Unit): Unit = context(body)
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
     public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
+
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
+        return context.stop(force, timeOutMs, block)
+    }
 
 }
 
@@ -41,14 +52,72 @@ public interface Context {
 
     val callbackContext: DispatcherContext
     val workerContext: DispatcherContext
+
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
+        val callbackTasks = callbackContext.dispatcher.stop(force, timeOutMs, block)
+        val workerTasks = workerContext.dispatcher.stop(force, timeOutMs, block)
+        return callbackTasks + workerTasks
+    }
+
+    @deprecated("use callbackContext.dispatcher instead", ReplaceWith("callbackContext.dispatcher"))
+    val callbackDispatcher: Dispatcher get() = callbackContext.dispatcher
+
+    @deprecated("use workerContext.dispatcher instead", ReplaceWith("workerContext.dispatcher"))
+    val workerDispatcher: Dispatcher get() = workerContext.dispatcher
+
+    @deprecated("use callbackContext.errorHandler instead", ReplaceWith("callbackContext.errorHandler"))
+    val callbackError: (Exception) -> Unit get() = callbackContext.errorHandler
+
+    @deprecated("use workerContext.errorHandler instead", ReplaceWith("workerContext.errorHandler"))
+    val workerError: (Exception) -> Unit get() = workerContext.errorHandler
 }
 
 public interface MutableContext : Context {
-    var callbackDispatcher: Dispatcher
-    var workerDispatcher: Dispatcher
-    var callbackError: (Exception) -> Unit
-    var workerError: (Exception) -> Unit
+    override val callbackContext: MutableDispatcherContext
+    override val workerContext: MutableDispatcherContext
+
     override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+
+    fun callbackContext(body: MutableDispatcherContext.() -> Unit) {
+        callbackContext.body()
+    }
+
+    fun workerContext(body: MutableDispatcherContext.() -> Unit) {
+        workerContext.body()
+    }
+
+    @deprecated("use callbackContext.dispatcher instead", ReplaceWith("callbackContext.dispatcher"))
+    override var callbackDispatcher: Dispatcher
+        get() = callbackContext.dispatcher
+        set(value) {
+            callbackContext.dispatcher = value
+        }
+
+    @deprecated("use workerContext.dispatcher instead", ReplaceWith("workerContext.dispatcher"))
+    override var workerDispatcher: Dispatcher
+        get() = workerContext.dispatcher
+        set(value) {
+            workerContext.dispatcher = value
+        }
+
+    @deprecated("use callbackContext.errorHandler instead", ReplaceWith("callbackContext.errorHandler"))
+    override var callbackError: (Exception) -> Unit
+        get() = callbackContext.errorHandler
+        set(value) {
+            callbackContext.errorHandler = value
+        }
+
+    @deprecated("use workerContext.errorHandler instead", ReplaceWith("workerContext.errorHandler"))
+    override var workerError: (Exception) -> Unit
+        get() = workerContext.errorHandler
+        set(value) {
+            workerContext.errorHandler = value
+        }
+
+}
+
+public interface ReconfigurableContext : MutableContext {
+    fun copy(): ReconfigurableContext
 }
 
 public interface DispatcherContext {
@@ -64,10 +133,14 @@ public interface DispatcherContext {
     }
 }
 
-//public trait MutableDispatcherContext : DispatcherContext {
-//    override var dispatcher: Dispatcher
-//    override var errorHandler: (Exception) -> Unit
-//}
+public interface MutableDispatcherContext : DispatcherContext {
+    override var dispatcher: Dispatcher
+    override var errorHandler: (Exception) -> Unit
+
+    fun dispatcher(body: DispatcherBuilder.() -> Unit) {
+        dispatcher = buildDispatcher(body)
+    }
+}
 
 
 

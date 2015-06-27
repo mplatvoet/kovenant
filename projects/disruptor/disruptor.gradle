@@ -19,11 +19,7 @@
  * THE SOFTWARE.
  */
 
-package nl.komponents.kovenant
-
-
-public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
-
-public open class CancelException : KovenantException()
-
-public open class ConfigurationException(message: String) : KovenantException(message)
+dependencies {
+    compile project(':kovenant-core')
+    compile 'com.lmax:disruptor:3.3.2'
+}

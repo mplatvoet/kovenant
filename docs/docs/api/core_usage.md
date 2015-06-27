@@ -12,7 +12,7 @@ This will execute function `foo()` asynchronously and immediately returns a `Pro
 the inferred return type of `foo()`. If `foo()` completes successful the `Promise` is resolved as successful. Any 
 `Exception` from `foo()` is considered a failure.
 
-`async` dispatches the work on the [`workerDispatcher`](core_config.md). 
+`async` dispatches the work on the [`workerContext`](core_config.md). 
 
 ---
 
@@ -101,6 +101,21 @@ async {
 }
 ```
 
+###DispatcherContext
+By default the callbacks are executed on the callback `DispatcherContext` that is associated with this `Promise`. 
+But you can also provide your own DispatcherContext for a specific callback.
+
+```kt
+val dispatcherContext = //...
+
+async {
+	foo()
+}.success(dispatcherContext) {
+	bar()
+}
+
+```
+
 
 ###Multiple Success stories
 You don't have to limit yourself to registering just one callback. You can add multiple `success`, `fail` and `always` actions to one single promise. 
@@ -120,9 +135,9 @@ async {
 ```
 
 ###Execution order
-The order of execution of the callbacks depends greatly on the underlying callback `Dispatcher`. Kovenant guarantees
-that callbacks are offered to the `Dispatcher` in the same order they were added to the `Promise`. The default
-callback Dispatcher also maintains this order. So by default all callbacks are executed in the same order they were 
+The order of execution of the callbacks depends greatly on the underlying callback `DispatcherContext`. Kovenant guarantees
+that callbacks are offered to the `DispatcherContext` in the same order they were added to the `Promise`. The default
+callback DispatcherContext also maintains this order. So by default all callbacks are executed in the same order they were 
 added. 
 
 The default behaviour can easily be broken though. For instance, if you configure the callbackDispatcher to operate with 
@@ -147,7 +162,7 @@ all (first, second) success {
 If we don't have guarantees about the order of the callbacks the above example simply won't work. This is because
 the `all` function also relies on callbacks on the `first` and `second` promise. So without order guarantees the
 `success`callback of `all` might just execute before the `success` callbacks of the `first` and `second` promise. 
-So don't just blindly change the callback `Dispatcher` without actually understanding what you are doing.
+So don't just blindly change the callback `DispatcherContext` without actually understanding what you are doing.
 
 ---
 
@@ -165,13 +180,13 @@ async {
 }
 ```
 Any `Exception` thrown from any of the steps in the chain of promises results in every next promises to be resolved as
-failed. The work of `then` is executed by the worker `Dispatcher`. 
+failed. The work of `then` is executed by the `workerContext`. 
 
 ---
 
 ##Then Use
 `thenUse` operates similar to [`then`](#then) except that it takes the output from a previous `Promise` as its input
-as an extension function. The previous exaxmple would thus be:
+as an extension function. The previous example would thus be:
 
 ```kt
 async {
@@ -211,6 +226,24 @@ fun main(args: Array<String>) {
 class ExpensiveResource {
     val value :String = "result"
 }
+```
+
+---
+
+##Of
+In order align with existing libraries and code you can create promises of existing values with `of`, `ofSuccess` 
+and `ofFail`.
+ 
+```kt
+// Success promise with inferred value type
+// and Exception as fail type 
+Promise.of(13)
+
+// Failed promise with explicit types
+Promise.ofFail<String, Int>(13)
+
+// Successful promise with explicit types
+Promise.ofSuccess<String, Int>("thirteen")
 ```
 
 ---

@@ -34,7 +34,7 @@ interface Dispatcher {
      * @param task the task to be executed by this dispatcher
      * @return true if the task was scheduled, false if this dispatcher has shutdown or is shutting down
      */
-    fun offer(task: () -> Unit) : Boolean
+    fun offer(task: () -> Unit): Boolean
 
     /**
      * Stops this dispatcher therefor stops accepting new tasks. This methods blocks and executes everything that
@@ -57,18 +57,50 @@ interface Dispatcher {
      *
      * @return true if the task was cancelled, false otherwise
      */
-    fun tryCancel(task: ()-> Unit) : Boolean
+    fun tryCancel(task: () -> Unit): Boolean
 
 
     /**
      * @return true if dispatcher is shutdown all threads have been shutdown, false otherwise
      */
-    val terminated : Boolean
+    val terminated: Boolean
 
     /**
      * @return true if shutdown has been invoked, false otherwise.
      */
-    val stopped : Boolean
+    val stopped: Boolean
+}
+
+public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
+
+public interface DispatcherBuilder {
+    var name: String
+
+    var concurrentTasks: Int
+    var exceptionHandler: (Exception) -> Unit
+    var errorHandler: (Throwable) -> Unit
+
+    var workQueue: WorkQueue<() -> Unit>
+
+    fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
+
+    @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
+    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
+
+    @deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
+    var numberOfThreads: Int
+        get() = concurrentTasks
+        set(value) {
+            concurrentTasks = value
+        }
+}
+
+public interface PollStrategyBuilder {
+    fun yielding(numberOfPolls: Int = 1000)
+    fun busy(numberOfPolls: Int = 1000)
+    fun blocking()
+    fun sleeping(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
+    fun blockingSleep(numberOfPolls: Int = 10, sleepTimeInMs: Long = 10)
 }
 
 

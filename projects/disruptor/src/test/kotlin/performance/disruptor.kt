@@ -19,29 +19,32 @@
  * THE SOFTWARE.
  */
 
-package performance.perf01
+package performance.disruptor
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import nl.komponents.kovenant.buildDispatcher
-import nl.komponents.kovenant.jvm.asDispatcher
+import nl.komponents.kovenant.disruptor.queue.disruptorWorkQueue
 import support.fib
 import java.text.DecimalFormat
 import java.util.ArrayList
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 
-val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
-val excWorkDispatcher = Executors.newFixedThreadPool(numberOfWorkerThreads).asDispatcher()
-val excCallbackDispatcher = Executors.newSingleThreadExecutor().asDispatcher()
-val workDispatcher = buildDispatcher { concurrentTasks = numberOfWorkerThreads }
-val callDispatcher = buildDispatcher { concurrentTasks = 1 }
 
 val attempts = 10
 val warmupRounds = 100000
-val timingRounds = 1000000
+val timingRounds = 3000000
+
+val numberOfWorkerThreads = Runtime.getRuntime().availableProcessors()
+val callDispatcher = buildDispatcher {
+    concurrentTasks = 1
+}
+val callDisruptor = buildDispatcher {
+    concurrentTasks = 1
+    workQueue = disruptorWorkQueue()
+}
 
 fun main(args: Array<String>) {
     println(
@@ -53,7 +56,7 @@ fun main(args: Array<String>) {
 
     val factors = ArrayList<Double>(attempts)
     for (i in 1..10) {
-        configureExecutor()
+        configureDisruptor()
         validate(warmupRounds)
 
         val startExc = System.currentTimeMillis()
@@ -70,28 +73,24 @@ fun main(args: Array<String>) {
 
         val factor = deltaExc.toDouble() / deltaDis.toDouble()
         factors add factor
-        println("[$i/$attempts] Executor: ${deltaExc}ms, Dispatcher: ${deltaDis}ms. " +
+        println("[$i/$attempts] Disruptor: ${deltaExc}ms, Dispatcher: ${deltaDis}ms. " +
                 "Dispatcher is a factor ${fasterOrSlower(factor)}")
     }
 
     val averageFactor = factors.sum() / attempts.toDouble()
-    println("On average with ${attempts} attempts, "+
+    println("On average with ${attempts} attempts, " +
             "Dispatcher was a factor ${fasterOrSlower(averageFactor)}")
 
-    excWorkDispatcher.stop(force = true)
-    excCallbackDispatcher.stop(force = true)
 }
 
-fun configureExecutor() {
+fun configureDisruptor() {
     Kovenant.context {
-        workerContext.dispatcher = excWorkDispatcher
-        callbackContext.dispatcher = excCallbackDispatcher
+        callbackContext.dispatcher = callDisruptor
     }
 }
 
 fun configureDispatcher() {
     Kovenant.context {
-        workerContext.dispatcher = workDispatcher
         callbackContext.dispatcher = callDispatcher
     }
 }
@@ -113,8 +112,7 @@ private fun await(vararg promises: Promise<*, *>) {
     val latch = CountDownLatch(promises.size())
     promises forEach {
         p ->
-        p success  { latch.countDown() }
-        p fail {latch.countDown() }
+        p always  { latch.countDown() }
     }
     latch.await()
 }

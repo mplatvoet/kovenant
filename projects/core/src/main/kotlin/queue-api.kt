@@ -18,12 +18,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
 package nl.komponents.kovenant
 
 
-public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+public interface Offerable<V : Any> {
+    fun offer(elem: V): Boolean
+}
 
-public open class CancelException : KovenantException()
+public interface Pollable<V : Any> {
+    fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
+}
 
-public open class ConfigurationException(message: String) : KovenantException(message)
+public interface WorkQueue<V : Any> : Offerable<V>, Pollable<V> {
+    fun size(): Int
+
+    fun isEmpty(): Boolean = size() == 0
+    fun isNotEmpty(): Boolean = !isEmpty()
+
+    fun remove(elem: Any?): Boolean
+}
+

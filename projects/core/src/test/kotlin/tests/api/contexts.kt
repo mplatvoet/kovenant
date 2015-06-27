@@ -34,14 +34,18 @@ class AsyncTest {
     var context = Kovenant.context //gets overridden by setup, avoids null checks
 
     Before fun setup() {
-        Kovenant.configure {
-            callbackDispatcher = defaultDispatcher
-            workerDispatcher = defaultDispatcher
+        Kovenant.context {
+            callbackContext {
+                dispatcher = defaultDispatcher
+            }
+            workerContext {
+                dispatcher = defaultDispatcher
+            }
         }
 
         context = Kovenant.createContext {
-            callbackDispatcher = alternateDispatcher
-            workerDispatcher = alternateDispatcher
+            callbackContext.dispatcher = alternateDispatcher
+            workerContext.dispatcher = alternateDispatcher
         }
     }
 

@@ -16,14 +16,22 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package nl.komponents.kovenant
+package examples.of
 
+import nl.komponents.kovenant.Promise
 
-public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+fun main(args: Array<String>) {
+    // Success promise with inferred type
+    Promise.of(13)
 
-public open class CancelException : KovenantException()
+    // Failed promise with explicit types
+    Promise.ofFail<String, Int>(13)
 
-public open class ConfigurationException(message: String) : KovenantException(message)
+    // Successful promise with explicit types
+    Promise.ofSuccess<String, Int>("thirteen")
+}
+

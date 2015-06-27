@@ -54,9 +54,9 @@ public fun stopKovenant(force: Boolean = false) {
 public fun configureKovenant(): Disposable {
     val callbackDispatcher = buildDispatcher {
         name = "kovenant-callback"
-        numberOfThreads = 1
+        concurrentTasks = 1
 
-        configurePollStrategy {
+        pollStrategy {
             yielding(numberOfPolls = 100)
             blocking()
         }
@@ -64,15 +64,19 @@ public fun configureKovenant(): Disposable {
     val workerDispatcher = buildDispatcher {
         name = "kovenant-worker"
 
-        configurePollStrategy {
+        pollStrategy {
             yielding(numberOfPolls = 100)
             blocking()
         }
     }
 
-    Kovenant.configure {
-        this.callbackDispatcher = callbackDispatcher
-        this.workerDispatcher = workerDispatcher
+    Kovenant.context {
+        callbackContext {
+            dispatcher = callbackDispatcher
+        }
+        workerContext {
+            dispatcher = workerDispatcher
+        }
     }
     return DispatchersDisposable(workerDispatcher, callbackDispatcher)
 }

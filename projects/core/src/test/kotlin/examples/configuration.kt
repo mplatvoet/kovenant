@@ -22,31 +22,28 @@
 package examples.configuration
 
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.buildDispatcher
 
 
-fun main (args: Array<String>) {
-    Kovenant.configure {
+fun main(args: Array<String>) {
+    Kovenant.context {
         // Specify a new worker dispatcher.
         // this dispatcher is responsible for
         // work that is executed by async and
         // then functions so this is basically
         // work that is expected to run a bit
         // longer
-        workerDispatcher = buildDispatcher {
+        workerContext.dispatcher {
             // Name this dispatcher, threads
             // created by this dispatcher will
             // get this name with a number
             // appended
             name = "Bob the builder"
 
-            // the max number of threads this
+            // the max number tasks this
             // dispatcher keeps running in parallel.
-            // During the lifetime of this
-            // dispatcher the number of threads
-            // created can be far greater because
-            // threads also get destroyed.
-            numberOfThreads = 2
+            // This setting might be ignored on some
+            // platforms
+            concurrentTasks = 2
 
             // Configure the strategy to apply
             // to a thread when there is no work
@@ -56,7 +53,7 @@ fun main (args: Array<String>) {
             // applied in order of configuration and
             // resets after a thread executes any
             // new task.
-            configurePollStrategy {
+            pollStrategy {
                 // A busy poll strategy simple polls
                 // the provided amount of polls
                 // without interrupting the thread.
@@ -69,23 +66,27 @@ fun main (args: Array<String>) {
             }
         }
 
-        //Specify a new callback dispatcher.
-        //this dispatcher is responsible for
-        //callbacks like success, fail and always.
-        //it is expected that these callback do
-        //very little work and never block
-        callbackDispatcher = buildDispatcher {
-            name = "Tank"
-            numberOfThreads = 1
+
+        callbackContext {
+            // Specify a new callback dispatcher.
+            // this dispatcher is responsible for
+            // callbacks like success, fail and always.
+            // it is expected that these callback do
+            // very little work and never block
+            dispatcher {
+                name = "Tank"
+                concurrentTasks = 1
+            }
+            // route internal errors when invoking
+            // callbacks. This is also the place to
+            // route this to a preferred logging
+            // framework
+            errorHandler =
+                    fun(e: Exception)
+                            = e.printStackTrace(System.err)
         }
 
-        // route internal errors when invoking
-        //callbacks. This is also the place to
-        //route this to a preferred logging
-        //framework
-        callbackError =
-                fun (e: Exception): Unit
-                        = e.printStackTrace(System.err)
+
 
         // when promises are being resolved
         // multiple time, which is misuse of
@@ -93,7 +94,7 @@ fun main (args: Array<String>) {
         // can for instance choose to throw
         // an Exception here
         multipleCompletion =
-                fun (a: Any, b: Any): Unit
+                fun(a: Any, b: Any): Unit
                         = System.err.println(
                         "Tried resolving with $b, but is $a")
     }
