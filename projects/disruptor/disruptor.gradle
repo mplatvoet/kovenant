@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':kovenant-core')
+    compile 'com.lmax:disruptor:3.3.+'
+}

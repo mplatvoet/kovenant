@@ -26,6 +26,7 @@ include 'combine'
 include 'jvm'
 include 'kovenant'
 include 'android'
+include 'disruptor'
 
 rootProject.children.each { project ->
     String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
@@ -38,3 +39,4 @@ project(":core").name = "kovenant-core"
 project(":combine").name = "kovenant-combine"
 project(":jvm").name = "kovenant-jvm"
 project(":android").name = "kovenant-android"
+project(':disruptor').name = 'kovenant-disruptor'

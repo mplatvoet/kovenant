@@ -19,11 +19,44 @@
  * THE SOFTWARE.
  */
 
-package nl.komponents.kovenant
+package validate.disruptor
+
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.disruptor.queue.disruptorWorkQueue
+import support.fib
+import java.util.Random
+import java.util.concurrent.atomic.AtomicInteger
+
+fun main(args: Array<String>) {
+    Kovenant.context {
+        callbackContext {
+            dispatcher {
+                workQueue = disruptorWorkQueue()
+            }
+        }
+    }
+    validate(100000)
+
+}
 
 
-public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+fun validate(n: Int) {
+    val errors = AtomicInteger()
+    val successes = AtomicInteger()
+    val promises = Array(n) { n ->
+        errors.incrementAndGet()
+        async {
+            val i = Random().nextInt(10)
+            Pair(i, fib(i))
+        } success {
+            errors.decrementAndGet()
+            successes.incrementAndGet()
+        }
+    }
 
-public open class CancelException : KovenantException()
-
-public open class ConfigurationException(message: String) : KovenantException(message)
+    all(*promises) always {
+        println("validate with $n attempts, errors: ${errors.get()}, successes: ${successes.get()}")
+    }
+}

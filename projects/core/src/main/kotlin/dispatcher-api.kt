@@ -80,6 +80,8 @@ public interface DispatcherBuilder {
     var exceptionHandler: (Exception) -> Unit
     var errorHandler: (Throwable) -> Unit
 
+    var workQueue: WorkQueue<() -> Unit>
+
     fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
 
     @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))

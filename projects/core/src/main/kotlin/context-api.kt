@@ -41,6 +41,10 @@ public object Kovenant {
 
     public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
+        return context.stop(force, timeOutMs, block)
+    }
+
 }
 
 public interface Context {
@@ -48,6 +52,12 @@ public interface Context {
 
     val callbackContext: DispatcherContext
     val workerContext: DispatcherContext
+
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
+        val callbackTasks = callbackContext.dispatcher.stop(force, timeOutMs, block)
+        val workerTasks = workerContext.dispatcher.stop(force, timeOutMs, block)
+        return callbackTasks + workerTasks
+    }
 
     @deprecated("use callbackContext.dispatcher instead", ReplaceWith("callbackContext.dispatcher"))
     val callbackDispatcher: Dispatcher get() = callbackContext.dispatcher
