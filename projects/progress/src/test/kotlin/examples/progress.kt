@@ -19,26 +19,26 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package examples.progress
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.progress.attachToKovenant
+import nl.komponents.progress.Progress
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+fun main(args: Array<String>) {
+    Progress.attachToKovenant()
+
+    val control = Progress.control()
+    control.progress.update {
+        println(value)
+        if (done) println ("done")
+    }
+
+    val steps = 40
+    async {
+        for (i in 1..steps ) {
+            control.value = i / steps.toDouble()
+            Thread.sleep(100)
+        }
+    }
 }
-
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
-project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"

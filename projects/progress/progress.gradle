@@ -23,6 +23,6 @@
 project.description = "Progress tracking Kovenant extensions"
 
 dependencies {
-    compile project(':progress-core')
-    compile 'nl.mplatvoet.komponents:kovenant:0.1.2'
+    compile project(':kovenant-core')
+    compile 'nl.komponents.progress:progress-core:0.1.1'
 }
