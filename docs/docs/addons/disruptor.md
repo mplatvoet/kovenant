@@ -26,4 +26,4 @@ specify a capacity that is not a power of two Kovenant will round up to the near
 ##Blocking 
 If the maximum capacity of the Disruptor `WorkQueue` is reached the producers will block. So this is different to
 the default behaviour of Kovenant which is unbounded and non-blocking. The consumers follow the rules depending
-on the configured [poll strategies](../api/core_usage.md#buildDispatcher)
+on the configured [poll strategies](../api/core_config.md#builddispatcher)
