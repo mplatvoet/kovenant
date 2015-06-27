@@ -15,6 +15,7 @@ pages:
 - ['api/jvm_usage.md', 'API Documentation', 'Executors (JVM)']
 - ['android/features.md', 'Android','Features']
 - ['android/config.md', 'Android','Configuring']
+- ['addons/disruptor.md', 'Add-ons','Disruptor']
 - ['misc/goals.md', 'Misc', 'Goals']
 - ['misc/performance.md', 'Misc', 'Performance']
 - ['misc/considerations.md','Misc', 'Considerations']

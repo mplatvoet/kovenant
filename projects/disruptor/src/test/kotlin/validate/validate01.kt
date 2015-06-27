@@ -33,7 +33,8 @@ fun main(args: Array<String>) {
     Kovenant.context {
         callbackContext {
             dispatcher {
-                workQueue = disruptorWorkQueue()
+                concurrentTasks = 1
+                workQueue = disruptorWorkQueue(capacity = 2048)
             }
         }
     }

@@ -56,6 +56,7 @@ it's needed to keep class and method count low.
 |kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
 |kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |
 |kovenant-android  |Extensions for Android specific needs                                                              | 
+|kovenant-disruptor|LMAX Disruptor work queues                                                                         | 
 
 ##Issues
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
