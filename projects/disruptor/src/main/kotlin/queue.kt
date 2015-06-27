@@ -55,18 +55,6 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
 
     //Can't really ensure atomicity on this. So report false for now.
     public override fun remove(elem: Any?): Boolean {
-        //        var idx = buffer.getCursor()
-        //        while(idx > seq.get()) {
-        //            val tail = seq.get()
-        //            val container = buffer[idx]
-        //            val value = container.value
-        //            if (value == elem
-        //                    && buffer.isPublished(idx)
-        //                    && container.reset(value)) {
-        //                return true
-        //            }
-        //            --idx
-        //        }
         return false
     }
 
@@ -107,17 +95,6 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
 
 private class Container<V>(private val initialValue: V) {
     public var value: V = initialValue
-
-    /*for deletion*/
-    //    private val valueRef = AtomicReference(initialValue)
-    //    public var value: V
-    //        get() = valueRef.get()
-    //        set(newValue) {
-    //            valueRef.set(newValue)
-    //        }
-    //
-    //    public fun reset(expected: V) : Boolean = valueRef.compareAndSet(expected, initialValue)
-
 }
 
 private class ContainerFactory<V>(private val initialValue: V) : EventFactory<Container<V>> {
