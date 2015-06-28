@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '0.12.200'
+    ext.kotlinVersion = '0.12.613'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -37,7 +37,7 @@ apply from: "${rootProject.projectDir}/gradle/versions.gradle"
 
 allprojects {
     ext {
-        appVersion = '2.0.0'
+        appVersion = '2.1.0'
         appGroup = 'nl.komponents.kovenant'
 
 

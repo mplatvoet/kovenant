@@ -16,20 +16,20 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package tests.api.casts
 
-package tests.api.then
-
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-class ThenTest {
+class CastTest {
 
     Before fun setup() {
         Kovenant.context {
@@ -38,20 +38,23 @@ class ThenTest {
         }
     }
 
-    Test fun thenSuccess() {
-        var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
+    Test fun asyncPromise() {
+        val promise = async { 13 }
+        assertFalse(promise is Deferred<*,*>, "Promise created by async shouldn't be castable to a Deferred")
     }
 
-    Test fun thenFail() {
-        var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
-        assertEquals(1, count, "should report a failure")
+    Test fun thenPromise() {
+        val promise = async { 13 }.then { 14 }
+        assertFalse(promise is Deferred<*,*>, "Promise created by then shouldn't be castable to a Deferred")
     }
 
+    Test fun deferredPromise() {
+        val promise = deferred<Int, Int>().promise
+        assertFalse(promise is Deferred<*,*>, "Promise created by 'deferred()' shouldn't be castable to a Deferred")
+    }
 
+    Test fun promiseDeferred() {
+        val deferred = deferred<Int, Int>()
+        assertTrue(deferred is Promise<*,*>, "Deferred created by 'deferred()' should be castable to a Promise")
+    }
 }
-
-
-

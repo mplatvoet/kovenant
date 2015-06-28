@@ -16,29 +16,22 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package examples.of
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
+import nl.komponents.kovenant.Promise
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+fun main(args: Array<String>) {
+    // Success promise with inferred type
+    Promise.of(13)
+
+    // Failed promise with explicit types
+    Promise.ofFail<String, Int>(13)
+
+    // Successful promise with explicit types
+    Promise.ofSuccess<String, Int>("thirteen")
 }
 
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
-project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"

@@ -26,23 +26,36 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadWriteProperty
 
 class ConcreteKovenant {
-    val context: Context
-        get() = mutableContext.get()
+    private val contextRef: AtomicReference<Context> = AtomicReference(ThreadSafeContext())
+    var context: Context
+        get() {
+            return contextRef.get()
+        }
+        set(value) {
+            contextRef.set(value)
+        }
 
-    private val mutableContext = AtomicReference(ThreadSafeContext())
+    private val reconfigurableContext: ReconfigurableContext
+        get() {
+            val ctx = contextRef.get()
+            if (ctx is ReconfigurableContext) {
+                return ctx
+            }
+            throw ConfigurationException("Current context [$ctx] does not implement ReconfigurableContext and therefor can't be reconfigured.")
+        }
 
-    public fun configure(body: MutableContext.() -> Unit) {
+    public fun context(body: MutableContext.() -> Unit) {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
-        val trackingContext = TrackingContext(mutableContext.get())
+        val trackingContext = TrackingContext(reconfigurableContext)
         trackingContext.body()
 
         do {
-            val current = mutableContext.get()!!
+            val current = reconfigurableContext
             val newConfig = current.copy()
             trackingContext.applyChanged(newConfig)
-        } while (!mutableContext.compareAndSet(current, newConfig))
+        } while (!contextRef.compareAndSet(current, newConfig))
 
     }
 
@@ -54,7 +67,7 @@ class ConcreteKovenant {
 
     public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
 
-    private class ThreadSafeContext() : MutableContext {
+    private class ThreadSafeContext() : ReconfigurableContext {
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
             { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
@@ -64,7 +77,7 @@ class ConcreteKovenant {
         val threadSafeCallbackContext = ThreadSafeMutableDispatcherContext() {
             buildDispatcher {
                 name = "kovenant-callback"
-                numberOfThreads = 1
+                concurrentTasks = 1
             }
         }
 
@@ -77,7 +90,7 @@ class ConcreteKovenant {
         override val callbackContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeCallbackContext {}
         override val workerContext: MutableDispatcherContext = object : MutableDispatcherContext by threadSafeWorkerContext {}
 
-        fun copy(): ThreadSafeContext {
+        override fun copy(): ReconfigurableContext {
             val copy = ThreadSafeContext()
             threadSafeCallbackContext copyTo copy.callbackContext
             threadSafeWorkerContext copyTo copy.workerContext

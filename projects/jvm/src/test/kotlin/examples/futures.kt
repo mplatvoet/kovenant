@@ -19,39 +19,55 @@
  * THE SOFTWARE.
  */
 
-package tests.api.then
+package examples.futures
 
 import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
-import org.junit.Before
-import org.junit.Test
-import tests.support.ImmediateDispatcher
-import kotlin.test.assertEquals
+import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.jvm.asDispatcher
+import support.fib
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ForkJoinPool
 
-class ThenTest {
-
-    Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
-        }
-    }
-
-    Test fun thenSuccess() {
-        var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
-    }
-
-    Test fun thenFail() {
-        var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
-        assertEquals(1, count, "should report a failure")
+fun main(args: Array<String>) {
+    Kovenant.context {
+        workerContext.dispatcher = ForkJoinPool.commonPool().asDispatcher()
     }
 
 
+    val completableFuture = CompletableFuture.supplyAsync {
+        fib(13)
+    }
+
+    val promise = completableFuture.toPromise()
+
+    promise success {
+        println("Hurray! fib(13) = $it")
+    }
+
+    async { fib(13) } success {
+        println("Hurray again! fib(13) = $it")
+    }
 }
 
+public fun <T> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
+    val deferred = deferred<T, Exception>()
 
+    thenAccept {
+        deferred.resolve(it)
+    }
+
+    exceptionally {
+        deferred.reject(it.toException())
+        null
+    }
+
+    return deferred.promise
+}
+
+private fun Throwable.toException(): Exception = when (this) {
+    is Exception -> this
+    else -> Exception(this)
+}
 

@@ -16,29 +16,17 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package nl.komponents.kovenant.progress
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
+import nl.komponents.kovenant.Context
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.progress.Progress
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+
+public fun Progress.Companion.attachToKovenant(context: Context = Kovenant.context) {
+    Progress.defaultExecutor = { context.callbackContext.offer(it) }
 }
-
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
-project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"

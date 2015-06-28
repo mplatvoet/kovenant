@@ -18,27 +18,23 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant
 
-rootProject.name = 'root'
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+public interface Offerable<V : Any> {
+    fun offer(elem: V): Boolean
 }
 
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
-project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"
+public interface Pollable<V : Any> {
+    fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
+}
+
+public interface WorkQueue<V : Any> : Offerable<V>, Pollable<V> {
+    fun size(): Int
+
+    fun isEmpty(): Boolean = size() == 0
+    fun isNotEmpty(): Boolean = !isEmpty()
+
+    fun remove(elem: Any?): Boolean
+}
+

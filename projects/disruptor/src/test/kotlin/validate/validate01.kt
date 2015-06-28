@@ -19,26 +19,45 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package validate.disruptor
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.all
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.disruptor.queue.disruptorWorkQueue
+import support.fib
+import java.util.Random
+import java.util.concurrent.atomic.AtomicInteger
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+fun main(args: Array<String>) {
+    Kovenant.context {
+        callbackContext {
+            dispatcher {
+                concurrentTasks = 1
+                workQueue = disruptorWorkQueue(capacity = 2048)
+            }
+        }
+    }
+    validate(100000)
+
 }
 
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
-project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"
+
+fun validate(n: Int) {
+    val errors = AtomicInteger()
+    val successes = AtomicInteger()
+    val promises = Array(n) { n ->
+        errors.incrementAndGet()
+        async {
+            val i = Random().nextInt(10)
+            Pair(i, fib(i))
+        } success {
+            errors.decrementAndGet()
+            successes.incrementAndGet()
+        }
+    }
+
+    all(*promises) always {
+        println("validate with $n attempts, errors: ${errors.get()}, successes: ${successes.get()}")
+    }
+}

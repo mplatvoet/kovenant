@@ -88,6 +88,39 @@ public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  * they where added to this Promise.
  */
 public interface Promise<V : Any, E : Any> {
+    companion object {
+        /**
+         * Takes any value `V` and wraps it as a successfully resolved promise.
+         *
+         * @param context the Context associated with the promise
+         * @param value the value to wrap into a Promise<V, Exception>
+         */
+        public fun of<V : Any>(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
+            return concreteSuccessfulPromise(context, value)
+        }
+
+        /**
+         * Takes any value `V` and wraps it as a successfully resolved promise.
+         *
+         * @param context the Context associated with the promise
+         * @param value the value to wrap into a Promise<V, E>
+         */
+        public fun ofSuccess<V : Any, E : Any>(value: V, context: Context = Kovenant.context): Promise<V, E> {
+            return concreteSuccessfulPromise(context, value)
+        }
+
+        /**
+         * Takes any value `E` and wraps it as a failed resolved promise.
+         *
+         * @param context the Context associated with the promise
+         * @param value the value to wrap into a failed Promise<V, E>
+         */
+        public fun ofFail<V : Any, E : Any>(value: E, context: Context = Kovenant.context): Promise<V, E> {
+            return concreteFailedPromise(context, value)
+        }
+
+    }
+
     /**
      * The context that is associated with this Promise. By default all callbacks are executed on the callback
      * `DispatcherContext` of this context.
@@ -170,6 +203,7 @@ public interface Promise<V : Any, E : Any> {
      */
     fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 }
+
 
 /**
  * Creates a new [Deferred] instance.

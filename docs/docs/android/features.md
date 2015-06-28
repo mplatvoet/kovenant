@@ -58,7 +58,7 @@ You can configure Kovenant to dispatch all callbacks on the main thread by using
 That all being said. You, of course, know what you are doing.  
 
 ```kt
-Kovenant.configure {
+Kovenant.context {
     callbackDispatcher = androidUiDispatcher()
 }
 ```
