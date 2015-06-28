@@ -12,13 +12,13 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `kotlin-stdlib:0.12.412`.
+This version is build against `kotlin-stdlib:0.12.613`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:2.0.+'
+    compile 'nl.komponents.kovenant:kovenant:2.1.+'
 }
 ```
 
@@ -27,9 +27,12 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[2.0.0,2.1.0)</version>
+	<version>[2.1.0,2.2.0)</version>
 </dependency>
 ```
+
+###Android Demo app
+Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
 ###Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
@@ -42,6 +45,11 @@ it's needed to keep class and method count low.
 |kovenant-combine  |Adds combine functionality that keep everything strongly typed                                     |
 |kovenant-jvm      |Support for converting between Executors and Dispatchers                                           |
 |kovenant-android  |Extensions for Android specific needs                                                              | 
+|kovenant-disruptor|LMAX Disruptor work queues                                                                         | 
+|kovenant-progress |Progress configuration helper                                                                         | 
 
 ##Issues
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
+
+##Release notes
+See [Changelog](changelog.md) for release notes

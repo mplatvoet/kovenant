@@ -6,19 +6,36 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v2.1.0
+###v2.2.0
 **certain**
 
-* [KOV-26](http://issues.komponents.nl/youtrack/issue/KOV-26) Smoother configuration
-* [KOV-25](http://issues.komponents.nl/youtrack/issue/KOV-25) Allow for custom context implementations
+* n/a
 
 **probably**
 
-* [KOV-8](http://issues.komponents.nl/youtrack/issue/KOV-8) Progress tracking support
+* [KOV-12](http://issues.komponents.nl/youtrack/issue/KOV-12) Blocking get functionality
 
 ---
 
 ##Released
+
+###v2.1.0
+
+**kovenant-core**
+
+* [KOV-28](http://issues.komponents.nl/youtrack/issue/KOV-28) Instant resolved Promises
+* [KOV-26](http://issues.komponents.nl/youtrack/issue/KOV-26) Smoother configuration
+* [KOV-25](http://issues.komponents.nl/youtrack/issue/KOV-25) Allow for custom context implementations
+* [KOV-29](http://issues.komponents.nl/youtrack/issue/KOV-29) Better backwards compatibility
+
+
+**kovenant-progress**
+
+* [KOV-8](http://issues.komponents.nl/youtrack/issue/KOV-8) Progress tracking support
+
+**kovenant-disruptor**
+
+* [KOV-7](http://issues.komponents.nl/youtrack/issue/KOV-7) LMAX Disruptor queues
 
 ###v2.0.0
 [KOV-21](http://issues.komponents.nl/youtrack/issue/KOV-21) Kovenant has a new home which is [komponents.nl](http://komponents.nl) and thus the project is now available as `nl.komponents.kovenant:kovenant:2.0.0`
