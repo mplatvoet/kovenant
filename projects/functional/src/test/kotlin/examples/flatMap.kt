@@ -19,28 +19,27 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package examples.flatMap
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.functional.flatMap
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+fun main(args: Array<String>) {
+
+    Promise.of(13).flatMap {
+        divide(it, 12)
+    } success {
+        println("Success: $it")
+    } fail {
+        println("Fail: ${it.getMessage()}")
+    }
 }
 
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'
+fun divide(a: Int, b: Int): Promise<Int, Exception> {
+    return if (a == 0 || b == 0) {
+        Promise.ofFail(Exception("Cannot divide by zero: $a/$b"))
+    } else {
+        Promise.ofSuccess(a / b)
+    }
+}
+

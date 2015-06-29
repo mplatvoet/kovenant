@@ -19,28 +19,33 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package nl.komponents.kovenant.functional
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.then
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+
+public fun <V : Any, R : Any> Promise<V, Exception>.map(bind: (V) -> R): Promise<R, Exception> = then(bind)
+
+
+public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(bind: (V) -> Promise<R, Exception>): Promise<R, Exception> {
+    val deferred = deferred<R, Exception>(context)
+    success {
+        value ->
+        context.workerContext.offer {
+            val p = bind(value)
+            p success {
+                deferred resolve it
+            }
+            p fail {
+                deferred reject it
+            }
+        }
+    }
+    fail {
+        deferred reject it
+    }
+
+    return deferred.promise
 }
-
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'
