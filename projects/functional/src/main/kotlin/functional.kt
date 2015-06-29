@@ -21,9 +21,8 @@
 
 package nl.komponents.kovenant.functional
 
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.deferred
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.*
+import java.util.ArrayList
 
 
 public fun <V : Any, R : Any> Promise<V, Exception>.map(bind: (V) -> R): Promise<R, Exception> = then(bind)
@@ -45,6 +44,27 @@ public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(bind: (V) -> Promise
     }
     fail {
         deferred reject it
+    }
+
+    return deferred.promise
+}
+
+fun <V, R> Sequence<V>.aforEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
+    val deferred = deferred<List<R>, Exception>(context)
+    context.workerContext.offer {
+        val promises = ArrayList<Promise<R, Exception>>()
+        forEach {
+            value ->
+            promises add async(context) { bind(value) }
+        }
+        val promiseArray: Array<Promise<R, Exception>> = promises.toArray(arrayOf())
+        val masterPromise = all(*promiseArray)
+        masterPromise success {
+            deferred resolve it
+        }
+        masterPromise fail {
+            deferred reject it
+        }
     }
 
     return deferred.promise
