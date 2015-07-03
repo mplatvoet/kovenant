@@ -32,14 +32,20 @@ package nl.komponents.kovenant
  * will be the cause of fail of this promise. If [cancelOthersOnError] is `true` it is attempted to cancel the execution of
  * the other promises.
  *
+ * If provided no promises are provided an empty successful promise is returned.
+ *
  * @param promises the promises that create the new combined promises of. Must be at least 1 promises or an Exception is thrown
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnError whether an error of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
 public fun all<V>(vararg promises: Promise<V, Exception>,
                   context: Context = Kovenant.context,
-                  cancelOthersOnError: Boolean = true): Promise<List<V>, Exception>
-        = concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
+                  cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
+    return when (promises.size()) {
+        0 -> Promise.ofSuccess(listOf(), context)
+        else -> concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
+    }
+}
 
 
 /**
@@ -52,11 +58,17 @@ public fun all<V>(vararg promises: Promise<V, Exception>,
  * If all promises result in failure this promise fails too with a `List` containing all failures. The order if the
  * items in the list is the same order as the provided promises.
  *
+ * If provided no promises are provided an empty failed promise is returned.
+ *
  * @param promises the promises that create the new combined promises of. Must be at least 1 promises or an Exception is thrown
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnSuccess whether a success of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
 public fun any<V>(vararg promises: Promise<V, Exception>,
                   context: Context = Kovenant.context,
-                  cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>>
-        = concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
+                  cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
+    return when(promises.size()) {
+        0 -> Promise.ofFail(listOf(), context)
+        else -> concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
+    }
+}
