@@ -19,6 +19,13 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Released
 
+###v2.1.1
+
+**kovenant-core**
+
+* [KOV-33](http://issues.komponents.nl/youtrack/issue/KOV-33) Disruptor project lacks a description
+* [KOV-32](http://issues.komponents.nl/youtrack/issue/KOV-32) Empty collections with bulk operations are not properly handled
+
 ###v2.1.0
 
 **kovenant-core**
