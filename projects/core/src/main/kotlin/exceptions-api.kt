@@ -27,3 +27,5 @@ public open class KovenantException(message: String? = null, cause: Exception? =
 public open class CancelException : KovenantException()
 
 public open class ConfigurationException(message: String) : KovenantException(message)
+
+public open class FailedException(val error: Any) : KovenantException(error.toString())

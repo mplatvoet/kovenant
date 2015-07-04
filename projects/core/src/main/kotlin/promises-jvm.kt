@@ -21,6 +21,8 @@
 
 package nl.komponents.kovenant
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
@@ -48,7 +50,7 @@ private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<
         trySetFailResult(value)
     }
 
-    // Could override the `fail` methods since there is nothing to add
+    // Could override the `success` methods since there is nothing to add
     // but any change to those methods might be missed.
     // the callbacks essentially get ignored anyway
 }
@@ -180,12 +182,14 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     }
 
     override val promise: Promise<V, E> = object : Promise<V, E> by this {}
-
-    private fun isDone() = isSuccessResult() || isFailResult()
 }
 
 private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
     private val state = AtomicReference(State.PENDING)
+    private val waitingThreads = AtomicInteger(0)
+
+    //@suppress("")
+    private val mutex = waitingThreads as Object
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
     private volatile var result: Any? = null
 
@@ -245,6 +249,30 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
+    override fun get(): V {
+        if (!isDone()) {
+            waitingThreads.incrementAndGet()
+            try {
+                while (!isDone()) {
+                    try {
+                        mutex.wait()
+                    } catch(e: InterruptedException) {
+                        throw FailedException(e)
+                    }
+                }
+            } finally {
+                waitingThreads.decrementAndGet()
+            }
+        }
+
+        if (isSuccessResult()) {
+            return getAsValueResult()
+        } else {
+            throw getAsFailResult().asException()
+        }
+
+    }
+
     fun fireSuccess(value: V) = popAll {
         node ->
         node.runSuccess(value)
@@ -274,6 +302,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         if (state.compareAndSet(State.PENDING, State.MUTATING)) {
             this.result = result
             state.set(State.SUCCESS)
+            notifyBlockedThreads()
             return true
         }
         return false
@@ -285,11 +314,25 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         if (state.compareAndSet(State.PENDING, State.MUTATING)) {
             this.result = result
             state.set(State.FAIL)
+            notifyBlockedThreads()
             return true
         }
         return false
     }
 
+    private fun notifyBlockedThreads() {
+        if (waitingThreads.get() > 0) {
+            synchronized(mutex) {
+                mutex.notifyAll()
+            }
+        }
+    }
+
+
+    protected fun isDone(): Boolean {
+        val currentState = state.get()
+        return currentState == State.SUCCESS || currentState == State.FAIL
+    }
     protected fun isSuccessResult(): Boolean = state.get() == State.SUCCESS
     protected fun isFailResult(): Boolean = state.get() == State.FAIL
 
@@ -423,4 +466,31 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         override fun runFail(value: E) = context.offer { fn(value) }
     }
 
+}
+
+private fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
+    val latch = CountDownLatch(1)
+    val e = AtomicReference<E>()
+    val v = AtomicReference<V>()
+
+    promise.success {
+        v.set(it)
+        latch.countDown()
+    } fail {
+        e.set(it)
+        latch.countDown()
+    }
+    latch.await()
+    val error = e.get()
+    if (error != null) {
+        throw error.asException()
+    }
+    return v.get()
+}
+
+private fun <T : Any> T.asException(): Exception {
+    return when (this) {
+        is Exception -> this
+        else -> FailedException(this)
+    }
 }

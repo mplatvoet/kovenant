@@ -202,6 +202,17 @@ public interface Promise<V : Any, E : Any> {
      * @param context the DispatcherContext on which this callback is executed
      */
     fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
+
+    /**
+     * Blocks until this promises is done and either immediate returning the success result or throwing an `Exception`
+     *
+     * Blocks until this promises is done. When this promise is successful this will return success value `V`.
+     * When this promise failed this will throw an exception. If the type of `E` is an Exception this will be thrown
+     * otherwise a `FailedException` will be thrown with the error value wrapped.
+     *
+     * @return returns the success value when done
+     */
+    fun get(): V = defaultGet(this)
 }
 
 
