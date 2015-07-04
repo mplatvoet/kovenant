@@ -188,7 +188,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     private val state = AtomicReference(State.PENDING)
     private val waitingThreads = AtomicInteger(0)
 
-    //@suppress("")
+    @suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val mutex = waitingThreads as Object
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
     private volatile var result: Any? = null
