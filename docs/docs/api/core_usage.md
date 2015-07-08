@@ -214,7 +214,7 @@ val fib20 : Int = async { fib(20) }.get()
 ---
 
 ##isDone
-The functions `isDone()`, `isFailure()` and `isSuccess()` simply tell you if this promise is resolved and whether
+The functions `isDone()`, `isFailure()` and `isSuccess()` simply tells you if this promise is resolved and whether
 it is successful or has failed. This comes in handy in combination with `get()`. 
 
 
