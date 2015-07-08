@@ -214,10 +214,26 @@ public interface Promise<V : Any, E : Any> {
      */
     fun get(): V = defaultGet(this)
 
+
+    /**
+     * Returns true if this promise is either resolved successfully or has failed
+     *
+     * @return true if this promise is either resolved successfully or has failed, false otherwise
+     */
     fun isDone(): Boolean = defaultIsDone()
 
+    /**
+     * Returns true if this promise is resolved a failed
+     *
+     * @return true if this promise is resolved a failed, false otherwise
+     */
     fun isFailure(): Boolean = defaultIsFailure()
 
+    /**
+     * Returns true if this promise is resolved successfully
+     *
+     * @return true if this promise is resolved successfully, false otherwise
+     */
     fun isSuccess(): Boolean = defaultIsSuccess()
 }
 
