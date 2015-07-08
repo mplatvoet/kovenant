@@ -19,18 +19,17 @@
  * THE SOFTWARE.
  */
 
-package tests.api.get
+package tests.api.state
 
-import nl.komponents.kovenant.FailedException
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.deferred
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
-import kotlin.test.assertEquals
-import kotlin.test.fail
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-class GetTest {
+class StateTest {
 
     Before fun setup() {
         Kovenant.context {
@@ -39,36 +38,27 @@ class GetTest {
         }
     }
 
-    Test fun successResult() {
-        val promise = Promise.of(13)
-        assertEquals(13, promise.get(), "should return the proper value")
+    Test fun uncompleted() {
+        val deferred = deferred<Int, Exception>()
+        assertFalse(deferred.promise.isDone(), "Should not be done")
+        assertFalse(deferred.promise.isSuccess(), "Should not be successful")
+        assertFalse(deferred.promise.isFailure(), "Should not be a failure")
     }
 
-    Test fun failResultException() {
-        val promise = Promise.ofFail<Int, Exception>(Exception("bummer"))
-        var thrown = false
-        try {
-            promise.get()
-            fail("Should not be reachable")
-        } catch(e: FailedException) {
-            fail("Exception should not be wrapped")
-        } catch(e: Exception) {
-            thrown = true
-        }
-        assert(thrown, "should throw an exception")
+    Test fun success() {
+        val deferred = deferred<Int, Exception>()
+        deferred.resolve(13)
+        assertTrue(deferred.promise.isDone(), "Should be done")
+        assertTrue(deferred.promise.isSuccess(), "Should be successful")
+        assertFalse(deferred.promise.isFailure(), "Should not be a failure")
     }
 
-    Test fun failResultValue() {
-        val promise = Promise.ofFail<Int, String>("bummer")
-        var thrown = false
-        try {
-            promise.get()
-            fail("Should not be reachable")
-        } catch(e: FailedException) {
-            thrown = true
-        } catch(e: Exception) {
-            fail("Should be of type FailedException")
-        }
-        assert(thrown, "should throw a FailedException")
+    Test fun failure() {
+        val deferred = deferred<Int, Exception>()
+        deferred.reject(Exception())
+        assertTrue(deferred.promise.isDone(), "Should be done")
+        assertFalse(deferred.promise.isSuccess(), "Should not be successful")
+        assertTrue(deferred.promise.isFailure(), "Should be a failure")
     }
 }
+

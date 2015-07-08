@@ -213,6 +213,12 @@ public interface Promise<V : Any, E : Any> {
      * @return returns the success value when done
      */
     fun get(): V = defaultGet(this)
+
+    fun isDone(): Boolean = defaultIsDone()
+
+    fun isFailure(): Boolean = defaultIsFailure()
+
+    fun isSuccess(): Boolean = defaultIsSuccess()
 }
 
 
