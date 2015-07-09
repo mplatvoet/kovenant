@@ -270,7 +270,29 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         } else {
             throw getAsFailResult().asException()
         }
+    }
 
+    override fun getError(): E {
+        if (!isDoneInternal()) {
+            waitingThreads.incrementAndGet()
+            try {
+                while (!isDoneInternal()) {
+                    try {
+                        mutex.wait()
+                    } catch(e: InterruptedException) {
+                        throw FailedException(e)
+                    }
+                }
+            } finally {
+                waitingThreads.decrementAndGet()
+            }
+        }
+
+        if (isFailureInternal()) {
+            return getAsFailResult()
+        } else {
+            throw FailedException(getAsValueResult())
+        }
     }
 
     fun fireSuccess(value: V) = popAll {
@@ -491,6 +513,26 @@ private fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
         throw error.asException()
     }
     return v.get()
+}
+
+private fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
+    val latch = CountDownLatch(1)
+    val e = AtomicReference<E>()
+    val v = AtomicReference<V>()
+
+    promise.success {
+        v.set(it)
+        latch.countDown()
+    } fail {
+        e.set(it)
+        latch.countDown()
+    }
+    latch.await()
+    val error = e.get()
+    if (error != null) {
+        throw FailedException(v.get())
+    }
+    return error
 }
 
 // Function introduced solely to remain backwards compatible.

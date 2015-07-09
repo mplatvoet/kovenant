@@ -214,6 +214,16 @@ public interface Promise<V : Any, E : Any> {
      */
     fun get(): V = defaultGet(this)
 
+    /**
+     * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
+     *
+     * Blocks until this promises is done. When this promise has failed this will return the failure value `E`.
+     * When this promise is successful this will throw a `FailedException`.
+     *
+     * @return returns the fail value when done
+     */
+    fun getError(): E = defaultGetError(this)
+
 
     /**
      * Returns true if this promise is either resolved successfully or has failed

@@ -21,33 +21,81 @@
 
 package nl.komponents.kovenant.android
 
+import android.os.Looper
 import nl.komponents.kovenant.*
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
 
-public fun <V> promiseOnUi(context: Context = Kovenant.context, body: () -> V): Promise<V, Exception> {
-    val deferred = deferred<V, Exception>(context)
-    LooperExecutor.main submit PromiseUiRunnable(deferred, body)
-    return deferred.promise
+public fun <V> promiseOnUi(context: Context = Kovenant.context,
+                           alwaysSchedule: Boolean = false,
+                           body: () -> V): Promise<V, Exception> {
+    if (!alwaysSchedule && currentIsUiThread()) {
+        return try {
+            Promise.ofSuccess(context = context, value = body())
+        } catch(e: Exception) {
+            Promise.ofFail(context = context, value = e)
+        }
+    } else {
+        val deferred = deferred<V, Exception>(context)
+        LooperExecutor.main submit PromiseUiRunnable(deferred, body)
+        return deferred.promise
+    }
 }
 
 
-public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> {
-    val dispatcherContext = CallbackContextCache forContext context
-    return success(dispatcherContext, body)
+public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(false, body)
+
+public fun <V, E> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value: V) -> Unit): Promise<V, E> {
+    if (!alwaysSchedule && isDone() && currentIsUiThread()) {
+        if (isSuccess()) {
+            try {
+                body(get())
+            } catch(e: Exception) {
+                context.callbackContext.errorHandler(e)
+            }
+        }
+    } else {
+        val dispatcherContext = CallbackContextCache forContext context
+        success(dispatcherContext, body)
+    }
+    return this
 }
 
 
-public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> {
-    val dispatcherContext = CallbackContextCache forContext context
-    return fail(dispatcherContext, body)
+public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(false, body)
+
+public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
+    if (!alwaysSchedule && isDone() && currentIsUiThread()) {
+        if (isFailure()) {
+            try {
+                body(getError())
+            } catch(e: Exception) {
+                context.callbackContext.errorHandler(e)
+            }
+        }
+    } else {
+        val dispatcherContext = CallbackContextCache forContext context
+        fail(dispatcherContext, body)
+    }
+    return this
 }
 
 
-public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> {
-    val dispatcherContext = CallbackContextCache forContext context
-    return always(dispatcherContext, body)
+public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(false, body)
+
+public fun <V, E> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
+    if (!alwaysSchedule && isDone() && currentIsUiThread()) {
+        try {
+            body()
+        } catch(e: Exception) {
+            context.callbackContext.errorHandler(e)
+        }
+    } else {
+        val dispatcherContext = CallbackContextCache forContext context
+        always(dispatcherContext, body)
+    }
+    return this
 }
 
 
@@ -158,4 +206,8 @@ private object CallbackContextCache {
             tail = next
         }
     }
+}
+
+private fun currentIsUiThread(): Boolean {
+    return Thread.currentThread() == Looper.getMainLooper().getThread()
 }
