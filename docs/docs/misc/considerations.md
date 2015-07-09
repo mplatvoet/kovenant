@@ -34,43 +34,6 @@ the Promise resolves in just 2 states. Kovenant's `then` behaves quite similar t
  
 So reason enough to not follow the [Promises/A+](https://promisesaplus.com/) spec. 
 
-##Non Blocking
-Most Promises implementations provide functions like `isDone() : Boolean` and blocking functions `get() : V` as an alternative for 
-working with callbacks. Though it's fairly easy to implement I haven't done so yet. I feel it's defying the purpose 
-of having a promises API. Though this might just one of this topics where I will change my mind, because Kovenant should 
-make it easier to work with async jobs, not harder. 
-
-If I decide to add additional functions for determining state and retrieval of values it will *not* be added to the
-[Promise interface](https://github.com/mplatvoet/kovenant/blob/master/projects/core/src/main/kotlin/promises-api.kt). Instead, 
-I will implement it as [Extensions](http://kotlinlang.org/docs/reference/extensions.html) to the current interface. And
-maybe, as an optimization, I will introduce a second/extended interface `PromisePlus` which will define this methods to 
-which the extension function can delegate if the current promise is of the second/extended type. This will keep the 
-`Promise` interface lean. 
-
-###I need it now!
-Still, if you desperately need such functionality already it's easy to implement on the Jvm as shown by 
-[get.kt](https://github.com/mplatvoet/kovenant/blob/master/projects/core/src/test/kotlin/examples/get.kt). It basically
- comes down to this:
-
-```kt
-fun <V:Any> Promise<V, Exception>.get() : V {
-    val latch = CountDownLatch(1)
-    val e = AtomicReference<Exception>()
-    val v = AtomicReference<V>()
-
-    this.success {
-        v.set(it)
-        latch.countDown()
-    } fail {
-        e.set(it)
-        latch.countDown()
-    }
-    latch.await()
-    val exception = e.get()
-    if (exception !=null) throw exception
-    return v.get()
-}
-```
 
 ##Top level functions
 One important consideration is the use of top level functions versus `class` or 
