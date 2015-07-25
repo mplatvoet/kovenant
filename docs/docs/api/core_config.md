@@ -118,6 +118,22 @@ val dispatcher = buildDispatcher {
 
 What's best for your situation depends on your needs. So like always with concurrency: test instead of guess.
 
+###Thread Factory (JVM)
+If you want to have a finer control over `Thread` creation you can. You can use the JVM only extension function to 
+configure JVM specific features. Please note that Kovenant still will make the Thread a non daemon thread and tries
+to start it. Starting this thread early will result in an `Exception`. 
+ 
+```kt
+Kovenant.context {
+    callbackContext.jvmDispatcher { 
+        threadFactory = {
+            target, dispatcherName, id ->
+            Thread(target, "custom name")
+        }
+    }
+}
+```
+
 ###Common example
 
 ```kt

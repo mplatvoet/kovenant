@@ -27,53 +27,42 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-private fun concreteBuildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher {
+public fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() -> Unit) {
+    dispatcher = buildJvmDispatcher(body)
+}
+
+public fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
+
+private fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
     builder.body()
     return builder.build()
 }
 
-private class ConcreteDispatcherBuilder : DispatcherBuilder {
-    private var localName = "dispatcher"
-    private var localNumberOfThreads = threadAdvice
-    private var localExceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
-    private var localErrorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
+public interface JvmDispatcherBuilder : DispatcherBuilder {
+    var threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread
+}
 
-    private var localWorkQueue: WorkQueue<() -> Unit> = NonBlockingWorkQueue()
+private class ConcreteDispatcherBuilder : JvmDispatcherBuilder {
+    override var name = "dispatcher"
+    private var localNumberOfThreads = threadAdvice
+    override var exceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
+    override var errorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
+
+    override var workQueue: WorkQueue<() -> Unit> = NonBlockingWorkQueue()
     private val pollStrategyBuilder = ConcretePollStrategyBuilder()
 
-    override var name: String
-        get() = localName
-        set(value) {
-            localName = value
-        }
+    override var threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread
+            = fun(target: Runnable, dispatcherName: String, id: Int) = Thread(target, "$dispatcherName-$id")
 
 
     override var concurrentTasks: Int
         get() = localNumberOfThreads
         set(value) {
             if (value < 1) {
-                throw IllegalArgumentException("numberOfThreads must be at least 1, but was $value")
+                throw ConfigurationException("concurrentTasks must be at least 1, but was $value")
             }
             localNumberOfThreads = value
-        }
-
-    override var exceptionHandler: (Exception) -> Unit
-        get() = localExceptionHandler
-        set(value) {
-            localExceptionHandler = value
-        }
-
-    override var errorHandler: (Throwable) -> Unit
-        get() = localErrorHandler
-        set(value) {
-            localErrorHandler = value
-        }
-
-    override var workQueue: WorkQueue<() -> Unit>
-        get() = localWorkQueue
-        set(value) {
-            localWorkQueue = value
         }
 
 
@@ -83,12 +72,15 @@ private class ConcreteDispatcherBuilder : DispatcherBuilder {
     }
 
     fun build(): Dispatcher {
-        return NonBlockingDispatcher(name = localName,
+        val localWorkQueue = workQueue
+
+        return NonBlockingDispatcher(name = name,
                 numberOfThreads = localNumberOfThreads,
-                exceptionHandler = localExceptionHandler,
-                errorHandler = localErrorHandler,
+                exceptionHandler = exceptionHandler,
+                errorHandler = errorHandler,
                 workQueue = localWorkQueue,
-                pollStrategy = pollStrategyBuilder.build(localWorkQueue))
+                pollStrategy = pollStrategyBuilder.build(localWorkQueue),
+                threadFactory = threadFactory)
     }
 }
 
@@ -136,7 +128,8 @@ private class NonBlockingDispatcher(val name: String,
                                     private val exceptionHandler: (Exception) -> Unit,
                                     private val errorHandler: (Throwable) -> Unit,
                                     private val workQueue: WorkQueue<() -> Unit>,
-                                    private val pollStrategy: PollStrategy<() -> Unit>) : Dispatcher {
+                                    private val pollStrategy: PollStrategy<() -> Unit>,
+                                    private val threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread) : Dispatcher {
 
     init {
         if (numberOfThreads < 1) {
@@ -236,9 +229,7 @@ private class NonBlockingDispatcher(val name: String,
     }
 
     private fun newThreadContext(): ThreadContext {
-        val threadName = "${name}-${threadId.incrementAndGet()}"
-
-        return ThreadContext(threadName = threadName)
+        return ThreadContext(threadId.incrementAndGet())
     }
 
 
@@ -258,7 +249,7 @@ private class NonBlockingDispatcher(val name: String,
     }
 
 
-    private inner class ThreadContext(val threadName: String) {
+    private inner class ThreadContext(val id: Int) : Runnable {
 
         private val pending = 0
         private val running = 1
@@ -266,14 +257,14 @@ private class NonBlockingDispatcher(val name: String,
         private val mutating = 3
 
         private val state = AtomicInteger(pending)
-        private val thread = Thread() { run() }
+        private val thread: Thread
         private volatile var alive = true
         private volatile var keepAlive: Boolean = true
         private volatile var pollResult: (() -> Unit)? = null
 
 
         init {
-            thread.setName(threadName)
+            thread = threadFactory(this, name, id)
             thread.setDaemon(false)
             thread.start()
         }
@@ -285,7 +276,7 @@ private class NonBlockingDispatcher(val name: String,
 
         private fun tryChangeState(expect: Int, update: Int): Boolean = state.compareAndSet(expect, update)
 
-        private fun run() {
+        override fun run() {
             while (alive) {
                 changeState(pending, polling)
                 try {
