@@ -19,6 +19,13 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Released
 
+###v2.2.1
+
+**general**
+
+* Updated kotlin version to 0.12.1218
+
+
 ###v2.2.0
 
 **kovenant-android**
