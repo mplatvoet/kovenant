@@ -25,4 +25,5 @@ dependencies {
     compile project(':kovenant-core')
     compile project(':kovenant-combine')
     compile project(':kovenant-jvm')
+    compile project(':kovenant-functional')
 }
