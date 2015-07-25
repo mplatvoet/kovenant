@@ -174,7 +174,7 @@ subprojects {
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
+    if (false && !'master'.equals(branchName) && !taskGraph.hasTask(release)) {
         enrichVersion()
     } else {
         allprojects*.version = appVersion
