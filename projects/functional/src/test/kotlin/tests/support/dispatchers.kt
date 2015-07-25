@@ -19,19 +19,25 @@
  * THE SOFTWARE.
  */
 
-package examples.aforEach
+package tests.support
 
-import nl.komponents.kovenant.functional.aforEach
+import nl.komponents.kovenant.Dispatcher
 
-fun main(args: Array<String>) {
-    val promise = sequenceOf(12, 13, 14, 15, 16).aforEach {
-        it - 1
+public class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
+    override fun offer(task: () -> Unit): Boolean {
+        onOffered(task)
+        task()
+        return true
     }
 
-    promise success {
-        it forEach {
-            println(it)
-        }
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = listOf()
+
+    override fun tryCancel(task: () -> Unit): Boolean {
+        return false
     }
+
+    override val terminated: Boolean
+        get() = true
+    override val stopped: Boolean
+        get() = true
 }
-
