@@ -19,15 +19,18 @@
  * THE SOFTWARE.
  */
 
-package examples.get
-
+package examples.done
 
 import nl.komponents.kovenant.async
-import support.fib
-
 
 fun main(args: Array<String>) {
-    val (n, fib) = async { Pair(30, fib(30)) }.get()
-    println("fib($n) = $fib")
+    val p = async {
+        Thread.sleep(1000)
+    }
+    while (!p.isDone()) {
+        Thread.sleep(10)
+        println("not done")
+    }
+    println("done")
 }
 

@@ -202,6 +202,49 @@ public interface Promise<V : Any, E : Any> {
      * @param context the DispatcherContext on which this callback is executed
      */
     fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
+
+    /**
+     * Blocks until this promises is done and either immediate returning the success result or throwing an `Exception`
+     *
+     * Blocks until this promises is done. When this promise is successful this will return success value `V`.
+     * When this promise failed this will throw an exception. If the type of `E` is an Exception this will be thrown
+     * otherwise a `FailedException` will be thrown with the error value wrapped.
+     *
+     * @return returns the success value when done
+     */
+    fun get(): V = defaultGet(this)
+
+    /**
+     * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
+     *
+     * Blocks until this promises is done. When this promise has failed this will return the failure value `E`.
+     * When this promise is successful this will throw a `FailedException`.
+     *
+     * @return returns the fail value when done
+     */
+    fun getError(): E = defaultGetError(this)
+
+
+    /**
+     * Returns true if this promise is either resolved successfully or has failed
+     *
+     * @return true if this promise is either resolved successfully or has failed, false otherwise
+     */
+    fun isDone(): Boolean = defaultIsDone()
+
+    /**
+     * Returns true if this promise is resolved a failed
+     *
+     * @return true if this promise is resolved a failed, false otherwise
+     */
+    fun isFailure(): Boolean = defaultIsFailure()
+
+    /**
+     * Returns true if this promise is resolved successfully
+     *
+     * @return true if this promise is resolved successfully, false otherwise
+     */
+    fun isSuccess(): Boolean = defaultIsSuccess()
 }
 
 

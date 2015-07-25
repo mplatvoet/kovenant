@@ -13,7 +13,8 @@ One is by specific extensions methods and the other is by a specific `Dispatcher
 The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-android` 
 library provides `successUi`, `failUi` and `alwaysUi`. They operate just like their 
 [regular counterparts](../api/core_usage.md#callbacks) except their bodies are executed on the Android main thread. Both type of 
-callbacks can be mixed freely.
+callbacks can be mixed freely. If a callback is added to an already resolved `Promise` this gets executed immediately
+without scheduling. If you want to force scheduling just pas `alwaysSchedule = true` along.
 
 ```kt
 val promise = async {
@@ -37,7 +38,8 @@ this should be the preferred way of interacting with the main thread.
 ##Start on UI thread
 Just like Androids `AsyncTask` you might want to do some preparations on the UI thread before you start your background
 work. This is what `promiseOnUi` does, it schedules a task on the UI thread and returns a `Promise` on which you can 
-chain along.
+chain along. If this is called from the UI Thread this gets executed immediately without scheduling. If you want to 
+force scheduling just pas `alwaysSchedule = true` along.
  
 ```kt
 promiseOnUi {

@@ -104,4 +104,29 @@ public interface PollStrategyBuilder {
 }
 
 
+public class DirectDispatcher private constructor() : Dispatcher {
+    companion object {
+        public val instance: Dispatcher = DirectDispatcher()
+    }
+
+    override fun offer(task: () -> Unit): Boolean {
+        task()
+        return true
+    }
+
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
+        throw UnsupportedException()
+    }
+
+    override fun tryCancel(task: () -> Unit): Boolean {
+        return false
+    }
+
+    override val terminated: Boolean
+        get() = throw UnsupportedException()
+    override val stopped: Boolean
+        get() = throw UnsupportedException()
+
+}
+
 

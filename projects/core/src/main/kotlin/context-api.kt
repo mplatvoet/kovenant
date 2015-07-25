@@ -121,6 +121,11 @@ public interface ReconfigurableContext : MutableContext {
 }
 
 public interface DispatcherContext {
+    companion object {
+        public fun create(dispatcher: Dispatcher,
+                          errorHandler: (Exception) -> Unit): DispatcherContext
+                = StaticDispatcherContext(dispatcher, errorHandler)
+    }
     val dispatcher: Dispatcher
     val errorHandler: (Exception) -> Unit
 
@@ -141,6 +146,9 @@ public interface MutableDispatcherContext : DispatcherContext {
         dispatcher = buildDispatcher(body)
     }
 }
+
+private class StaticDispatcherContext(override val dispatcher: Dispatcher,
+                                      override val errorHandler: (Exception) -> Unit) : DispatcherContext
 
 
 

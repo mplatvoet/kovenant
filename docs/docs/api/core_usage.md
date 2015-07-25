@@ -200,6 +200,28 @@ async {
 
 ---
 
+##Get
+Sometimes you need to jsut wait for a result, this is what `get()` does. It blocks the calling thread until the result 
+is available. Returning the success value if resolved successful. If promise rolsolved as a failure an Exception is thrown.
+If the error value of the promise is an Exception then that is thrown directly, otherwise a FailureException is thrown
+with the error value wrapped in it.
+
+```kt
+val fib20 : Int = async { fib(20) }.get()
+```
+>Note that implementors should override this function because the fallback methods are far from efficient
+
+---
+
+##isDone
+The functions `isDone()`, `isFailure()` and `isSuccess()` simply tells you if this promise is resolved and whether
+it is successful or has failed. This comes in handy in combination with `get()`. 
+
+
+>Note that implementors should override these functions because the fallback functions are far from efficient
+
+---
+
 ##Lazy Promise
 Kovenant provides a `lazyPromise` property delegate similar to Kotlin's standard library `Delegates.lazy {}`. 
 The difference with the standard library version is that initialization happens by an [`async`](#async) operation and

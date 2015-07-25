@@ -19,15 +19,19 @@
  * THE SOFTWARE.
  */
 
-package examples.get
+package examples.threads
 
-
-import nl.komponents.kovenant.async
-import support.fib
-
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.jvmDispatcher
 
 fun main(args: Array<String>) {
-    val (n, fib) = async { Pair(30, fib(30)) }.get()
-    println("fib($n) = $fib")
+    Kovenant.context {
+        callbackContext.jvmDispatcher {
+            threadFactory = {
+                target, dispatcherName, id ->
+                Thread(target, "custom name")
+            }
+        }
+    }
 }
 

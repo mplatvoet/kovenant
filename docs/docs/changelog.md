@@ -6,18 +6,47 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v2.2.0
+###v2.3.0
 **certain**
 
 * n/a
 
 **probably**
 
-* [KOV-12](http://issues.komponents.nl/youtrack/issue/KOV-12) Blocking get functionality
+* Functional constructs, map, flatMap, unwrap, ...
 
 ---
 
 ##Released
+
+###v2.2.1
+
+**general**
+
+* Updated kotlin version to 0.12.1218
+
+
+###v2.2.0
+
+**kovenant-android**
+
+* [KOV-13](http://issues.komponents.nl/youtrack/issue/KOV-13) Improve performance successUI, failUI, alwaysUI callbacks
+
+**kovenant-core**
+
+* [KOV-12](http://issues.komponents.nl/youtrack/issue/KOV-12) Blocking get functionality
+* [KOV-31](http://issues.komponents.nl/youtrack/issue/KOV-31) Allow wait strategies to be properly interrupted
+
+
+###v2.1.1
+
+**kovenant-disruptor**
+
+* [KOV-33](http://issues.komponents.nl/youtrack/issue/KOV-33) Disruptor project lacks a description
+
+**kovenant-core**
+
+* [KOV-32](http://issues.komponents.nl/youtrack/issue/KOV-32) Empty collections with bulk operations are not properly handled
 
 ###v2.1.0
 
