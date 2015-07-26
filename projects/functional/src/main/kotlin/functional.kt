@@ -117,6 +117,32 @@ private fun <R : Any, V : Any> asyncBind(bind: (V) -> Promise<R, Exception>,
     }
 }
 
+/**
+ * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
+ * Not an idiomatic apply function, though quite useful.
+ */
+public fun <V1, V2, R> Promise<V1, Exception>.apply(context: Context = this.context,
+                                                    promise: Promise<V2, Exception>,
+                                                    bind: (V1, V2) -> R): Promise<R, Exception> {
+    val deferred = deferred<R, Exception>(context)
+    success {
+        first ->
+        promise success {
+            second ->
+            context.workerContext offer {
+                try {
+                    deferred resolve bind(first, second)
+                } catch (e: Exception) {
+                    deferred reject e
+                }
+            }
+        }
+    }
+    fail { deferred reject it }
+
+    return deferred.promise
+}
+
 
 /**
  * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
