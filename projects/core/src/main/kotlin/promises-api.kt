@@ -284,9 +284,33 @@ public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promis
     return concretePromise(context, this, bind)
 }
 
+/**
+ * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
+ *
+ * Transforms Promise A to Promise B. If Promise A resolves successful then [bind] is executed on the
+ * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
+ * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
+ *
+ * If Promise A fails with error E, Promise B will fail with error E too.
+ *
+ * @param context the on which the bind and returned Promise operate
+ * @param bind the transform function.
+ */
 public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 
+/**
+ * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
+ *
+ * Transforms Promise A to Promise B. If Promise A resolves successful then [bind] is executed on the
+ * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
+ * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
+ *
+ * If Promise A fails with error E, Promise B will fail with error E too.
+ *
+ *
+ * @param bind the transform function.
+ */
 public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
         inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R): Promise<R, Exception> = then { it.bind() }

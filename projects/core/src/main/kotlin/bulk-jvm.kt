@@ -29,11 +29,26 @@ import java.util.concurrent.atomic.AtomicReferenceArray
 private fun concreteAll<V>(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
-    if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
+    return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
+}
+
+private fun concreteAll<V>(promises: List<Promise<V, Exception>>,
+                           context: Context,
+                           cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
+    // this might fail with concurrent mutating list, revisit in the future
+    // not really a Kovenant issue but can prevent this from ever completing
+    return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
+}
+
+private fun concreteAll<V>(promises: Sequence<Promise<V, Exception>>,
+                           sequenceSize: Int,
+                           context: Context,
+                           cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
+    if (sequenceSize == 0) throw IllegalArgumentException("no promises provided")
 
     val deferred = deferred<List<V>, Exception>(context)
-    val results = AtomicReferenceArray<V>(promises.size())
-    val successCount = AtomicInteger(promises.size())
+    val results = AtomicReferenceArray<V>(sequenceSize)
+    val successCount = AtomicInteger(sequenceSize)
     val failCount = AtomicInteger(0)
     promises.forEachIndexed {
         i, promise ->
@@ -65,12 +80,27 @@ private fun concreteAll<V>(vararg promises: Promise<V, Exception>,
 private fun concreteAny<V>(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
-    if (promises.size() == 0) throw IllegalArgumentException("no promises provided")
+    return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
+}
+
+private fun concreteAny<V>(promises: List<Promise<V, Exception>>,
+                           context: Context,
+                           cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
+    // this might fail with concurrent mutating list, revisit in the future
+    // not really a Kovenant issue but can prevent this from ever completing
+    return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
+}
+
+private fun concreteAny<V>(promises: Sequence<Promise<V, Exception>>,
+                           sequenceSize: Int,
+                           context: Context,
+                           cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
+    if (sequenceSize == 0) throw IllegalArgumentException("no promises provided")
 
     val deferred = deferred<V, List<Exception>>(context)
-    val errors = AtomicReferenceArray<Exception>(promises.size())
+    val errors = AtomicReferenceArray<Exception>(sequenceSize)
     val successCount = AtomicInteger(0)
-    val failCount = AtomicInteger(promises.size())
+    val failCount = AtomicInteger(sequenceSize)
 
     promises.forEachIndexed {
         i, promise ->

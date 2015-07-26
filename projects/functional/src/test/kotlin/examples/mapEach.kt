@@ -19,11 +19,19 @@
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package examples.aforEach
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.functional.mapEach
+
+fun main(args: Array<String>) {
+    val promise = sequenceOf(12, 13, 14, 15, 16).mapEach {
+        it - 1
+    }
+
+    promise success {
+        it forEach {
+            println(it)
+        }
+    }
 }
+
