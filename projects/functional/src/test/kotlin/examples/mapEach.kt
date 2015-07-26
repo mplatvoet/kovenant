@@ -21,10 +21,10 @@
 
 package examples.aforEach
 
-import nl.komponents.kovenant.functional.aforEach
+import nl.komponents.kovenant.functional.mapEach
 
 fun main(args: Array<String>) {
-    val promise = sequenceOf(12, 13, 14, 15, 16).aforEach {
+    val promise = sequenceOf(12, 13, 14, 15, 16).mapEach {
         it - 1
     }
 
