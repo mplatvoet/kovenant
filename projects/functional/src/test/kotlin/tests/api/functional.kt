@@ -24,6 +24,10 @@ package tests.api.functional
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.functional.apply
+import nl.komponents.kovenant.functional.bind
+import nl.komponents.kovenant.functional.map
 import nl.komponents.kovenant.functional.unwrap
 import org.junit.Before
 import org.junit.Test
@@ -84,6 +88,72 @@ class UnwrapContextTest {
         val nestedPromise = Promise.of(42)
         val unwrapped = Promise.of(nestedPromise).unwrap(alternativeContext)
         assertEquals(alternativeContext, unwrapped.context, "Expected the alternative context")
+    }
+}
+
+class MapTest {
+    Before fun setup() {
+        Kovenant.context {
+            callbackContext.dispatcher = ImmediateDispatcher()
+            workerContext.dispatcher = ImmediateDispatcher()
+        }
+    }
+
+    Test fun mapSuccess() {
+        var result = 0
+        async { 13 } map { it + 2 } success { result = it }
+        assertEquals(15, result, "should chain")
+    }
+
+    Test fun mapFail() {
+        var count = 0
+        async { 13 } map { throw Exception() } fail { count++ }
+        assertEquals(1, count, "should report a failure")
+    }
+}
+
+class BindTest {
+    Before fun setup() {
+        Kovenant.context {
+            callbackContext.dispatcher = ImmediateDispatcher()
+            workerContext.dispatcher = ImmediateDispatcher()
+        }
+    }
+
+    Test fun bindSuccess() {
+        fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2)
+
+        var result = 0
+        async { 13 } bind { timesTwo(it) } success { result = it }
+        assertEquals(26, result, "should chain")
+    }
+
+    Test fun bindFail() {
+        fun timesTwo(i: Int): Promise<Int, Exception> = Promise.ofFail(Exception())
+        var count = 0
+        async { 13 } bind  { timesTwo(it) } fail { count++ }
+        assertEquals(1, count, "should report a failure")
+    }
+}
+
+class ApplyTest {
+    Before fun setup() {
+        Kovenant.context {
+            callbackContext.dispatcher = ImmediateDispatcher()
+            workerContext.dispatcher = ImmediateDispatcher()
+        }
+    }
+
+    Test fun bindSuccess() {
+        var result = 0
+        async { 13 } apply Promise.of({ i: Int -> i * 2})  success { result = it }
+        assertEquals(26, result, "should chain")
+    }
+
+    Test fun bindFail() {
+        var count = 0
+        async { 13 } apply Promise.ofFail<(Int) -> Int, Exception>(Exception()) fail { count++ }
+        assertEquals(1, count, "should report a failure")
     }
 }
 
