@@ -14,8 +14,8 @@ information on usage.
   
 ---
 
-##flatMap
-`flatMap` operates similar to [`map`](#map) except that it expects a `bind` function that returns a promise and maps 
+##bind
+`bind` operates similar to [`map`](#map) except that it expects a `fn` function that returns a promise and maps 
 that as the result of this operation.
 
 ```kt
@@ -36,8 +36,22 @@ fun divide(a: Int, b: Int): Promise<Int, Exception> {
 }
 ```
 Any `Exception` thrown from any of the steps in the chain of promises results in every next promises to be resolved as
-failed. The `bind` of `flatMap` is executed by the `workerContext`. 
+failed. The `fn` of `bind` is executed by the `workerContext`. 
   
+---
+
+##apply
+Applies the map function of the provided `Promise` to the result of this `Promise` and returns a new `Promise` with
+the transformed value.
+
+If either this or the provided `Promise` fails the resulting `Promise` has failed too. this `Promise` takes
+precedence over the provided `Promise` if both fail.
+
+```kt
+val p = Promise.of(21) apply Promise.of({ x: Int -> x * 2 })
+p success { println(it) }
+```
+
 ---
 
 ##unwrap

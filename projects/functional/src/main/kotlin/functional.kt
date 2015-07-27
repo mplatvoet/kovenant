@@ -25,28 +25,28 @@ import nl.komponents.kovenant.*
 import java.util.ArrayList
 
 /**
- * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
+ * Asynchronously map the success value of a [Promise] and returns a new [Promise] with the transformed value.
  *
- * Transforms Promise A to Promise B. If Promise A resolves successful then [bind] is executed on the
- * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
+ * Transforms Promise A to Promise B. If Promise A resolves successful then [fn] is executed on the
+ * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [fn] is successful,
  * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
  *
  * If Promise A fails with error E, Promise B will fail with error E too.
  *
- * @param bind the transform function.
+ * @param fn the transform function.
  */
-public fun <V : Any, R : Any> Promise<V, Exception>.map(bind: (V) -> R): Promise<R, Exception> = then(bind)
+public fun <V : Any, R : Any> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exception> = then(fn)
 
 /**
- * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
+ * Asynchronously map the success value of a [Promise] and returns a new [Promise] with the transformed value.
  *
- * Transforms Promise A to Promise B. If Promise A resolves successful then [bind] is executed on the
- * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
+ * Transforms Promise A to Promise B. If Promise A resolves successful then [fn] is executed on the
+ * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [fn] is successful,
  * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
  *
  * If Promise A fails with error E, Promise B will fail with error E too.
  *
- * @param context the on which the bind and returned Promise operate
+ * @param context the on which the map function and returned Promise operate
  * @param bind the transform function.
  */
 public fun <V : Any, R : Any> Promise<V, Exception>.map(context: Context, bind: (V) -> R): Promise<R, Exception> = then(context, bind)
@@ -56,7 +56,7 @@ public fun <V : Any, R : Any> Promise<V, Exception>.map(context: Context, bind: 
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
  *
  * Transforms Promise A to Promise B with a bind function that returns Promise B.
- * If Promise A resolves successful then [bind] is executed on the
+ * If Promise A resolves successful then [fn] is executed on the
  * work [DispatcherContext] of the default `Kovenant.context` and returns Promise B. If [bind] is successful,
  * meaning now Exception is thrown then Promise B resolves successful, failed otherwise.
  *
@@ -64,7 +64,7 @@ public fun <V : Any, R : Any> Promise<V, Exception>.map(context: Context, bind: 
  *
  * @param bind the transform function.
  */
-public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(bind: (V) -> Promise<R, Exception>): Promise<R, Exception> = flatMap(context, bind)
+public fun <V : Any, R : Any> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Exception>): Promise<R, Exception> = bind(context, fn)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -79,11 +79,11 @@ public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(bind: (V) -> Promise
  * @param context the on which the bind and returned Promise operate
  * @param bind the transform function.
  */
-public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(context: Context, bind: (V) -> Promise<R, Exception>): Promise<R, Exception> {
+public fun <V : Any, R : Any> Promise<V, Exception>.bind(context: Context, fn: (V) -> Promise<R, Exception>): Promise<R, Exception> {
     if (isDone()) when {
         isSuccess() -> {
             val deferred = deferred<R, Exception>(context)
-            asyncBind(bind, context, deferred, get())
+            bindAsync(fn, context, deferred, get())
             return deferred.promise
         }
         isFailure() -> return Promise.ofFail(getError(), context)
@@ -92,7 +92,7 @@ public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(context: Context, bi
     val deferred = deferred<R, Exception>(context)
     success {
         value ->
-        asyncBind(bind, context, deferred, value)
+        bindAsync(fn, context, deferred, value)
     }
     fail {
         deferred reject it
@@ -101,7 +101,7 @@ public fun <V : Any, R : Any> Promise<V, Exception>.flatMap(context: Context, bi
     return deferred.promise
 }
 
-private fun <R : Any, V : Any> asyncBind(bind: (V) -> Promise<R, Exception>,
+private fun <R : Any, V : Any> bindAsync(bind: (V) -> Promise<R, Exception>,
                                          context: Context,
                                          deferred: Deferred<R, Exception>,
                                          value: V) {
@@ -118,27 +118,70 @@ private fun <R : Any, V : Any> asyncBind(bind: (V) -> Promise<R, Exception>,
 }
 
 /**
- * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
+ * Applies the map function of the provided `Promise` to the result of this `Promise` and returns a new `Promise` with
+ * the transformed value.
+ *
+ * If either this or the provided `Promise` fails the resulting `Promise` has failed too. this `Promise` takes
+ * precedence over the provided `Promise` if both fail.
+ *
+ * @param promise Promise containing the map function
  */
-public fun <V, R> Promise<V, Exception>.apply(context: Context = this.context,
-                                                    promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+    return this.apply(this.context, promise)
+}
+
+
+/**
+ * Applies the map function of the provided `Promise` to the result of this `Promise` and returns a new `Promise` with
+ * the transformed value.
+ *
+ * If either this or the provided `Promise` fails the resulting `Promise` has failed too. this `Promise` takes
+ * precedence over the provided `Promise` if both fail.
+ *
+ * @param context the context on which the map function and the returned promise operate.
+ * @param promise Promise containing the map function
+ */
+public fun <V, R> Promise<V, Exception>.apply(context: Context, promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+    if (isDone()) when {
+        isDone() -> {
+            val deferred = deferred<R, Exception>(context)
+            applyAsync(promise, context, deferred, get())
+            return deferred.promise
+        }
+        isFailure() -> return Promise.ofFail(getError(), context)
+    }
+
     val deferred = deferred<R, Exception>(context)
     success {
         value ->
-        promise success {
-            bind ->
-            context.workerContext offer {
-                try {
-                    deferred resolve bind(value)
-                } catch (e: Exception) {
-                    deferred reject e
-                }
-            }
-        }
+        applyAsync(promise, context, deferred, value)
     }
     fail { deferred reject it }
 
     return deferred.promise
+}
+
+private fun <R, V> applyAsync(promise: Promise<(V) -> R, Exception>, context: Context, deferred: Deferred<R, Exception>, value: V) {
+    if (promise.isDone()) when {
+        promise.isSuccess() -> return applyAsync(context, deferred, promise.get(), value)
+        promise.isFailure() -> return deferred reject promise.getError()
+    }
+
+    promise success {
+        fn ->
+        applyAsync(context, deferred, fn, value)
+    }
+    promise fail { deferred reject it }
+}
+
+private fun <R, V> applyAsync(context: Context, deferred: Deferred<R, Exception>, fn: (V) -> R, value: V) {
+    context.workerContext offer {
+        try {
+            deferred resolve fn(value)
+        } catch (e: Exception) {
+            deferred reject e
+        }
+    }
 }
 
 

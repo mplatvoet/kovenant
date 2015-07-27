@@ -16,30 +16,17 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package examples.flatMap
+package examples.apply
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.functional.flatMap
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.functional.apply
 
 fun main(args: Array<String>) {
-
-    Promise.of(13).flatMap {
-        divide(it, 12)
-    } success {
-        println("Success: $it")
-    } fail {
-        println("Fail: ${it.getMessage()}")
-    }
+    val p = Promise.of(21) apply Promise.of({ x: Int -> x * 2 })
+    p success { println(it) }
 }
-
-fun divide(a: Int, b: Int): Promise<Int, Exception> {
-    return if (a == 0 || b == 0) {
-        Promise.ofFail(Exception("Cannot divide by zero: $a/$b"))
-    } else {
-        Promise.ofSuccess(a / b)
-    }
-}
-
