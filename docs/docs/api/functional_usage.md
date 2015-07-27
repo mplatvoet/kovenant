@@ -19,7 +19,7 @@ information on usage.
 that as the result of this operation.
 
 ```kt
-Promise.of(13).flatMap {
+Promise.of(13) bind {
     divide(it, 12)
 } success {
     println("Success: $it")
