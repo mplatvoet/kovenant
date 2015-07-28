@@ -22,6 +22,7 @@
 package tests.api.then
 
 import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import nl.komponents.kovenant.then
 import org.junit.Before
@@ -53,5 +54,30 @@ class ThenTest {
 
 }
 
+class ThenContextTest {
+    val defaultContext = Kovenant.context {
+        callbackContext.dispatcher = ImmediateDispatcher()
+        workerContext.dispatcher = ImmediateDispatcher()
+    }
 
+    val alternativeContext = Kovenant.createContext {
+        callbackContext.dispatcher = ImmediateDispatcher()
+        workerContext.dispatcher = ImmediateDispatcher()
+    }
+
+    Test fun defaultContext() {
+        val p = Promise.of(13) then { it + 2 }
+        assertEquals(defaultContext, p.context, "Expected the default context")
+    }
+
+    Test fun alternativeFirstContext() {
+        val p = Promise.of(13, alternativeContext) then { it + 2 }
+        assertEquals(alternativeContext, p.context, "Expected the alternative context")
+    }
+
+    Test fun specifiedContext() {
+        val p = Promise.of(13).then(alternativeContext) { it + 2 }
+        assertEquals(alternativeContext, p.context, "Expected the alternative context")
+    }
+}
 

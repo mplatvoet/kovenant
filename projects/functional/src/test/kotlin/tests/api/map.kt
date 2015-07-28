@@ -52,7 +52,7 @@ class MapTest {
     }
 }
 
-class ApplyContextTest {
+class MapContextTest {
     val defaultContext = Kovenant.context {
         callbackContext.dispatcher = ImmediateDispatcher()
         workerContext.dispatcher = ImmediateDispatcher()
