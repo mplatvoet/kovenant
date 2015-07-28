@@ -268,7 +268,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             toCancel.forEach { task -> task?.cancel(false) }
         }
 
-        return ArrayList(finished)
+        return ArrayList(finished.filterNotNull())
 
     }
 

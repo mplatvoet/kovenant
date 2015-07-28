@@ -161,7 +161,7 @@ private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any
         this.initializer = initializer
     }
 
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
+    public override fun get(thisRef: Any?, property: PropertyMetadata): T {
         //Busy /Spin lock, expect quick initialization
         while (value == null) {
             val counter = threadCount
@@ -182,7 +182,7 @@ private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any
         return unmask(value) as T
     }
 
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
+    public override fun set(thisRef: Any?, property: PropertyMetadata, value: T) {
         this.value = mask(value)
     }
 
@@ -193,12 +193,12 @@ private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any
 private class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
     private volatile var value: Any? = null
 
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
+    public override fun get(thisRef: Any?, property: PropertyMetadata): T {
         val curVal = value
         return if (curVal != null) unmask(curVal) as T else source()
     }
 
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
+    public override fun set(thisRef: Any?, property: PropertyMetadata, value: T) {
         this.value = mask(value)
     }
 

@@ -46,7 +46,7 @@ private class LazyPromise<in R, T>(
         this.initializer = initializer
     }
 
-    override fun get(thisRef: R, desc: PropertyMetadata): Promise<T, Exception> {
+    override fun get(thisRef: R, property: PropertyMetadata): Promise<T, Exception> {
         // Busy/Spin lock, expecting async to return quickly
         // Don't want to using blocking semantics since
         // it's not in the nature of Kovenant
