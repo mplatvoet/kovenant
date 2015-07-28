@@ -15,6 +15,9 @@ def enrichVersion() {
 
 String extractKotlinMilestoneVersion() {
     def rawVersion = extractRawKotlinVersion()
+    if (rawVersion.contains("SNAPSHOT")) {
+        return "-SNAPSHOT"
+    }
     if (rawVersion) {
         def matcher = rawVersion =~ /\d+/
         matcher.find()
