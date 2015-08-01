@@ -6,18 +6,27 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v2.3.0
+###v2.4.0
+
 **certain**
 
 * n/a
 
-**probably**
-
-* Functional constructs, map, flatMap, unwrap, ...
-
 ---
 
 ##Released
+
+###v2.3.0
+
+**core**
+
+* [KOV-36](http://issues.komponents.nl/youtrack/issue/KOV-36) Ability to control JVM thread factory
+
+**kovenant-functional**
+
+* [KOV-37](http://issues.komponents.nl/youtrack/issue/KOV-37) [Unwrap](http://kovenant.komponents.nl/api/functional_usage/#unwrap) method
+* [KOV-38](http://issues.komponents.nl/youtrack/issue/KOV-38) Functional constructs. [map](http://kovenant.komponents.nl/api/functional_usage/#map)  / [bind](http://kovenant.komponents.nl/api/functional_usage/#bind)  / [apply](http://kovenant.komponents.nl/api/functional_usage/#apply)  / [withContext](http://kovenant.komponents.nl/api/functional_usage/#withcontext)  
+
 
 ###v2.2.1
 
