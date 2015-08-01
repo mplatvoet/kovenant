@@ -32,10 +32,12 @@ public object Kovenant {
         }
 
 
-    public fun context(body: MutableContext.() -> Unit): Unit = concrete.context(body)
+    public fun context(body: MutableContext.() -> Unit): Context = concrete.context(body)
 
     @deprecated("use context { ... } instead", ReplaceWith("context(body)"))
-    public fun configure(body: MutableContext.() -> Unit): Unit = context(body)
+    public fun configure(body: MutableContext.() -> Unit): Unit {
+        context(body)
+    }
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 

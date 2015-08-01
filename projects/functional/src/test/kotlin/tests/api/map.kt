@@ -16,22 +16,22 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package tests.api.then
+package tests.api.functional.map
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.functional.map
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
-class ThenTest {
-
+class MapTest {
     Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = ImmediateDispatcher()
@@ -39,22 +39,20 @@ class ThenTest {
         }
     }
 
-    Test fun thenSuccess() {
+    Test fun mapSuccess() {
         var result = 0
-        async { 13 } then {it + 2} success { result = it }
+        Promise.of(13) map { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
-    Test fun thenFail() {
+    Test fun mapFail() {
         var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
+        Promise.of(13) map { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
     }
-
-
 }
 
-class ThenContextTest {
+class MapContextTest {
     val defaultContext = Kovenant.context {
         callbackContext.dispatcher = ImmediateDispatcher()
         workerContext.dispatcher = ImmediateDispatcher()
@@ -66,18 +64,17 @@ class ThenContextTest {
     }
 
     Test fun defaultContext() {
-        val p = Promise.of(13) then { it + 2 }
+        val p = Promise.of(13) map { it + 2 }
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
     Test fun alternativeFirstContext() {
-        val p = Promise.of(13, alternativeContext) then { it + 2 }
+        val p = Promise.of(13, alternativeContext) map { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
     Test fun specifiedContext() {
-        val p = Promise.of(13).then(alternativeContext) { it + 2 }
+        val p = Promise.of(13).map(alternativeContext) { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 }
-

@@ -44,7 +44,7 @@ class ConcreteKovenant {
             throw ConfigurationException("Current context [$ctx] does not implement ReconfigurableContext and therefor can't be reconfigured.")
         }
 
-    public fun context(body: MutableContext.() -> Unit) {
+    public fun context(body: MutableContext.() -> Unit): Context {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
@@ -56,7 +56,7 @@ class ConcreteKovenant {
             val newConfig = current.copy()
             trackingContext.applyChanged(newConfig)
         } while (!contextRef.compareAndSet(current, newConfig))
-
+        return context
     }
 
     fun createContext(body: MutableContext.() -> Unit): Context {

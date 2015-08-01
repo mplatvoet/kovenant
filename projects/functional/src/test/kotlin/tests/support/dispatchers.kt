@@ -19,11 +19,25 @@
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package tests.support
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.Dispatcher
+
+public class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
+    override fun offer(task: () -> Unit): Boolean {
+        onOffered(task)
+        task()
+        return true
+    }
+
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = listOf()
+
+    override fun tryCancel(task: () -> Unit): Boolean {
+        return false
+    }
+
+    override val terminated: Boolean
+        get() = true
+    override val stopped: Boolean
+        get() = true
 }

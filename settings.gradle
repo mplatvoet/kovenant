@@ -28,6 +28,7 @@ include 'kovenant'
 include 'android'
 include 'disruptor'
 include 'progress'
+include 'functional'
 
 rootProject.children.each { project ->
     String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
@@ -36,9 +37,10 @@ rootProject.children.each { project ->
     project.buildFileName = "${projectFileName}.gradle"
 }
 
-project(":core").name = "kovenant-core"
-project(":combine").name = "kovenant-combine"
-project(":jvm").name = "kovenant-jvm"
-project(":android").name = "kovenant-android"
+project(':core').name = 'kovenant-core'
+project(':combine').name = 'kovenant-combine'
+project(':jvm').name = 'kovenant-jvm'
+project(':android').name = 'kovenant-android'
 project(':disruptor').name = 'kovenant-disruptor'
-project(":progress").name = "kovenant-progress"
+project(':progress').name = 'kovenant-progress'
+project(':functional').name = 'kovenant-functional'

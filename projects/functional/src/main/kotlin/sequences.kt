@@ -16,14 +16,36 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.functional
 
-project.description = "Kovenant. Promises for Kotlin."
+import nl.komponents.kovenant.*
+import java.util.*
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+
+/**
+ * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
+ */
+public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
+    val deferred = deferred<List<R>, Exception>(context)
+    context.workerContext offer {
+        //TODO ArrayList is jvm only
+        val promises = ArrayList<Promise<R, Exception>>()
+        forEach {
+            value ->
+            promises add async(context) { bind(value) }
+        }
+        val masterPromise = all(promises)
+        masterPromise success {
+            deferred resolve it
+        }
+        masterPromise fail {
+            deferred reject it
+        }
+    }
+
+    return deferred.promise
 }
+

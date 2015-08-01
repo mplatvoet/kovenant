@@ -12,6 +12,7 @@ pages:
 - ['api/core_usage.md', 'API Documentation', 'Core Usage']
 - ['api/core_config.md', 'API Documentation', 'Core Configuration']
 - ['api/combine_usage.md', 'API Documentation', 'Combine']
+- ['api/functional_usage.md', 'API Documentation', 'Functional']
 - ['api/jvm_usage.md', 'API Documentation', 'Executors (JVM)']
 - ['android/features.md', 'Android','Features']
 - ['android/config.md', 'Android','Configuring']

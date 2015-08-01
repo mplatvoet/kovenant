@@ -16,21 +16,22 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package tests.api.then
+package tests.api.functional.unwrap
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.functional.unwrap
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
-class ThenTest {
+class UnwrapTest {
 
     Before fun setup() {
         Kovenant.context {
@@ -39,22 +40,19 @@ class ThenTest {
         }
     }
 
-    Test fun thenSuccess() {
-        var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
+    Test fun successUnwrap() {
+        var success = 0
+        var fails = 0
+        Promise.of(Promise.of(42)).unwrap() success {
+            assertEquals(42, it, "should be unwrapped")
+            success++
+        } fail { fails++ }
+        assertEquals(1, success, "success should be called once")
+        assertEquals(0, fails, "fail should not be called")
     }
-
-    Test fun thenFail() {
-        var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
-        assertEquals(1, count, "should report a failure")
-    }
-
-
 }
 
-class ThenContextTest {
+class UnwrapContextTest {
     val defaultContext = Kovenant.context {
         callbackContext.dispatcher = ImmediateDispatcher()
         workerContext.dispatcher = ImmediateDispatcher()
@@ -66,18 +64,26 @@ class ThenContextTest {
     }
 
     Test fun defaultContext() {
-        val p = Promise.of(13) then { it + 2 }
-        assertEquals(defaultContext, p.context, "Expected the default context")
+        val nestedPromise = Promise.of(42)
+        val unwrapped = Promise.of(nestedPromise).unwrap()
+        assertEquals(defaultContext, unwrapped.context, "Expected the default context")
     }
 
-    Test fun alternativeFirstContext() {
-        val p = Promise.of(13, alternativeContext) then { it + 2 }
-        assertEquals(alternativeContext, p.context, "Expected the alternative context")
+    Test fun alternativeNestedContext() {
+        val nestedPromise = Promise.of(42, alternativeContext)
+        val unwrapped = Promise.of(nestedPromise).unwrap()
+        assertEquals(defaultContext, unwrapped.context, "Expected the default context")
+    }
+
+    Test fun alternativeUnwrappedContext() {
+        val nestedPromise = Promise.of(42)
+        val unwrapped = Promise.of(nestedPromise, alternativeContext).unwrap()
+        assertEquals(alternativeContext, unwrapped.context, "Expected the alternative context")
     }
 
     Test fun specifiedContext() {
-        val p = Promise.of(13).then(alternativeContext) { it + 2 }
-        assertEquals(alternativeContext, p.context, "Expected the alternative context")
+        val nestedPromise = Promise.of(42)
+        val unwrapped = Promise.of(nestedPromise).unwrap(alternativeContext)
+        assertEquals(alternativeContext, unwrapped.context, "Expected the alternative context")
     }
 }
-

@@ -19,11 +19,19 @@
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package examples.threads
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.jvmDispatcher
+
+fun main(args: Array<String>) {
+    Kovenant.context {
+        callbackContext.jvmDispatcher {
+            threadFactory = {
+                target, dispatcherName, id ->
+                Thread(target, "custom name")
+            }
+        }
+    }
 }
+

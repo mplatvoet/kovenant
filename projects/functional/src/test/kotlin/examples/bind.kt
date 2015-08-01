@@ -19,11 +19,27 @@
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package examples.flatMap
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.functional.bind
+
+fun main(args: Array<String>) {
+
+    Promise.of(13).bind {
+        divide(it, 12)
+    } success {
+        println("Success: $it")
+    } fail {
+        println("Fail: ${it.getMessage()}")
+    }
 }
+
+fun divide(a: Int, b: Int): Promise<Int, Exception> {
+    return if (a == 0 || b == 0) {
+        Promise.ofFail(Exception("Cannot divide by zero: $a/$b"))
+    } else {
+        Promise.ofSuccess(a / b)
+    }
+}
+

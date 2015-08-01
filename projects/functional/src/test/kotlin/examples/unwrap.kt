@@ -19,11 +19,18 @@
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package examples.unwrap
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.functional.unwrap
+
+fun main(args: Array<String>) {
+    val nested = Promise.of(Promise.of(42))
+    val promise = nested.unwrap()
+    promise success {
+        println(it)
+    }
 }
+
+
+

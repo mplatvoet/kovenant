@@ -16,22 +16,21 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package tests.api.then
+package tests.api.functional.apply
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.functional.apply
 import org.junit.Before
 import org.junit.Test
 import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
-class ThenTest {
-
+class ApplyTest {
     Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = ImmediateDispatcher()
@@ -39,22 +38,20 @@ class ThenTest {
         }
     }
 
-    Test fun thenSuccess() {
+    Test fun bindSuccess() {
         var result = 0
-        async { 13 } then {it + 2} success { result = it }
-        assertEquals(15, result, "should chain")
+        Promise.of(13) apply Promise.of({ i: Int -> i * 2})  success { result = it }
+        assertEquals(26, result, "should chain")
     }
 
-    Test fun thenFail() {
+    Test fun bindFail() {
         var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
+        Promise.of(13) apply Promise.ofFail<(Int) -> Int, Exception>(Exception()) fail { count++ }
         assertEquals(1, count, "should report a failure")
     }
-
-
 }
 
-class ThenContextTest {
+class ApplyContextTest {
     val defaultContext = Kovenant.context {
         callbackContext.dispatcher = ImmediateDispatcher()
         workerContext.dispatcher = ImmediateDispatcher()
@@ -66,17 +63,22 @@ class ThenContextTest {
     }
 
     Test fun defaultContext() {
-        val p = Promise.of(13) then { it + 2 }
+        val p = Promise.of(13) apply Promise.of({ i: Int -> i * 2})
+        assertEquals(defaultContext, p.context, "Expected the default context")
+    }
+
+    Test fun alternativeSecondContext() {
+        val p = Promise.of(13) apply Promise.of({ i: Int -> i * 2}, alternativeContext)
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
     Test fun alternativeFirstContext() {
-        val p = Promise.of(13, alternativeContext) then { it + 2 }
+        val p = Promise.of(13, alternativeContext) apply Promise.of({ i: Int -> i * 2})
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
     Test fun specifiedContext() {
-        val p = Promise.of(13).then(alternativeContext) { it + 2 }
+        val p = Promise.of(13).apply(alternativeContext, Promise.of({ i: Int -> i * 2}))
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 }

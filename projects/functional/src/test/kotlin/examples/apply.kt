@@ -16,14 +16,17 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-project.description = "Kovenant. Promises for Kotlin."
+package examples.apply
 
-dependencies {
-    compile project(':kovenant-core')
-    compile project(':kovenant-combine')
-    compile project(':kovenant-jvm')
-    compile project(':kovenant-functional')
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.functional.apply
+
+fun main(args: Array<String>) {
+    val p = Promise.of(21) apply Promise.of({ x: Int -> x * 2 })
+    p success { println(it) }
 }
