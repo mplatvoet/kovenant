@@ -18,7 +18,7 @@ Source and target compatibility is `1.6`
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:2.2.+'
+    compile 'nl.komponents.kovenant:kovenant:2.3.+'
 }
 ```
 
@@ -27,7 +27,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[2.2.0,2.3.0)</version>
+	<version>[2.3.0,2.4.0)</version>
 </dependency>
 ```
 
@@ -53,4 +53,4 @@ it's needed to keep class and method count low.
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
 
 ##Release notes
-See [Changelog](changelog.md) for release notes
+See [Changelog](http://kovenant.komponents.nl/changelog/) for release notes

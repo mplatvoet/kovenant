@@ -37,7 +37,7 @@ apply from: "${rootProject.projectDir}/gradle/versions.gradle"
 
 allprojects {
     ext {
-        appVersion = '2.2.1'
+        appVersion = '2.3.0'
         appGroup = 'nl.komponents.kovenant'
 
 
