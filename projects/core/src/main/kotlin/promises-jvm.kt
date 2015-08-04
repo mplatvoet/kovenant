@@ -253,11 +253,13 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
-                while (!isDoneInternal()) {
-                    try {
-                        mutex.wait()
-                    } catch(e: InterruptedException) {
-                        throw FailedException(e)
+                synchronized(mutex) {
+                    while (!isDoneInternal()) {
+                        try {
+                            mutex.wait()
+                        } catch(e: InterruptedException) {
+                            throw FailedException(e)
+                        }
                     }
                 }
             } finally {
@@ -276,11 +278,13 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
-                while (!isDoneInternal()) {
-                    try {
-                        mutex.wait()
-                    } catch(e: InterruptedException) {
-                        throw FailedException(e)
+                synchronized(mutex) {
+                    while (!isDoneInternal()) {
+                        try {
+                            mutex.wait()
+                        } catch(e: InterruptedException) {
+                            throw FailedException(e)
+                        }
                     }
                 }
             } finally {
