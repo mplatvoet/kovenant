@@ -21,12 +21,12 @@
 
 package tests.api.get
 
+import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.FailedException
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
@@ -34,8 +34,8 @@ class GetTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 

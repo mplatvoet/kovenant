@@ -21,33 +21,29 @@
 
 package tests.api.then
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.then
+import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
 class ThenTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
     Test fun thenSuccess() {
         var result = 0
-        async { 13 } then {it + 2} success { result = it }
+        async { 13 } then { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
     Test fun thenFail() {
         var count = 0
-        async { 13 } then {throw Exception()} fail { count++ }
+        async { 13 } then { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
     }
 
@@ -56,13 +52,13 @@ class ThenTest {
 
 class ThenContextTest {
     val defaultContext = Kovenant.context {
-        callbackContext.dispatcher = ImmediateDispatcher()
-        workerContext.dispatcher = ImmediateDispatcher()
+        callbackContext.dispatcher = DirectDispatcher.instance
+        workerContext.dispatcher = DirectDispatcher.instance
     }
 
     val alternativeContext = Kovenant.createContext {
-        callbackContext.dispatcher = ImmediateDispatcher()
-        workerContext.dispatcher = ImmediateDispatcher()
+        callbackContext.dispatcher = DirectDispatcher.instance
+        workerContext.dispatcher = DirectDispatcher.instance
     }
 
     Test fun defaultContext() {

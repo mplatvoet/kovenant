@@ -24,7 +24,6 @@ package tests.api.casts
 import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -33,8 +32,8 @@ class CastTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 

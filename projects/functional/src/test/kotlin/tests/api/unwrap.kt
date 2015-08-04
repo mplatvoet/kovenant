@@ -22,21 +22,20 @@
 
 package tests.api.functional.unwrap
 
+import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
 import nl.komponents.kovenant.functional.unwrap
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
 class UnwrapTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
@@ -54,13 +53,13 @@ class UnwrapTest {
 
 class UnwrapContextTest {
     val defaultContext = Kovenant.context {
-        callbackContext.dispatcher = ImmediateDispatcher()
-        workerContext.dispatcher = ImmediateDispatcher()
+        callbackContext.dispatcher = DirectDispatcher.instance
+        workerContext.dispatcher = DirectDispatcher.instance
     }
 
     val alternativeContext = Kovenant.createContext {
-        callbackContext.dispatcher = ImmediateDispatcher()
-        workerContext.dispatcher = ImmediateDispatcher()
+        callbackContext.dispatcher = DirectDispatcher.instance
+        workerContext.dispatcher = DirectDispatcher.instance
     }
 
     Test fun defaultContext() {
