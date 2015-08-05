@@ -16,28 +16,24 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package tests.support
+package validate.get
 
-import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.async
+import support.fib
+import java.util.*
 
-public class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
-    override fun offer(task: () -> Unit): Boolean {
-        onOffered(task)
-        task()
-        return true
+
+fun main(args: Array<String>) {
+    val attempts = 100000
+    val results = ArrayList<Int>(attempts)
+
+    for (i in 1..10000) {
+        results add async { fib(i % 23) }.get()
     }
 
-    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = listOf()
-
-    override fun tryCancel(task: () -> Unit): Boolean {
-        return false
-    }
-
-    override val terminated: Boolean
-        get() = true
-    override val stopped: Boolean
-        get() = true
+    println("got ${results.size()} results")
 }

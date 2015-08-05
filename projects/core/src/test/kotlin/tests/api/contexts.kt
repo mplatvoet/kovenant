@@ -21,11 +21,12 @@
 
 package tests.api.contexts
 
+import nl.komponents.kovenant.DirectDispatcher
+import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.async
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
 class AsyncTest {
@@ -62,5 +63,24 @@ class AsyncTest {
         async(context) { 13 }
         assertEquals(1, calls, "should by called on default dispatcher")
     }
+}
+
+private class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
+    override fun offer(task: () -> Unit): Boolean {
+        onOffered(task)
+        task()
+        return true
+    }
+
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = listOf()
+
+    override fun tryCancel(task: () -> Unit): Boolean {
+        return false
+    }
+
+    override val terminated: Boolean
+        get() = true
+    override val stopped: Boolean
+        get() = true
 }
 

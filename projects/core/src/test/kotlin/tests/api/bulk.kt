@@ -22,21 +22,17 @@
 
 package tests.api.bulk
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.all
-import nl.komponents.kovenant.any
+import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
 class AllTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
@@ -109,8 +105,8 @@ class AllTest {
 
     Test fun properContextMultiple() {
         val context = Kovenant.createContext {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
 
         val p = all(Promise.of(13), Promise.of(9), Promise.of(8), context = context)
@@ -119,8 +115,8 @@ class AllTest {
 
     Test fun properContextEmpty() {
         val context = Kovenant.createContext {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
 
         val p = all<Int>(context = context)
@@ -132,8 +128,8 @@ class AnyTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
@@ -200,8 +196,8 @@ class AnyTest {
 
     Test fun properContextMultiple() {
         val context = Kovenant.createContext {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
 
         val p = any(Promise.of(13), Promise.of(9), Promise.of(8), context = context)
@@ -210,8 +206,8 @@ class AnyTest {
 
     Test fun properContextEmpty() {
         val context = Kovenant.createContext {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
 
         val p = any<Int>(context = context)
