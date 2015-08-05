@@ -16,6 +16,19 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Released
 
+###v2.3.2
+
+**general**
+
+* Updated kotlin version to 0.12.1230
+* Improved testing of get()
+
+###v2.3.1
+
+**core**
+
+* [KOV-43](http://issues.komponents.nl/youtrack/issue/KOV-43) Fix for broken get()
+
 ###v2.3.0
 
 **core**

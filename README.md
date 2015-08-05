@@ -12,7 +12,7 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `kotlin-stdlib:0.12.1218`.
+This version is build against `kotlin-stdlib:0.12.1230`.
 Source and target compatibility is `1.6`
 
 ###Gradle
