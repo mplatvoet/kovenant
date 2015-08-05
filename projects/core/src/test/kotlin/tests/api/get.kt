@@ -21,12 +21,12 @@
 
 package tests.api.get
 
-import nl.komponents.kovenant.FailedException
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.*
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.fail
 
@@ -34,8 +34,8 @@ class GetTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
@@ -71,4 +71,66 @@ class GetTest {
         }
         assert(thrown, "should throw a FailedException")
     }
+}
+
+class GetAsyncTest {
+
+
+    Before fun setup() {
+        Kovenant.context {
+            val dispatcher = buildDispatcher { concurrentTasks = 1 }
+            callbackContext.dispatcher = dispatcher
+            workerContext.dispatcher = dispatcher
+        }
+    }
+
+    After fun shutdown() {
+        Kovenant.stop()
+    }
+
+    Test(timeout = 10000) fun blockingGet() {
+        val deferred = deferred<Int, Exception>()
+
+        verifyBlocking({ deferred.resolve(42) }) {
+            try {
+                val i = deferred.promise.get()
+                assertEquals(42, i, "Should succeed")
+            } catch(e: Exception) {
+                fail("Should not fail")
+            }
+        }
+    }
+
+
+    private fun verifyBlocking(trigger: () -> Unit, blockingAction: () -> Unit) {
+        val startLatch = CountDownLatch(1)
+        val stopLatch = CountDownLatch(1)
+        val ref = AtomicReference<Throwable>()
+        val thread = Thread {
+            startLatch.countDown()
+            try {
+                blockingAction()
+            } catch (err: Throwable) {
+                ref.set(err)
+            } finally {
+                stopLatch.countDown()
+            }
+        }
+        thread.start()
+
+        startLatch.await()
+        loop@while (true) when (thread.getState()) {
+            Thread.State.BLOCKED, Thread.State.WAITING, Thread.State.TIMED_WAITING -> break@loop
+            Thread.State.TERMINATED -> break@loop
+            else -> Thread.yield()
+        }
+        trigger()
+        stopLatch.await()
+        val throwable = ref.get()
+        if (throwable != null) {
+            throw throwable
+        }
+    }
+
+
 }

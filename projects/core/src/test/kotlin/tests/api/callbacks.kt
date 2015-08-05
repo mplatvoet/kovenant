@@ -21,19 +21,19 @@
 
 package tests.api.promises
 
+import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.async
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertEquals
 
 class PromiseCallbackTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
@@ -110,8 +110,8 @@ class PromiseCallbackOrderTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 

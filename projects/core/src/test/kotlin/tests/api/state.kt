@@ -21,11 +21,11 @@
 
 package tests.api.state
 
+import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.deferred
 import org.junit.Before
 import org.junit.Test
-import tests.support.ImmediateDispatcher
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -33,8 +33,8 @@ class StateTest {
 
     Before fun setup() {
         Kovenant.context {
-            callbackContext.dispatcher = ImmediateDispatcher()
-            workerContext.dispatcher = ImmediateDispatcher()
+            callbackContext.dispatcher = DirectDispatcher.instance
+            workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
