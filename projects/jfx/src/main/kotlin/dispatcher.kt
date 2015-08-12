@@ -18,31 +18,27 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.jfx
 
-rootProject.name = 'root'
+import javafx.application.Platform
+import nl.komponents.kovenant.Dispatcher
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'jfx'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+public class JFXDispatcher private constructor() : Dispatcher {
+    companion object {
+        val instance: JFXDispatcher = JFXDispatcher()
+    }
+
+    override val stopped: Boolean get() = throw UnsupportedOperationException()
+    override val terminated: Boolean get() = throw UnsupportedOperationException()
+
+    override fun offer(task: () -> Unit): Boolean {
+        Platform.runLater(task)
+        return true
+    }
+
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = throw UnsupportedOperationException()
+    override fun tryCancel(task: () -> Unit): Boolean = throw UnsupportedOperationException()
+
+    fun currentIsUiThread(): Boolean = Platform.isFxApplicationThread()
 }
-
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':jfx').name = 'kovenant-jfx'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'
