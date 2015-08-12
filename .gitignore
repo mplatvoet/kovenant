@@ -4,6 +4,7 @@
 *.iml
 .gradle
 classes
+docs/site
 build
 gradle.properties
 

@@ -8,6 +8,11 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ###v2.4.0
 
+**expected**
+
+* [KOV-44](http://issues.komponents.nl/youtrack/issue/KOV-44) UI Callback project
+* [KOV-35](http://issues.komponents.nl/youtrack/issue/KOV-35) JFX Dispatcher
+
 **certain**
 
 * n/a
@@ -15,6 +20,12 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 ---
 
 ##Released
+
+###v2.3.3
+
+**progress**
+
+* [KOV-45](http://issues.komponents.nl/youtrack/issue/KOV-45) Updated progress
 
 ###v2.3.2
 
