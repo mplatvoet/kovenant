@@ -48,7 +48,7 @@ interface Dispatcher {
      *
      * @return tasks that where not yet started, does not include cancelled tasks
      */
-    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit>
+    fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> = throw UnsupportedException("stop() is not implemented")
 
     /**
      * Cancels a previously scheduled task, Does, of course, not execute the provided task.
@@ -57,18 +57,18 @@ interface Dispatcher {
      *
      * @return true if the task was cancelled, false otherwise
      */
-    fun tryCancel(task: () -> Unit): Boolean
+    fun tryCancel(task: () -> Unit): Boolean = false
 
 
     /**
      * @return true if dispatcher is shutdown all threads have been shutdown, false otherwise
      */
-    val terminated: Boolean
+    val terminated: Boolean get() = throw UnsupportedException()
 
     /**
      * @return true if shutdown has been invoked, false otherwise.
      */
-    val stopped: Boolean
+    val stopped: Boolean get() = throw UnsupportedException()
 }
 
 public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)

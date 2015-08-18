@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference
 public fun <V> promiseOnUi(context: Context = Kovenant.context,
                            alwaysSchedule: Boolean = false,
                            body: () -> V): Promise<V, Exception> {
-    if (!alwaysSchedule && JFXDispatcher.instance.currentIsUiThread()) {
+    if (!alwaysSchedule && JFXDispatcher.instance.currentIsUi()) {
         return try {
             Promise.ofSuccess(context = context, value = body())
         } catch(e: Exception) {
@@ -53,7 +53,7 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context,
 public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(false, body)
 
 public fun <V, E> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value: V) -> Unit): Promise<V, E> {
-    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUiThread()) {
+    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUi()) {
         if (isSuccess()) {
             try {
                 body(get())
@@ -72,7 +72,7 @@ public fun <V, E> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value:
 public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(false, body)
 
 public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
-    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUiThread()) {
+    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUi()) {
         if (isFailure()) {
             try {
                 body(getError())
@@ -91,7 +91,7 @@ public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E)
 public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(false, body)
 
 public fun <V, E> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
-    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUiThread()) {
+    if (!alwaysSchedule && isDone() && JFXDispatcher.instance.currentIsUi()) {
         try {
             body()
         } catch(e: Exception) {
