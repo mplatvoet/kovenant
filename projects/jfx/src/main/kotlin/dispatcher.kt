@@ -22,6 +22,7 @@ package nl.komponents.kovenant.jfx
 
 import javafx.application.Platform
 import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.UnsupportedException
 
 
 public class JFXDispatcher private constructor() : Dispatcher {
@@ -29,16 +30,16 @@ public class JFXDispatcher private constructor() : Dispatcher {
         val instance: JFXDispatcher = JFXDispatcher()
     }
 
-    override val stopped: Boolean get() = throw UnsupportedOperationException()
-    override val terminated: Boolean get() = throw UnsupportedOperationException()
+    override val stopped: Boolean get() = throw UnsupportedException()
+    override val terminated: Boolean get() = throw UnsupportedException()
 
     override fun offer(task: () -> Unit): Boolean {
         Platform.runLater(task)
         return true
     }
 
-    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = throw UnsupportedOperationException()
-    override fun tryCancel(task: () -> Unit): Boolean = throw UnsupportedOperationException()
+    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = throw UnsupportedException()
+    override fun tryCancel(task: () -> Unit): Boolean = throw UnsupportedException()
 
     fun currentIsUiThread(): Boolean = Platform.isFxApplicationThread()
 }
