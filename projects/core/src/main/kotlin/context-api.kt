@@ -25,7 +25,7 @@ package nl.komponents.kovenant
 public object Kovenant {
     private val concrete = ConcreteKovenant()
 
-    var context: Context
+    public var context: Context
         get() = concrete.context
         set(value) {
             concrete.context = value

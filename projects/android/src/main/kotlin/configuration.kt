@@ -24,6 +24,7 @@ package nl.komponents.kovenant.android
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.ui.KovenantUi
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
@@ -52,6 +53,10 @@ public fun stopKovenant(force: Boolean = false) {
  * @return `Disposable` to properly shutdown Kovenant
  */
 public fun configureKovenant(): Disposable {
+    KovenantUi.uiContext {
+        dispatcher = androidUiDispatcher()
+    }
+
     val callbackDispatcher = buildDispatcher {
         name = "kovenant-callback"
         concurrentTasks = 1

@@ -71,6 +71,20 @@ interface Dispatcher {
     val stopped: Boolean get() = throw UnsupportedException()
 }
 
+/**
+ * A ProcessAwareDispatcher knows about the tasks it executes and can be used to optimize some calls
+ * by avoiding scheduling but using direct execution instead
+ */
+public interface ProcessAwareDispatcher : Dispatcher {
+    /**
+     * Determines whether the caller is operating on a process/thread/strand/fiber/etc owned by this
+     * dispatcher.
+     *
+     * @return true if caller is operating on a process/thread/strand/fiber/etc owned by this dispatcher, false otherwise.
+     */
+    fun ownsCurrentProcess(): Boolean
+}
+
 public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
 public interface DispatcherBuilder {

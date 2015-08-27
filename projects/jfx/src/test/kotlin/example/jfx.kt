@@ -22,9 +22,12 @@
 package example.jfx
 
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.jfx.successUi
+import nl.komponents.kovenant.jfx.startKovenant
+import nl.komponents.kovenant.ui.successUi
 
 fun main(args: Array<String>) {
+    startKovenant()
+
     async {
         1 + 1
     } successUi {

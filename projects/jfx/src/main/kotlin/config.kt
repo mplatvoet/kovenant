@@ -18,33 +18,16 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.jfx
 
-rootProject.name = 'root'
+import nl.komponents.kovenant.ui.KovenantUi
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'ui'
-include 'jfx'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
+public fun startKovenant() {
+    KovenantUi.uiContext {
+        dispatcher = JFXDispatcher.instance
+    }
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+    //TODO, determine what's the best default for Kovenant configuration
+    //Kovenant.context {  }
 }
 
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':ui').name = 'kovenant-ui'
-project(':jfx').name = 'kovenant-jfx'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'

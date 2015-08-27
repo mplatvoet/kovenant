@@ -19,32 +19,8 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+description = "UI callback support for Kovenant. Promises for Kotlin"
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'ui'
-include 'jfx'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
-
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+dependencies {
+    compile project(':kovenant-core')
 }
-
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':ui').name = 'kovenant-ui'
-project(':jfx').name = 'kovenant-jfx'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'

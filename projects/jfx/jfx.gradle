@@ -23,4 +23,5 @@ description = "JavaFX extensions for Kovenant. Promises for Kotlin"
 
 dependencies {
     compile project(':kovenant-core')
+    compile project(':kovenant-ui')
 }

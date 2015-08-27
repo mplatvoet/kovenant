@@ -44,7 +44,7 @@ public interface JvmDispatcherBuilder : DispatcherBuilder {
 }
 
 private class ConcreteDispatcherBuilder : JvmDispatcherBuilder {
-    override var name = "dispatcher"
+    override var name = "kovenant-dispatcher"
     private var localNumberOfThreads = threadAdvice
     override var exceptionHandler: (Exception) -> Unit = { e -> e.printStackTrace(System.err) }
     override var errorHandler: (Throwable) -> Unit = { t -> t.printStackTrace(System.err) }
@@ -129,7 +129,7 @@ private class NonBlockingDispatcher(val name: String,
                                     private val errorHandler: (Throwable) -> Unit,
                                     private val workQueue: WorkQueue<() -> Unit>,
                                     private val pollStrategy: PollStrategy<() -> Unit>,
-                                    private val threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread) : Dispatcher {
+                                    private val threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread) : ProcessAwareDispatcher {
 
     init {
         if (numberOfThreads < 1) {
@@ -227,6 +227,11 @@ private class NonBlockingDispatcher(val name: String,
         }
         return false
     }
+
+    // implemented for completeness. not the best implementation out there, iteration is quite wasteful
+    // on resources. Not used in primary processes though. Consider using a custom list implementation,
+    // there is more then one already implemented
+    override fun ownsCurrentProcess(): Boolean = threadContexts.any { it.isCurrentThread() }
 
     private fun newThreadContext(): ThreadContext {
         return ThreadContext(threadId.incrementAndGet())
@@ -413,6 +418,8 @@ private class NonBlockingDispatcher(val name: String,
             thread.interrupt()
             deRegisterRequest(this, force = true)
         }
+
+        fun isCurrentThread(): Boolean = Thread.currentThread() == thread
     }
 
 

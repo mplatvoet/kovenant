@@ -21,14 +21,10 @@
 package nl.komponents.kovenant.jfx
 
 import javafx.application.Platform
-import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.ProcessAwareDispatcher
 
 
-public interface UiDispatcher : Dispatcher {
-    fun currentIsUi(): Boolean
-}
-
-public class JFXDispatcher private constructor() : UiDispatcher {
+public class JFXDispatcher private constructor() : ProcessAwareDispatcher {
     companion object {
         val instance: JFXDispatcher = JFXDispatcher()
     }
@@ -38,5 +34,5 @@ public class JFXDispatcher private constructor() : UiDispatcher {
         return true
     }
 
-    override fun currentIsUi(): Boolean = Platform.isFxApplicationThread()
+    override fun ownsCurrentProcess(): Boolean = Platform.isFxApplicationThread()
 }
