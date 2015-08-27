@@ -37,6 +37,7 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context,
             body = body)
 }
 
+//TODO figure out how to properly deprecate this with decent replacement
 @deprecated("now part of kovenant-ui package", ReplaceWith("successUi(body)", "nl.komponents.kovenant.ui.successUi"))
 public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(false, body)
 
