@@ -54,3 +54,9 @@ Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=p
 
 ##Release notes
 See [Changelog](http://kovenant.komponents.nl/changelog/) for release notes
+
+## Recommended libraries:
+Other libraries for Kotlin applications:
+
+* [Injekt](https://github.com/kohesive/injekt) - Crazily easy Dependency Injection for Kotlin
+* [Fuel](https://github.com/kittinunf/Fuel) - The easiest HTTP networking library in Kotlin for Android.
