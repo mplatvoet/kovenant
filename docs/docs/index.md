@@ -66,7 +66,7 @@ Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=p
 ##Release notes
 See [Changelog](changelog.md) for release notes
 
-## Recommended libraries:
+## Recommended libraries
 Other libraries for Kotlin applications:
 
 * [Injekt](https://github.com/kohesive/injekt) - Crazily easy Dependency Injection for Kotlin
