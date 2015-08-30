@@ -57,7 +57,10 @@ public interface ReconfigurableUiContext : MutableUiContext {
     fun copy(): ReconfigurableUiContext
 }
 
-private class DelegatingDispatcherContext(private val base: DispatcherContext,
+/**
+ * Undocumented, may change in the future
+ */
+public class DelegatingDispatcherContext(private val base: DispatcherContext,
                                           override val dispatcher: Dispatcher) : DispatcherContext {
     override val errorHandler: (Exception) -> Unit
         get() = base.errorHandler
