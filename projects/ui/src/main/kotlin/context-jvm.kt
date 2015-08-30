@@ -71,8 +71,16 @@ class ConcreteUiKovenant {
             CurrentCallbackDispatcher()
         }
 
-        private val dispatcherContextBuilderDelegate = ThreadSafeLazyVar<(Dispatcher, Context) -> DispatcherContext> {
-            { dispatcher, context -> DelegatingDispatcherContext(context.callbackContext, dispatcher) }
+        private val dispatcherContextBuilderDelegate = ThreadSafeLazyVar {
+            val cache = WeakReferenceCache<Dispatcher, WeakReferenceCache<Context, DispatcherContext>>() {
+                dispatcher ->
+                WeakReferenceCache<Context, DispatcherContext>() {
+                    context ->
+                    DelegatingDispatcherContext(context.callbackContext, dispatcher)
+                }
+            };
+
+            { dispatcher: Dispatcher, context: Context -> cache[dispatcher][context] }
         }
 
         override var dispatcherContextBuilder: (Dispatcher, Context) -> DispatcherContext by dispatcherContextBuilderDelegate

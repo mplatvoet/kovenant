@@ -23,9 +23,6 @@ package nl.komponents.kovenant.ui
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
-
-//TODO hook up the cache
-
 /**
  * A special kind of weak reference cache. The key is weakly referenced and if,
  * during iteration, we come across a cleared key the *whole* cache gets invalidated.
@@ -34,8 +31,10 @@ import java.util.concurrent.atomic.AtomicReference
  * are kept to a minimum and it is expected that keys are reasonably long lived.
  *
  * Iteration is done without introducing garbage opposed to the standard JVM concurrent structures.
+ *
+ * Not fully documented yet as this might change in the future
  */
-private class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
+public class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
     private val head = AtomicReference<CacheNode<K, V>>(null)
 
     fun get(key: K): V {
