@@ -49,7 +49,7 @@ it's needed to keep class and method count low.
 |kovenant-progress   |Progress configuration helper                                                                      | 
 |kovenant-functional |Functional Programming idiomatic additions                                                         | 
 
-##Issues
+##Issues 
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
 
 ##Release notes

@@ -18,50 +18,41 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
-/* A lot of assumptions are made during the creation of this class.
- *
- * Assuming that during the lifetime of the app the creation of different contexts is sparse. Therefor
- * the number of active contexts will be limited. At most a couple of context die during the lifetime of the
- * app, thus the leftovers aren't in the way. Assuming that iteration is faster than using a concurrent
- * HashMap for this particular case since we mostly hit our target on first or second iteration.
- *
- * Not using ConcurrentLinkedQueue since iteration creates a new Iterator instance every single time. Then we would
- * rather just create a new DelegatingDispatcherContext every single call.
- *
- * Also, this cache does not guard against duplicates, and we don't really care either.
- *
- * Cleanup is done in a rather simple yet radical way: If we come across a cleared node we discard the whole cache.
- */
-
 package nl.komponents.kovenant.ui
 
-import nl.komponents.kovenant.Context
-import nl.komponents.kovenant.Dispatcher
-import nl.komponents.kovenant.DispatcherContext
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
-//TODO hook up the cache
-private class DispatcherContextCache(private val dispatcher: Dispatcher) {
-    private val head = AtomicReference<CacheNode>(null)
 
-    fun forContext(context: Context): DispatcherContext {
+//TODO hook up the cache
+
+/**
+ * A special kind of weak reference cache. The key is weakly referenced and if,
+ * during iteration, we come across a cleared key the *whole* cache gets invalidated.
+ *
+ * Key lookup is always done by iteration. So best performance is achieved when number of elements
+ * are kept to a minimum and it is expected that keys are reasonably long lived.
+ *
+ * Iteration is done without introducing garbage opposed to the standard JVM concurrent structures.
+ */
+private class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
+    private val head = AtomicReference<CacheNode<K, V>>(null)
+
+    fun get(key: K): V {
         iterate {
-            ctx, dpCtx ->
-            if (ctx == context) return dpCtx
+            k, v ->
+            if (k == key) return v
         }
-        val dispatcherContext = DelegatingDispatcherContext(context.callbackContext, dispatcher)
-        add(context, dispatcherContext)
-        return dispatcherContext
+        val value = factory(key)
+        add(key, value)
+        return value
     }
 
-    private class CacheNode(context: Context, val dispatcherContext: DispatcherContext) {
-        // Use a weak reference, as long as the context lives (e.g. Kovenant.context) we have strong reference.
-        val next = AtomicReference<CacheNode>(null)
-        private val contextRef = WeakReference(context)
+    private class CacheNode<K : Any, V : Any>(key: K, val value: V) {
+        val next = AtomicReference<CacheNode<K, V>>(null)
+        private val keyRef = WeakReference(key)
 
-        val context: Context? get() = contextRef.get()
+        val key: K? get() = keyRef.get()
     }
 
     // Let the Storm Troopers that call themselves Software Craftsmen go berserk
@@ -69,20 +60,20 @@ private class DispatcherContextCache(private val dispatcher: Dispatcher) {
     //
     // This does not only iterate but also clears the cache if we hit
     // a cleared reference.
-    private inline fun iterate(fn: (Context, DispatcherContext) -> Unit) {
+    private inline fun iterate(fn: (K, V) -> Unit) {
         val headNode = head.get()
         if (headNode != null) {
             var node = headNode
             while (true) {
-                val ctx = node.context
-                if (ctx == null) {
+                val key = node.key
+                if (key == null) {
                     // one of the cache items is null
                     // discard the whole cache and rebuild
                     head.set(null)
                     break
                 }
 
-                fn(ctx, node.dispatcherContext)
+                fn(key, node.value)
 
                 val next = node.next.get()
                 if (next == null) break
@@ -91,11 +82,11 @@ private class DispatcherContextCache(private val dispatcher: Dispatcher) {
         }
     }
 
-    fun add(context: Context, dispatcherContext: DispatcherContext) {
-        add(CacheNode(context, dispatcherContext))
+    fun add(key: K, value: V) {
+        add(CacheNode(key, value))
     }
 
-    private fun add(node: CacheNode) {
+    private fun add(node: CacheNode<K, V>) {
         while (true) {
             val headNode = head.get()
             if (headNode == null) {
@@ -109,7 +100,7 @@ private class DispatcherContextCache(private val dispatcher: Dispatcher) {
         }
     }
 
-    private fun tailNode(head: CacheNode): CacheNode {
+    private fun tailNode(head: CacheNode<K, V>): CacheNode<K, V> {
         var tail = head
         while (true) {
             val next = tail.next.get()

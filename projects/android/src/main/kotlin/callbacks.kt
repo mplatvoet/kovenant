@@ -18,7 +18,6 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
 package nl.komponents.kovenant.android
 
 import nl.komponents.kovenant.Context

@@ -104,8 +104,8 @@ class ConcreteUiKovenant {
         }
     }
 
+    //Don't use delegation `by`, since the dispatcher might change/be reconfigured
     private class CurrentCallbackDispatcher() : Dispatcher {
-        //Don't use delegation `by`, since the dispatcher might change/be reconfigured
         private val dispatcher: Dispatcher get() = Kovenant.context.callbackContext.dispatcher
 
         override fun offer(task: () -> Unit): Boolean = dispatcher offer task
