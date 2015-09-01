@@ -61,7 +61,7 @@ That all being said. You, of course, know what you are doing.
 
 ```kt
 Kovenant.context {
-    callbackDispatcher = androidUiDispatcher()
+    callbackContext.dispatcher = androidUiDispatcher()
 }
 ```
 
