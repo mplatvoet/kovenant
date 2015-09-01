@@ -72,22 +72,13 @@ class ConcreteUiKovenant {
         }
 
         private val dispatcherContextBuilderDelegate = ThreadSafeLazyVar {
-            val cache = WeakReferenceCache<Dispatcher, WeakReferenceCache<Context, DispatcherContext>>() {
-                dispatcher ->
-                WeakReferenceCache<Context, DispatcherContext>() {
-                    context ->
-                    DelegatingDispatcherContext(context.callbackContext, dispatcher)
-                }
-            };
-
-            { dispatcher: Dispatcher, context: Context -> cache[dispatcher][context] }
+            defaultDispatcherContextBuilder()
         }
 
         override var dispatcherContextBuilder: (Dispatcher, Context) -> DispatcherContext by dispatcherContextBuilderDelegate
 
 
         override var dispatcher: Dispatcher by dispatcherDelegate
-
 
         override fun copy(): ReconfigurableUiContext {
             val copy = ThreadSafeUiContext()
@@ -129,4 +120,28 @@ class ConcreteUiKovenant {
         override val stopped: Boolean
             get() = dispatcher.stopped
     }
+}
+
+
+/**
+ * Build a default DispatcherContext builder. Not part of documented API (yet). Might change in the future.
+ */
+public fun defaultDispatcherContextBuilder(): (Dispatcher, Context) -> DispatcherContext
+        = cachedDispatcherContextBuilder { dispatcher, context -> DelegatingDispatcherContext(context.callbackContext, dispatcher) }
+
+
+/**
+ * Build a cached DispatcherContext builder with the supplied factory method. Not part of documented API (yet).
+ * Might change in the future.
+ */
+public fun cachedDispatcherContextBuilder(factory: (Dispatcher, Context) -> DispatcherContext): (Dispatcher, Context) -> DispatcherContext {
+    val cache = WeakReferenceCache<Dispatcher, WeakReferenceCache<Context, DispatcherContext>>() {
+        dispatcher ->
+        WeakReferenceCache<Context, DispatcherContext>() {
+            context ->
+            factory(dispatcher, context)
+        }
+    }
+
+    return { dispatcher: Dispatcher, context: Context -> cache[dispatcher][context] }
 }

@@ -23,6 +23,7 @@ package nl.komponents.kovenant.ui
 import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
+
 /**
  * A special kind of weak reference cache. The key is weakly referenced and if,
  * during iteration, we come across a cleared key the *whole* cache gets invalidated.
@@ -37,6 +38,12 @@ import java.util.concurrent.atomic.AtomicReference
 public class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
     private val head = AtomicReference<CacheNode<K, V>>(null)
 
+    /**
+     * Gets the value for specified key. If the key is not present a value will be created and added
+     * to this cache. Does not guard against duplicate creation and also duplicate keys.
+     *
+     * @return the value for this key
+     */
     fun get(key: K): V {
         iterate {
             k, v ->
@@ -81,7 +88,7 @@ public class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V)
         }
     }
 
-    fun add(key: K, value: V) {
+    private fun add(key: K, value: V) {
         add(CacheNode(key, value))
     }
 
