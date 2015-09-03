@@ -27,9 +27,9 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.atomic.AtomicReference
 
 
-public fun <V> promiseOnUi(context: Context = Kovenant.context,
-                           alwaysSchedule: Boolean = false,
-                           body: () -> V): Promise<V, Exception> {
+public fun <V : Any> promiseOnUi(context: Context = Kovenant.context,
+                                 alwaysSchedule: Boolean = false,
+                                 body: () -> V): Promise<V, Exception> {
     if (!alwaysSchedule && currentIsUiThread()) {
         return try {
             Promise.ofSuccess(context = context, value = body())
@@ -44,9 +44,9 @@ public fun <V> promiseOnUi(context: Context = Kovenant.context,
 }
 
 
-public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(false, body)
+public fun <V : Any, E : Any> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(false, body)
 
-public fun <V, E> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value: V) -> Unit): Promise<V, E> {
+public fun <V : Any, E : Any> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value: V) -> Unit): Promise<V, E> {
     if (!alwaysSchedule && isDone() && currentIsUiThread()) {
         if (isSuccess()) {
             try {
@@ -63,9 +63,9 @@ public fun <V, E> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value:
 }
 
 
-public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(false, body)
+public fun <V : Any, E : Any> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(false, body)
 
-public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
+public fun <V : Any, E : Any> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
     if (!alwaysSchedule && isDone() && currentIsUiThread()) {
         if (isFailure()) {
             try {
@@ -82,9 +82,9 @@ public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E)
 }
 
 
-public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(false, body)
+public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(false, body)
 
-public fun <V, E> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
+public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
     if (!alwaysSchedule && isDone() && currentIsUiThread()) {
         try {
             body()
@@ -104,8 +104,8 @@ private class DelegatingDispatcherContext(private val base: DispatcherContext, o
         get() = base.errorHandler
 }
 
-private class PromiseUiRunnable<V>(private val deferred: Deferred<V, Exception>,
-                                   private val body: () -> V) : Runnable {
+private class PromiseUiRunnable<V : Any>(private val deferred: Deferred<V, Exception>,
+                                         private val body: () -> V) : Runnable {
     override fun run() = try {
         val result = body()
         deferred.resolve(result)

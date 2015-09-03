@@ -23,8 +23,7 @@ package nl.komponents.kovenant.properties
 
 import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Promise
-import kotlin.properties.ReadOnlyProperty
 
 
-public fun lazyPromise<R, T>(context: Context? = null, initializer: () -> T)
-        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromise(context, initializer)
+public fun lazyPromise<T : Any>(context: Context? = null, initializer: () -> T)
+        : Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)

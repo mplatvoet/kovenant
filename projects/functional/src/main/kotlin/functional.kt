@@ -126,7 +126,7 @@ private fun <R : Any, V : Any> bindAsync(bind: (V) -> Promise<R, Exception>,
  *
  * @param promise Promise containing the map function
  */
-public fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+public fun <V : Any, R : Any> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
     return this.apply(this.context, promise)
 }
 
@@ -141,7 +141,7 @@ public fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Excepti
  * @param context the context on which the map function and the returned promise operate.
  * @param promise Promise containing the map function
  */
-public fun <V, R> Promise<V, Exception>.apply(context: Context, promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+public fun <V : Any, R : Any> Promise<V, Exception>.apply(context: Context, promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
     if (isDone()) when {
         isDone() -> {
             val deferred = deferred<R, Exception>(context)
@@ -161,7 +161,7 @@ public fun <V, R> Promise<V, Exception>.apply(context: Context, promise: Promise
     return deferred.promise
 }
 
-private fun <R, V> applyAsync(promise: Promise<(V) -> R, Exception>, context: Context, deferred: Deferred<R, Exception>, value: V) {
+private fun <R : Any, V : Any> applyAsync(promise: Promise<(V) -> R, Exception>, context: Context, deferred: Deferred<R, Exception>, value: V) {
     if (promise.isDone()) when {
         promise.isSuccess() -> return applyAsync(context, deferred, promise.get(), value)
         promise.isFailure() -> return deferred reject promise.getError()
@@ -174,7 +174,7 @@ private fun <R, V> applyAsync(promise: Promise<(V) -> R, Exception>, context: Co
     promise fail { deferred reject it }
 }
 
-private fun <R, V> applyAsync(context: Context, deferred: Deferred<R, Exception>, fn: (V) -> R, value: V) {
+private fun <R : Any, V : Any> applyAsync(context: Context, deferred: Deferred<R, Exception>, fn: (V) -> R, value: V) {
     context.workerContext offer {
         try {
             deferred resolve fn(value)
@@ -188,7 +188,7 @@ private fun <R, V> applyAsync(context: Context, deferred: Deferred<R, Exception>
 /**
  * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
  */
-public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
+public fun <V : Any, R : Any> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
     val deferred = deferred<List<R>, Exception>(context)
     context.workerContext offer {
         val promises = ArrayList<Promise<R, Exception>>()
@@ -221,7 +221,7 @@ public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind:
  * @param context the `Context` on which the returned `Promise` operates
  * @return the unwrapped Promise
  */
-public fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
+public fun <V : Any, E : Any> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
     if (isDone()) when {
         isSuccess() -> return get().withContext(context)
         isFailure() -> return Promise.ofFail(getError(), context)
@@ -249,7 +249,7 @@ public fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.conte
  * @param context The `Context` on which the returned promise should operate
  * @return the same `Promise` if the `Context` matches, a new promise otherwise with the provided context
  */
-public fun <V, E>Promise<V, E>.withContext(context: Context): Promise<V, E> {
+public fun <V : Any, E : Any>Promise<V, E>.withContext(context: Context): Promise<V, E> {
     // Already same context, just return self
     if (this.context == context) return this
 
