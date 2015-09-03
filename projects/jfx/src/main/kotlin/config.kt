@@ -20,14 +20,109 @@
  */
 package nl.komponents.kovenant.jfx
 
+import nl.komponents.kovenant.Dispatcher
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.buildDispatcher
 import nl.komponents.kovenant.ui.KovenantUi
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+
+
+private val initCount = AtomicInteger(0)
+private val disposable = AtomicReference<Disposable>(null)
 
 public fun startKovenant() {
+    initCount.onlyFirst {
+        disposable set configureKovenant()
+    }
+}
+
+
+public fun stopKovenant(force: Boolean = false) {
+    val dispose = disposable.get()
+    if (dispose != null && disposable.compareAndSet(dispose, null)) {
+        dispose.close(force)
+        initCount.set(0)
+    }
+}
+
+/**
+ * Configures Kovenant for common JavaFX scenarios.
+ *
+ * @return `Disposable` to properly shutdown Kovenant
+ */
+public fun configureKovenant(): Disposable {
     KovenantUi.uiContext {
         dispatcher = JFXDispatcher.instance
     }
 
-    //TODO, determine what's the best default for Kovenant configuration
-    //Kovenant.context {  }
+    val callbackDispatcher = buildDispatcher {
+        name = "kovenant-callback"
+        concurrentTasks = 1
+
+        pollStrategy {
+            yielding(numberOfPolls = 100)
+            blocking()
+        }
+    }
+    val workerDispatcher = buildDispatcher {
+        name = "kovenant-worker"
+
+        pollStrategy {
+            yielding(numberOfPolls = 100)
+            blocking()
+        }
+    }
+
+    Kovenant.context {
+        callbackContext {
+            dispatcher = callbackDispatcher
+        }
+        workerContext {
+            dispatcher = workerDispatcher
+        }
+    }
+    return DispatchersDisposable(workerDispatcher, callbackDispatcher)
 }
+
+
+/**
+ * Disposes of a resource.
+ *
+ */
+public interface Disposable {
+    fun close(force: Boolean = false)
+}
+
+private class DispatchersDisposable(private vararg val dispatcher: Dispatcher) : Disposable {
+    override fun close(force: Boolean) {
+        dispatcher forEach {
+            close(force, it)
+        }
+    }
+
+    private fun close(force: Boolean, dispatcher: Dispatcher) {
+        try {
+            if (force) {
+                dispatcher.stop(force = true)
+            } else {
+                dispatcher.stop(block = true)
+            }
+        } catch(e: Exception) {
+            //ignore, nothing we can do
+        }
+    }
+
+}
+
+private inline fun AtomicInteger.onlyFirst(body: () -> Unit) {
+    val threadNumber = incrementAndGet()
+    if (threadNumber == 1) {
+        body()
+    } else {
+        decrementAndGet()
+    }
+}
+
+
 

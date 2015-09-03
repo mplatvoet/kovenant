@@ -65,7 +65,7 @@ public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> 
 @deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("failUi(alwaysSchedule = alwaysSchedule, body = body)", "nl.komponents.kovenant.ui.failUi")*/)
 public fun <V, E> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
-    return this.newFailUi(alwaysSchedule = alwaysSchedule, body = body)
+    return newFailUi(alwaysSchedule = alwaysSchedule, body = body)
 }
 
 @deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
@@ -75,5 +75,5 @@ public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = newA
 @deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("alwaysUi(alwaysSchedule = alwaysSchedule, body = body)", "nl.komponents.kovenant.ui.alwaysUi")*/)
 public fun <V, E> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
-    return this.newAlwaysUi(alwaysSchedule = alwaysSchedule, body = body)
+    return newAlwaysUi(alwaysSchedule = alwaysSchedule, body = body)
 }

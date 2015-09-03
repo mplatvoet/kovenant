@@ -6,15 +6,12 @@ Frameworks involving UIs are commonly implemented in a way that only one thread 
 Android, Swing, AWT and JavaFX all use this strategy. For this reason Kovenant-UI offers a generic way for executing
 callbacks of promises on that specific UI thread. 
 
-There are two ways we can achieve interacting with the UI thread.
-One is by specific extensions methods and the other is by a specific `Dispatcher`.
 
 ##UI callbacks
 The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-ui` 
 library provides `successUi`, `failUi` and `alwaysUi`. They operate just like their 
 [regular counterparts](../api/core_usage.md#callbacks) except their bodies are executed on the configured UI thread. Both type of 
-callbacks can be mixed freely. If a callback is added to an already resolved `Promise` this gets executed immediately
-without scheduling. If you want to force scheduling just pas `alwaysSchedule = true` along.
+callbacks can be mixed freely. 
 
 ```kt
 val promise = async {
@@ -32,14 +29,12 @@ promise successUi {
     bar -> updateUI(bar)
 }
 ```
-The huge advantage of this approach is that operations on the main thread are explicitly chosen. So when in doubt,
-this should be the preferred way of interacting with the main thread. 
+The huge advantage of this approach is that operations on the main thread are explicitly chosen. 
 
 ##Start on UI thread
-Just like Androids `AsyncTask` you might want to do some preparations on the UI thread before you start your background
+You might want to do some preparations on the UI thread before you start your background
 work. This is what `promiseOnUi` does, it schedules a task on the UI thread and returns a `Promise` on which you can 
-chain along. If this is called from the UI Thread this gets executed immediately without scheduling. If you want to 
-force scheduling just pas `alwaysSchedule = true` along.
+chain along. 
  
 ```kt
 promiseOnUi {
@@ -51,16 +46,18 @@ promiseOnUi {
 }
 ```
 
-##Dispatcher
-You can, of course, configure Kovenant to dispatch all callbacks on the UI thread by default. Just  
-
->Please note, this approach can have a **serious negative effect on the platforms UI performance** since you can delegate
->to much work to the UI thread way too easy.
-
-That all being said. You, of course, know what you are doing.  
+##Configuring
+Kovenant UI just requires a minimal setup: It needs to know where to dispatch the callback to. So all that is needed
+is configure it with a `Dispatcher` that operates on the desired thread, like this:
 
 ```kt
-Kovenant.context {
-    callbackContext.dispatcher = myUiDispatcher
+KovenantUi.uiContext {
+    dispatcher = myUiDispatcher
 }
 ```
+
+###ProcessAwareDispatcher
+When you configure Kovenant UI with a `ProcessAwareDispatcher` calls can sometimes be optimized. A `ProcessAwareDispatcher`
+knows which threads/tasks/processes it owns and therefor scheduling of tasks can sometimes be avoided. All the ui callbacks
+have a parameter `alwaysSchedule`, which is `false` by default, which tells whether a specific callback always gets
+scheduled/queued or that it may be optimized.

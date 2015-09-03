@@ -1,5 +1,5 @@
-#Android features
-part of [`kovenant-android`](../index.md#artifacts)
+#JavaFX features
+part of [`kovenant-jfx`](../index.md#artifacts)
 
 ---
 While Kovenant is perfectly usable on Android as-is, there are a couple things that are specific to the platform.
