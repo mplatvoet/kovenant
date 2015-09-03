@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
     }
 }
 
-public fun <T> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
+public fun <T : Any> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
     val deferred = deferred<T, Exception>()
 
     thenAccept {
