@@ -22,7 +22,6 @@ package nl.komponents.kovenant.jfx
 
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.buildDispatcher
 import nl.komponents.kovenant.ui.KovenantUi
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -56,33 +55,26 @@ public fun configureKovenant(): Disposable {
         dispatcher = JFXDispatcher.instance
     }
 
-    val callbackDispatcher = buildDispatcher {
-        name = "kovenant-callback"
-        concurrentTasks = 1
+    val ctx = Kovenant.context {
+        callbackContext.dispatcher {
+            name = "kovenant-callback"
+            concurrentTasks = 1
 
-        pollStrategy {
-            yielding(numberOfPolls = 100)
-            blocking()
+            pollStrategy {
+                yielding(numberOfPolls = 100)
+                blocking()
+            }
+        }
+        workerContext.dispatcher {
+            name = "kovenant-worker"
+
+            pollStrategy {
+                yielding(numberOfPolls = 100)
+                blocking()
+            }
         }
     }
-    val workerDispatcher = buildDispatcher {
-        name = "kovenant-worker"
-
-        pollStrategy {
-            yielding(numberOfPolls = 100)
-            blocking()
-        }
-    }
-
-    Kovenant.context {
-        callbackContext {
-            dispatcher = callbackDispatcher
-        }
-        workerContext {
-            dispatcher = workerDispatcher
-        }
-    }
-    return DispatchersDisposable(workerDispatcher, callbackDispatcher)
+    return DispatchersDisposable(ctx.workerContext.dispatcher, ctx.callbackContext.dispatcher)
 }
 
 
