@@ -20,12 +20,15 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '0.12.1230'
+    ext.kotlinVersion = '0.1-SNAPSHOT'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
@@ -51,7 +54,12 @@ allprojects {
 
 
 subprojects {
-    repositories { mavenCentral() }
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
+    }
 
     def pomOnlyProject = project.name == "kovenant"
 

@@ -39,7 +39,7 @@ import nl.komponents.kovenant.deferred
  * @param context the `Context` on which the returned `Promise` operates
  * @return the unwrapped Promise
  */
-public fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
+public fun <V : Any, E : Any> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
     if (isDone()) when {
         isSuccess() -> return get().withContext(context)
         isFailure() -> return Promise.ofFail(getError(), context)
