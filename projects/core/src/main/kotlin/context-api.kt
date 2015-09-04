@@ -41,7 +41,7 @@ public object Kovenant {
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
+    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
     fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
         return context.stop(force, timeOutMs, block)
@@ -128,6 +128,7 @@ public interface DispatcherContext {
                           errorHandler: (Exception) -> Unit): DispatcherContext
                 = StaticDispatcherContext(dispatcher, errorHandler)
     }
+
     val dispatcher: Dispatcher
     val errorHandler: (Exception) -> Unit
 

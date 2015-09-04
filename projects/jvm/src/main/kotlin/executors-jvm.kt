@@ -260,7 +260,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             throw e
         }
 
-        val finished = finishedFutures.entrySet() sortBy { entry -> entry.key } map { entry -> entry.value }
+        val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }
 
         //Can happen when we are using a timeout on the latch
         if (finished.size() < allFutures.size()) {
@@ -268,7 +268,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             toCancel.forEach { task -> task?.cancel(false) }
         }
 
-        return ArrayList(finished)
+        return ArrayList(finished.filterNotNull())
 
     }
 

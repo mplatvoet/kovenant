@@ -25,17 +25,17 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
+internal fun concretePromise<V : Any>(context: Context, callable: () -> V): Promise<V, Exception>
         = AsyncPromise(context, callable)
 
-internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+internal fun concretePromise<V : Any, R : Any>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
 
-internal fun concreteSuccessfulPromise<V, E>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
+internal fun concreteSuccessfulPromise<V : Any, E : Any>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
 
-internal fun concreteFailedPromise<V, E>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
+internal fun concreteFailedPromise<V : Any, E : Any>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
-private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
+private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
     }
@@ -45,7 +45,7 @@ private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractProm
     // the callbacks essentially get ignored anyway
 }
 
-private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<V, E>(context) {
+private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : AbstractPromise<V, E>(context) {
     init {
         trySetFailResult(value)
     }
@@ -55,7 +55,7 @@ private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<
     // the callbacks essentially get ignored anyway
 }
 
-private class ThenPromise<V, R>(context: Context,
+private class ThenPromise<V : Any, R : Any>(context: Context,
                                 promise: Promise<V, Exception>,
                                 callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
@@ -100,7 +100,7 @@ private class ThenPromise<V, R>(context: Context,
 
 }
 
-private class AsyncPromise<V>(context: Context, callable: () -> V) :
+private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private volatile var task: (() -> Unit)?
@@ -138,7 +138,7 @@ private class AsyncPromise<V>(context: Context, callable: () -> V) :
     }
 }
 
-private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPromise<V, E>(context) {
+private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context) {
     protected fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -156,7 +156,7 @@ private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPr
     }
 }
 
-private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
+private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -184,7 +184,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     override val promise: Promise<V, E> = object : Promise<V, E> by this {}
 }
 
-private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
+private abstract class AbstractPromise<V : Any, E : Any>(override val context: Context) : Promise<V, E> {
     private val state = AtomicReference(State.PENDING)
     private val waitingThreads = AtomicInteger(0)
 

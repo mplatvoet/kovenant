@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
     }
 
 
-    val completableFuture = CompletableFuture.supplyAsync {
+    val completableFuture: CompletableFuture<Int> = CompletableFuture.supplyAsync {
         fib(13)
     }
 
@@ -51,7 +51,7 @@ fun main(args: Array<String>) {
     }
 }
 
-public fun <T> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
+public fun <T : Any> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
     val deferred = deferred<T, Exception>()
 
     thenAccept {
@@ -60,7 +60,8 @@ public fun <T> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
 
     exceptionally {
         deferred.reject(it.toException())
-        null
+        //TODO, works but might be a better way
+        null as T
     }
 
     return deferred.promise
