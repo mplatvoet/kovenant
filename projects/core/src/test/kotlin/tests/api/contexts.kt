@@ -21,7 +21,6 @@
 
 package tests.api.contexts
 
-import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.async
@@ -29,7 +28,7 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class AsyncTest {
+class MultipleContextsTest {
     val defaultDispatcher = ImmediateDispatcher()
     val alternateDispatcher = ImmediateDispatcher()
     var context = Kovenant.context //gets overridden by setup, avoids null checks
@@ -71,16 +70,5 @@ private class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}
         task()
         return true
     }
-
-    override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> = listOf()
-
-    override fun tryCancel(task: () -> Unit): Boolean {
-        return false
-    }
-
-    override val terminated: Boolean
-        get() = true
-    override val stopped: Boolean
-        get() = true
 }
 

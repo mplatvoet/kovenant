@@ -10,7 +10,7 @@ There are two ways we can achieve interacting with the main thread, besides the 
 One is by specific extensions methods and the other is by a specific `Dispatcher`.
 
 ##UI callbacks
-The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-android` 
+The most flexible way of interacting with the main thread is by using the extension methods. The `kovenant-ui` 
 library provides `successUi`, `failUi` and `alwaysUi`. They operate just like their 
 [regular counterparts](../api/core_usage.md#callbacks) except their bodies are executed on the Android main thread. Both type of 
 callbacks can be mixed freely. If a callback is added to an already resolved `Promise` this gets executed immediately
@@ -61,7 +61,7 @@ That all being said. You, of course, know what you are doing.
 
 ```kt
 Kovenant.context {
-    callbackDispatcher = androidUiDispatcher()
+    callbackContext.dispatcher = androidUiDispatcher()
 }
 ```
 

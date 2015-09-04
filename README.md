@@ -35,8 +35,7 @@ dependencies {
 Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
 ###Artifacts
-Kovenant has been structured in sub projects so you can cherry pick what you need. Especially for Android
-it's needed to keep class and method count low. 
+Kovenant has been structured in sub projects so you can cherry pick what you need. 
 
 |artifact            |description                                                                                        |
 |--------------------|---------------------------------------------------------------------------------------------------|
@@ -44,12 +43,14 @@ it's needed to keep class and method count low.
 |kovenant-core       |The core of kovenant. Provides the API and default implementations                                 |
 |kovenant-combine    |Adds combine functionality that keep everything strongly typed                                     |
 |kovenant-jvm        |Support for converting between Executors and Dispatchers                                           |
+|kovenant-ui         |Support for UI frameworks that need UI work to operate on a specific process                       |
 |kovenant-android    |Extensions for Android specific needs                                                              | 
+|kovenant-jfx        |Extensions for JavaFX specific needs                                                               | 
 |kovenant-disruptor  |LMAX Disruptor work queues                                                                         | 
 |kovenant-progress   |Progress configuration helper                                                                      | 
 |kovenant-functional |Functional Programming idiomatic additions                                                         | 
 
-##Issues
+##Issues 
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
 
 ##Release notes

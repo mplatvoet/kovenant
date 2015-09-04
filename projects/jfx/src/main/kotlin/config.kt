@@ -18,15 +18,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
-package nl.komponents.kovenant.android
+package nl.komponents.kovenant.jfx
 
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.buildDispatcher
 import nl.komponents.kovenant.ui.KovenantUi
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+
 
 private val initCount = AtomicInteger(0)
 private val disposable = AtomicReference<Disposable>(null)
@@ -38,7 +37,6 @@ public fun startKovenant() {
 }
 
 
-
 public fun stopKovenant(force: Boolean = false) {
     val dispose = disposable.get()
     if (dispose != null && disposable.compareAndSet(dispose, null)) {
@@ -48,42 +46,35 @@ public fun stopKovenant(force: Boolean = false) {
 }
 
 /**
- * Configures Kovenant for common Android scenarios.
+ * Configures Kovenant for common JavaFX scenarios.
  *
  * @return `Disposable` to properly shutdown Kovenant
  */
 public fun configureKovenant(): Disposable {
     KovenantUi.uiContext {
-        dispatcher = androidUiDispatcher()
+        dispatcher = JFXDispatcher.instance
     }
 
-    val callbackDispatcher = buildDispatcher {
-        name = "kovenant-callback"
-        concurrentTasks = 1
+    val ctx = Kovenant.context {
+        callbackContext.dispatcher {
+            name = "kovenant-callback"
+            concurrentTasks = 1
 
-        pollStrategy {
-            yielding(numberOfPolls = 100)
-            blocking()
+            pollStrategy {
+                yielding(numberOfPolls = 100)
+                blocking()
+            }
+        }
+        workerContext.dispatcher {
+            name = "kovenant-worker"
+
+            pollStrategy {
+                yielding(numberOfPolls = 100)
+                blocking()
+            }
         }
     }
-    val workerDispatcher = buildDispatcher {
-        name = "kovenant-worker"
-
-        pollStrategy {
-            yielding(numberOfPolls = 100)
-            blocking()
-        }
-    }
-
-    Kovenant.context {
-        callbackContext {
-            dispatcher = callbackDispatcher
-        }
-        workerContext {
-            dispatcher = workerDispatcher
-        }
-    }
-    return DispatchersDisposable(workerDispatcher, callbackDispatcher)
+    return DispatchersDisposable(ctx.workerContext.dispatcher, ctx.callbackContext.dispatcher)
 }
 
 
@@ -124,4 +115,6 @@ private inline fun AtomicInteger.onlyFirst(body: () -> Unit) {
         decrementAndGet()
     }
 }
+
+
 

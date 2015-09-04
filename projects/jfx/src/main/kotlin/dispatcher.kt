@@ -18,33 +18,21 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.jfx
 
-rootProject.name = 'root'
+import javafx.application.Platform
+import nl.komponents.kovenant.ProcessAwareDispatcher
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'ui'
-include 'jfx'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+public class JFXDispatcher private constructor() : ProcessAwareDispatcher {
+    companion object {
+        val instance: JFXDispatcher = JFXDispatcher()
+    }
+
+    override fun offer(task: () -> Unit): Boolean {
+        Platform.runLater(task)
+        return true
+    }
+
+    override fun ownsCurrentProcess(): Boolean = Platform.isFxApplicationThread()
 }
-
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':ui').name = 'kovenant-ui'
-project(':jfx').name = 'kovenant-jfx'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'

@@ -22,7 +22,6 @@
 package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.*
-import java.util.ArrayList
 
 /**
  * Asynchronously map the success value of a [Promise] and returns a new [Promise] with the transformed value.
