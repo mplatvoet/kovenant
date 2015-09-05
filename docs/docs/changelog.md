@@ -6,12 +6,11 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v2.4.0
+###v2.5.0
 
 **expected**
 
-* [KOV-44](http://issues.komponents.nl/youtrack/issue/KOV-44) UI Callback project
-* [KOV-35](http://issues.komponents.nl/youtrack/issue/KOV-35) JFX Dispatcher
+* Kotlin M13
 
 **certain**
 
@@ -20,6 +19,18 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 ---
 
 ##Released
+
+###v2.4.0
+
+**general**
+
+This release has generified UI callback support and introduced JavaFX support based on the new UI callback support.
+For more information see the [Kovenant document site](http://kovenant.komponents.nl) about the 
+[Ui Project](http://kovenant.komponents.nl/addons/ui/).
+
+* [KOV-44](http://issues.komponents.nl/youtrack/issue/KOV-44) UI Callback project
+* [KOV-35](http://issues.komponents.nl/youtrack/issue/KOV-35) JFX Dispatcher
+
 
 ###v2.3.3
 

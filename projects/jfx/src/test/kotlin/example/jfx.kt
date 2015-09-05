@@ -16,20 +16,21 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nl.komponents.kovenant.properties
 
-import nl.komponents.kovenant.Context
-import nl.komponents.kovenant.Promise
-import kotlin.properties.ReadOnlyProperty
+package example.jfx
 
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.jfx.startKovenant
+import nl.komponents.kovenant.ui.successUi
 
-public fun lazyPromise<R, T>(context: Context? = null, initializer: () -> T)
-        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromise(context, initializer)
+fun main(args: Array<String>) {
+    startKovenant()
 
-//TODO: M13 implementation
-/*
-public fun lazyPromise<T : Any>(context: Context? = null, initializer: () -> T)
-        : Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)*/
+    async {
+        1 + 1
+    } successUi {
+        //bla bla
+    }
+}

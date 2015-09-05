@@ -16,20 +16,23 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nl.komponents.kovenant.properties
+package nl.komponents.kovenant.jfx
 
-import nl.komponents.kovenant.Context
-import nl.komponents.kovenant.Promise
-import kotlin.properties.ReadOnlyProperty
+import javafx.application.Platform
+import nl.komponents.kovenant.ProcessAwareDispatcher
 
 
-public fun lazyPromise<R, T>(context: Context? = null, initializer: () -> T)
-        : ReadOnlyProperty<R, Promise<T, Exception>> = LazyPromise(context, initializer)
+public class JFXDispatcher private constructor() : ProcessAwareDispatcher {
+    companion object {
+        val instance: JFXDispatcher = JFXDispatcher()
+    }
 
-//TODO: M13 implementation
-/*
-public fun lazyPromise<T : Any>(context: Context? = null, initializer: () -> T)
-        : Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)*/
+    override fun offer(task: () -> Unit): Boolean {
+        Platform.runLater(task)
+        return true
+    }
+
+    override fun ownsCurrentProcess(): Boolean = Platform.isFxApplicationThread()
+}

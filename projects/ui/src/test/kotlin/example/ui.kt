@@ -19,55 +19,15 @@
  * THE SOFTWARE.
  */
 
-package examples.futures
+package example.ui
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
-import nl.komponents.kovenant.deferred
-import nl.komponents.kovenant.jvm.asDispatcher
-import support.fib
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ForkJoinPool
+import nl.komponents.kovenant.ui.successUi
 
 fun main(args: Array<String>) {
-    Kovenant.context {
-        workerContext.dispatcher = ForkJoinPool.commonPool().asDispatcher()
-    }
-
-
-    val completableFuture = CompletableFuture.supplyAsync {
-        fib(13)
-    }
-
-    val promise = completableFuture.toPromise()
-
-    promise success {
-        println("Hurray! fib(13) = $it")
-    }
-
-    async { fib(13) } success {
-        println("Hurray again! fib(13) = $it")
+    async {
+        1 + 1
+    } successUi {
+        //bla bla
     }
 }
-
-public fun <T> CompletableFuture<T>.toPromise(): Promise<T, Exception> {
-    val deferred = deferred<T, Exception>()
-
-    thenAccept {
-        deferred.resolve(it)
-    }
-
-    exceptionally {
-        deferred.reject(it.toException())
-        null
-    }
-
-    return deferred.promise
-}
-
-private fun Throwable.toException(): Exception = when (this) {
-    is Exception -> this
-    else -> Exception(this)
-}
-

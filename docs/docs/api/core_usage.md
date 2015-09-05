@@ -201,8 +201,8 @@ async {
 ---
 
 ##Get
-Sometimes you need to jsut wait for a result, this is what `get()` does. It blocks the calling thread until the result 
-is available. Returning the success value if resolved successful. If promise rolsolved as a failure an Exception is thrown.
+Sometimes you need to just wait for a result, this is what `get()` does. It blocks the calling thread until the result 
+is available. Returning the success value if resolved successful. If promise resolved as a failure an Exception is thrown.
 If the error value of the promise is an Exception then that is thrown directly, otherwise a FailureException is thrown
 with the error value wrapped in it.
 

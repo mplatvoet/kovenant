@@ -21,8 +21,6 @@ public class MainActivity : ... {
         setContentView(...)
 
         // Configure Kovenant with standard dispatchers
-        // obtain a reference to a Disposable to shutdown
-        // the thread pools on exit.
         startKovenant()
 
     }

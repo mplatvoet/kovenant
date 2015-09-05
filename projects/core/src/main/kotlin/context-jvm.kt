@@ -21,9 +21,9 @@
 
 package nl.komponents.kovenant
 
-import java.util.concurrent.atomic.AtomicInteger
+import nl.komponents.kovenant.properties.ThreadSafeLazyVar
+import nl.komponents.kovenant.properties.TrackChangesVar
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.properties.ReadWriteProperty
 
 class ConcreteKovenant {
     private val contextRef: AtomicReference<Context> = AtomicReference(ThreadSafeContext())
@@ -65,7 +65,7 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
+    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
 
     private class ThreadSafeContext() : ReconfigurableContext {
 
@@ -149,62 +149,3 @@ class ConcreteKovenant {
 
 
 }
-
-
-@suppress("UNCHECKED_CAST")
-private class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
-    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
-    private volatile var initializer: (() -> T)?
-    private volatile var value: Any? = null
-
-    init {
-        this.initializer = initializer
-    }
-
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
-        //Busy /Spin lock, expect quick initialization
-        while (value == null) {
-            val counter = threadCount
-            if (counter != null) {
-                val threadNumber = counter.incrementAndGet()
-                if (threadNumber == 1) {
-                    val fn = initializer!!
-                    value = mask(fn())
-                    initializer = null //initialized, gc do your magic
-                    threadCount = null //initialized, gc do your magic
-                }
-            }
-
-            //Signal other threads are more important at the moment
-            //Since another thread is initializing this property
-            Thread.yield()
-        }
-        return unmask(value) as T
-    }
-
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
-        this.value = mask(value)
-    }
-
-    val initialized: Boolean get() = value != null
-}
-
-@suppress("UNCHECKED_CAST")
-private class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
-    private volatile var value: Any? = null
-
-    public override fun get(thisRef: Any?, desc: PropertyMetadata): T {
-        val curVal = value
-        return if (curVal != null) unmask(curVal) as T else source()
-    }
-
-    public override fun set(thisRef: Any?, desc: PropertyMetadata, value: T) {
-        this.value = mask(value)
-    }
-
-    val written: Boolean get() = value != null
-}
-
-private val NULL_VALUE: Any = Any()
-private fun mask(value: Any?): Any = value ?: NULL_VALUE
-private fun unmask(value: Any?): Any? = if (value == NULL_VALUE) null else value
