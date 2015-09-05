@@ -3,6 +3,8 @@
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org)
 
+The easy asynchronous library for Kotlin. With extensions for Android, LMAX Disruptor, JavaFX and much more.
+
 ```kt
 async {
 	//some (long running) operation, or just:
@@ -29,7 +31,7 @@ Source and target compatibility is `1.6`
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:2.3.+'
+    compile 'nl.komponents.kovenant:kovenant:2.4.+'
 }
 ```
 
@@ -38,7 +40,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[2.3.0,2.4.0)</version>
+	<version>[2.4.0,2.5.0)</version>
 </dependency>
 ```
 
