@@ -260,7 +260,10 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             throw e
         }
 
-        val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }
+        val finished = finishedFutures.entrySet() sortBy { entry -> entry.key } map { entry -> entry.value }
+
+        //TODO, M13 implementation
+        /*val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }*/
 
         //Can happen when we are using a timeout on the latch
         if (finished.size() < allFutures.size()) {
@@ -319,8 +322,10 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
     private fun get(timeout: Long): V {
         do {
             @suppress("UNCHECKED_CAST")
-            if (state == State.SUCCESS) return result as V
-            if (state == State.ERROR) throw result as Exception
+            when (state) {
+                State.SUCCESS -> return result as V
+                State.ERROR -> throw result as Exception
+            }
 
             synchronized(mutex) {
                 ++queue
