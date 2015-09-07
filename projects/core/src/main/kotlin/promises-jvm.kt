@@ -532,11 +532,11 @@ private fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
         latch.countDown()
     }
     latch.await()
-    val error = e.get()
-    if (error != null) {
-        throw FailedException(v.get())
+    val value = v.get()
+    if (value != null) {
+        throw FailedException(value)
     }
-    return error
+    return e.get()
 }
 
 // Function introduced solely to remain backwards compatible.
