@@ -44,7 +44,7 @@ public interface Deferred<V : Any, E : Any> {
      *
      * @param [value] the value to resolve this deferred with
      */
-    fun resolve(value: V)
+    public fun resolve(value: V)
 
     /**
      * Rejects this deferred with the provided error
@@ -55,7 +55,7 @@ public interface Deferred<V : Any, E : Any> {
      *
      * @param [error] the value to reject this deferred with
      */
-    fun reject(error: E)
+    public fun reject(error: E)
 
     /**
      * Holds the accompanied [Promise]
@@ -63,7 +63,7 @@ public interface Deferred<V : Any, E : Any> {
      * The accompanied [Promise] for this deferred. Multiple invocations
      * must lead to the same instance of the Promise.
      */
-    val promise: Promise<V, E>
+    public val promise: Promise<V, E>
 }
 
 
@@ -74,7 +74,7 @@ public interface Deferred<V : Any, E : Any> {
  * But the intention is stopping.
  */
 public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
-    fun cancel(error: E): Boolean
+    public fun cancel(error: E): Boolean
 }
 
 
@@ -128,7 +128,7 @@ public interface Promise<V : Any, E : Any> {
      * Functions like `then`use this to base there returned promises on this to keep promises bound to a
      * desired context.
      */
-    val context: Context
+    public val context: Context
 
     /**
      * Adds a success callback to this Promise
@@ -140,7 +140,7 @@ public interface Promise<V : Any, E : Any> {
      *
      * @param callback the callback that gets executed on successful completion
      */
-    fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
+    public fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
 
     /**
      * Adds a fail callback to this Promise
@@ -152,7 +152,7 @@ public interface Promise<V : Any, E : Any> {
      *
      * @param callback the callback to be executed on failure or cancellation
      */
-    fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+    public fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
 
     /**
      * Adds a always callback to this Promise
@@ -165,7 +165,7 @@ public interface Promise<V : Any, E : Any> {
      *
      * @param callback the callback to be executed on success, failure or cancellation
      */
-    fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
+    public fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
 
     /**
      * Adds a success callback to this Promise
@@ -176,7 +176,7 @@ public interface Promise<V : Any, E : Any> {
      * @param callback the callback that gets executed on successful completion
      * @param context the DispatcherContext on which this callback is executed
      */
-    fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
+    public fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
 
 
     /**
@@ -188,7 +188,7 @@ public interface Promise<V : Any, E : Any> {
      * @param callback the callback to be executed on failure or cancellation
      * @param context the DispatcherContext on which this callback is executed
      */
-    fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
+    public fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
 
     /**
      * Adds a always callback to this Promise
@@ -201,7 +201,7 @@ public interface Promise<V : Any, E : Any> {
      * @param callback the callback to be executed on success, failure or cancellation
      * @param context the DispatcherContext on which this callback is executed
      */
-    fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
+    public fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 
     /**
      * Blocks until this promises is done and either immediate returning the success result or throwing an `Exception`
@@ -212,7 +212,7 @@ public interface Promise<V : Any, E : Any> {
      *
      * @return returns the success value when done
      */
-    fun get(): V = defaultGet(this)
+    public fun get(): V = defaultGet(this)
 
     /**
      * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
@@ -222,7 +222,7 @@ public interface Promise<V : Any, E : Any> {
      *
      * @return returns the fail value when done
      */
-    fun getError(): E = defaultGetError(this)
+    public fun getError(): E = defaultGetError(this)
 
 
     /**
@@ -230,21 +230,21 @@ public interface Promise<V : Any, E : Any> {
      *
      * @return true if this promise is either resolved successfully or has failed, false otherwise
      */
-    fun isDone(): Boolean = defaultIsDone()
+    public fun isDone(): Boolean = defaultIsDone()
 
     /**
      * Returns true if this promise is resolved a failed
      *
      * @return true if this promise is resolved a failed, false otherwise
      */
-    fun isFailure(): Boolean = defaultIsFailure()
+    public fun isFailure(): Boolean = defaultIsFailure()
 
     /**
      * Returns true if this promise is resolved successfully
      *
      * @return true if this promise is resolved successfully, false otherwise
      */
-    fun isSuccess(): Boolean = defaultIsSuccess()
+    public fun isSuccess(): Boolean = defaultIsSuccess()
 }
 
 
