@@ -26,7 +26,7 @@ import android.os.Message
 import java.util.concurrent.atomic.AtomicInteger
 
 
-private class LooperExecutor(private val looper: Looper) : Handler.Callback {
+internal class LooperExecutor(private val looper: Looper) : Handler.Callback {
     public companion object {
         val main: LooperExecutor = LooperExecutor(Looper.getMainLooper())
     }

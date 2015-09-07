@@ -319,10 +319,8 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
     private fun get(timeout: Long): V {
         do {
             @suppress("UNCHECKED_CAST")
-            when (state) {
-                State.SUCCESS -> return result as V
-                State.ERROR -> throw result as Exception
-            }
+            if (state == State.SUCCESS) return result as V
+            if (state == State.ERROR) throw result as Exception
 
             synchronized(mutex) {
                 ++queue

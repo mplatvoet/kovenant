@@ -33,7 +33,7 @@ public fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() 
 
 public fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
-private fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
+internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
     builder.body()
     return builder.build()

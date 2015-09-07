@@ -35,6 +35,8 @@ internal fun concreteSuccessfulPromise<V : Any, E : Any>(context: Context, value
 
 internal fun concreteFailedPromise<V : Any, E : Any>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
+internal fun concreteDeferred<V : Any, E : Any>(context: Context): Deferred<V, E> = DeferredPromise(context)
+
 private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
@@ -56,8 +58,8 @@ private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : Abst
 }
 
 private class ThenPromise<V : Any, R : Any>(context: Context,
-                                promise: Promise<V, Exception>,
-                                callable: (V) -> R) :
+                                            promise: Promise<V, Exception>,
+                                            callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
     private volatile var task: (() -> Unit)? = null

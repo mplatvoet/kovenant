@@ -27,6 +27,7 @@ import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
 
+internal fun concreteLazyPromise<T : Any>(context: Context?, initializer: () -> T): Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)
 
 private class LazyPromise<T : Any>(
         //Need to allow `null` context because we could easily
