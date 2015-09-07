@@ -26,52 +26,9 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.properties.ReadOnlyProperty
 
+internal fun concreteLazyPromise<T : Any>(context: Context?, initializer: () -> T): Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)
 
-private class LazyPromise<in R, T>(
-        //Need to allow `null` context because we could easily
-        //create this property before Kovenant gets configured.
-        //that would lead to this property using another Context
-        //than the rest of the program.
-        private val context: Context?,
-        initializer: () -> T) : ReadOnlyProperty<R, Promise<T, Exception>> {
-
-
-    private volatile var initializer: (() -> T)?
-    private volatile var value: Promise<T, Exception>? = null
-    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
-
-    init {
-        this.initializer = initializer
-    }
-
-    override fun get(thisRef: R, desc: PropertyMetadata): Promise<T, Exception> {
-        // Busy/Spin lock, expecting async to return quickly
-        // Don't want to using blocking semantics since
-        // it's not in the nature of Kovenant
-        while (value == null) {
-            val counter = threadCount
-            if (counter != null) {
-                val threadNumber = counter.incrementAndGet()
-                if (threadNumber == 1) {
-                    val fn = initializer!!
-                    value = async(context ?: Kovenant.context) { fn() }
-                    initializer = null // prevents memory leaking
-                    threadCount = null //gc, you're up
-                    break
-                }
-            }
-            //Signal other threads are more important at the moment
-            //Since another thread is initializing this property
-            Thread.yield()
-        }
-        return value!!
-    }
-}
-
-//TODO, M13 implementation
-/*
 private class LazyPromise<T : Any>(
         //Need to allow `null` context because we could easily
         //create this property before Kovenant gets configured.
@@ -115,4 +72,4 @@ private class LazyPromise<T : Any>(
         }
         return promise!!
     }
-}*/
+}

@@ -22,13 +22,13 @@
 package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.*
-import java.util.*
+import java.util.ArrayList
 
 
 /**
  * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
  */
-public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
+public fun <V, R : Any> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
     val deferred = deferred<List<R>, Exception>(context)
     context.workerContext offer {
         //TODO ArrayList is jvm only

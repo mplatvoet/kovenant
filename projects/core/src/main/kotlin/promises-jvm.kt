@@ -35,6 +35,8 @@ internal fun concreteSuccessfulPromise<V : Any, E : Any>(context: Context, value
 
 internal fun concreteFailedPromise<V : Any, E : Any>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
+internal fun concreteDeferred<V : Any, E : Any>(context: Context): Deferred<V, E> = DeferredPromise(context)
+
 private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
@@ -56,8 +58,8 @@ private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : Abst
 }
 
 private class ThenPromise<V : Any, R : Any>(context: Context,
-                                promise: Promise<V, Exception>,
-                                callable: (V) -> R) :
+                                            promise: Promise<V, Exception>,
+                                            callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
     private volatile var task: (() -> Unit)? = null
@@ -82,7 +84,7 @@ private class ThenPromise<V : Any, R : Any>(context: Context,
         }
     }
 
-    override fun cancel(error: Exception): Boolean {
+    override public fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
@@ -121,7 +123,7 @@ private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
         context.workerContext offer wrapper
     }
 
-    override fun cancel(error: Exception): Boolean {
+    override public fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
@@ -157,7 +159,7 @@ private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) 
 }
 
 private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
-    override fun resolve(value: V) {
+    override public fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
         } else {
@@ -165,7 +167,7 @@ private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractProm
         }
     }
 
-    override fun reject(error: E) {
+    override public fun reject(error: E) {
         if (trySetFailResult(error)) {
             fireFail(error)
         } else {
@@ -194,7 +196,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
     private volatile var result: Any? = null
 
 
-    override fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
+    override public fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
         if (isFailureInternal()) return this
 
         //Bypass the queue if this promise is resolved and the queue is empty
@@ -212,7 +214,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
         return this
     }
 
-    override fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E> {
+    override public fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E> {
         if (isSuccessInternal()) return this
 
         //Bypass the queue if this promise is resolved and the queue is empty
@@ -230,7 +232,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
         return this
     }
 
-    override fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E> {
+    override public fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E> {
         //Bypass the queue if this promise is resolved and the queue is empty
         //no need to create excess nodes
         if ((isSuccessInternal() || isFailureInternal()) && isEmptyCallbacks()) {
@@ -249,7 +251,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
         return this
     }
 
-    override fun get(): V {
+    override public fun get(): V {
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
@@ -274,7 +276,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
         }
     }
 
-    override fun getError(): E {
+    override public fun getError(): E {
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
@@ -499,7 +501,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
 
 }
 
-private fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
+internal fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
@@ -519,7 +521,7 @@ private fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
     return v.get()
 }
 
-private fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
+internal fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
@@ -542,7 +544,7 @@ private fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
 @deprecated("inefficient, to be removed in version 3.0.0")
-private fun Promise<*, *>.defaultIsDone(): Boolean {
+internal fun Promise<*, *>.defaultIsDone(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
     always(dispatcherCtx) { called = true }
@@ -552,7 +554,7 @@ private fun Promise<*, *>.defaultIsDone(): Boolean {
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
 @deprecated("inefficient, to be removed in version 3.0.0")
-private fun Promise<*, *>.defaultIsFailure(): Boolean {
+internal fun Promise<*, *>.defaultIsFailure(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
     fail(dispatcherCtx) { called = true }
@@ -562,7 +564,7 @@ private fun Promise<*, *>.defaultIsFailure(): Boolean {
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
 @deprecated("inefficient, to be removed in version 3.0.0")
-private fun Promise<*, *>.defaultIsSuccess(): Boolean {
+internal fun Promise<*, *>.defaultIsSuccess(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
     success(dispatcherCtx) { called = true }

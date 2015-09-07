@@ -65,7 +65,7 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = DeferredPromise(context)
+    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
 
     private class ThreadSafeContext() : ReconfigurableContext {
 
