@@ -36,7 +36,7 @@ import nl.komponents.kovenant.ui.promiseOnUi as newPromiseOnUi
 import nl.komponents.kovenant.ui.successUi as newSuccessUi
 
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("promiseOnUi(context, alwaysSchedule, body)", "nl.komponents.kovenant.ui.promiseOnUi")*/)
 public fun <V : Any> promiseOnUi(context: Context = Kovenant.context,
                                  alwaysSchedule: Boolean = false,
@@ -48,31 +48,31 @@ public fun <V : Any> promiseOnUi(context: Context = Kovenant.context,
 }
 
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("successUi(body)", "nl.komponents.kovenant.ui.successUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = newSuccessUi(body)
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("successUi(alwaysSchedule = alwaysSchedule, body = body)", "nl.komponents.kovenant.ui.successUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.successUi(alwaysSchedule: Boolean, body: (value: V) -> Unit): Promise<V, E> {
     return newSuccessUi(alwaysSchedule = alwaysSchedule, body = body)
 }
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("failUi(alwaysSchedule = false, body = body)", "nl.komponents.kovenant.ui.failUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = newFailUi(alwaysSchedule = false, body = body)
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("failUi(alwaysSchedule = alwaysSchedule, body = body)", "nl.komponents.kovenant.ui.failUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.failUi(alwaysSchedule: Boolean, body: (error: E) -> Unit): Promise<V, E> {
     return newFailUi(alwaysSchedule = alwaysSchedule, body = body)
 }
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("alwaysUi(alwaysSchedule = false, body = body)", "nl.komponents.kovenant.ui.alwaysUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = newAlwaysUi(alwaysSchedule = false, body = body)
 
-@deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
+@Deprecated("now part of kovenant-ui package, replace imports with 'nl.komponents.kovenant.ui'"
         /*, ReplaceWith("alwaysUi(alwaysSchedule = alwaysSchedule, body = body)", "nl.komponents.kovenant.ui.alwaysUi")*/)
 public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(alwaysSchedule: Boolean, body: () -> Unit): Promise<V, E> {
     return newAlwaysUi(alwaysSchedule = alwaysSchedule, body = body)

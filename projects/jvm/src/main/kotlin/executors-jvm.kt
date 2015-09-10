@@ -265,7 +265,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         //Can happen when we are using a timeout on the latch
         if (finished.size() < allFutures.size()) {
             val toCancel = allFutures subtract finished
-            toCancel.forEach { task -> task?.cancel(false) }
+            toCancel.forEach { task -> task.cancel(false) }
         }
 
         return ArrayList(finished.filterNotNull())
@@ -303,11 +303,11 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
                                 private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
     enum class State {PENDING, SUCCESS, ERROR }
 
-    private volatile var state = State.PENDING
-    private volatile var result: Any? = null
-    private volatile var queue = 0
+    private @Volatile var state = State.PENDING
+    private @Volatile var result: Any? = null
+    private @Volatile var queue = 0
 
-    @suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val mutex: Object = Object()
 
 
@@ -315,10 +315,10 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
 
     override fun get(timeout: Long, unit: TimeUnit): V = get(TimeUnit.MILLISECONDS.convert(timeout, unit))
 
-    @suppress("UNREACHABLE_CODE")
+    @Suppress("UNREACHABLE_CODE")
     private fun get(timeout: Long): V {
         do {
-            @suppress("UNCHECKED_CAST")
+            @Suppress("UNCHECKED_CAST")
             if (state == State.SUCCESS) return result as V
             if (state == State.ERROR) throw result as Exception
 

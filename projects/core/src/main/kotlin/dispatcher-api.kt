@@ -98,10 +98,10 @@ public interface DispatcherBuilder {
 
     fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
 
-    @deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
+    @Deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
     fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
 
-    @deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
+    @Deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
     var numberOfThreads: Int
         get() = concurrentTasks
         set(value) {

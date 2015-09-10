@@ -313,4 +313,4 @@ public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind:
  * @param bind the transform function.
  */
 public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
-        inlineOptions(InlineOption.ONLY_LOCAL_RETURN) bind: V.() -> R): Promise<R, Exception> = then { it.bind() }
+        crossinline bind: V.() -> R): Promise<R, Exception> = then { it.bind() }

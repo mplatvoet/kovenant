@@ -62,7 +62,7 @@ private class ThenPromise<V : Any, R : Any>(context: Context,
                                             callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
-    private volatile var task: (() -> Unit)? = null
+    private @Volatile var task: (() -> Unit)? = null
 
     init {
         promise success {
@@ -105,7 +105,7 @@ private class ThenPromise<V : Any, R : Any>(context: Context,
 private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
-    private volatile var task: (() -> Unit)?
+    private @Volatile var task: (() -> Unit)?
 
     init {
         val wrapper = {
@@ -190,10 +190,10 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
     private val state = AtomicReference(State.PENDING)
     private val waitingThreads = AtomicInteger(0)
 
-    @suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val mutex = waitingThreads as Object
     private val head = AtomicReference<CallbackContextNode<V, E>>(null)
-    private volatile var result: Any? = null
+    private @Volatile var result: Any? = null
 
 
     override public fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
@@ -371,11 +371,11 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
 
 
     //For internal use only! Method doesn't check anything, just casts.
-    suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun getAsValueResult(): V = result as V
 
     //For internal use only! Method doesn't check anything, just casts.
-    suppress("UNCHECKED_CAST")
+    @Suppress("UNCHECKED_CAST")
     private fun getAsFailResult(): E = result as E
 
     protected fun rawValue(): Any = result as Any
@@ -457,7 +457,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
     }
 
     private abstract class CallbackContextNode<V, E> : CallbackContext<V, E> {
-        volatile var next: CallbackContextNode<V, E>? = null
+        @Volatile var next: CallbackContextNode<V, E>? = null
         var nodeState = AtomicReference(NodeState.CHAINED)
     }
 
@@ -543,7 +543,7 @@ internal fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
 
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
-@deprecated("inefficient, to be removed in version 3.0.0")
+@Deprecated("inefficient, to be removed in version 3.0.0")
 internal fun Promise<*, *>.defaultIsDone(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
@@ -553,7 +553,7 @@ internal fun Promise<*, *>.defaultIsDone(): Boolean {
 
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
-@deprecated("inefficient, to be removed in version 3.0.0")
+@Deprecated("inefficient, to be removed in version 3.0.0")
 internal fun Promise<*, *>.defaultIsFailure(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
@@ -563,7 +563,7 @@ internal fun Promise<*, *>.defaultIsFailure(): Boolean {
 
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
-@deprecated("inefficient, to be removed in version 3.0.0")
+@Deprecated("inefficient, to be removed in version 3.0.0")
 internal fun Promise<*, *>.defaultIsSuccess(): Boolean {
     val dispatcherCtx = DispatcherContext.create(DirectDispatcher.instance, context.callbackContext.errorHandler)
     var called = false
