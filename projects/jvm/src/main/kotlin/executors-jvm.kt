@@ -265,7 +265,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
         //Can happen when we are using a timeout on the latch
         if (finished.size() < allFutures.size()) {
             val toCancel = allFutures subtract finished
-            toCancel.forEach { task -> task.cancel(false) }
+            toCancel.forEach { task -> task?.cancel(false) }
         }
 
         return ArrayList(finished.filterNotNull())
