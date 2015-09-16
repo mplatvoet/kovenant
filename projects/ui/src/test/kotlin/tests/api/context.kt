@@ -43,21 +43,21 @@ class CacheBehaviourTest {
     val context1 = createContext(dispatcher1)
     val context2 = createContext(dispatcher2)
 
-    Test fun sameInstance() {
+    @Test fun sameInstance() {
         val instance1 = factory(dispatcher1, context1)
         val instance2 = factory(dispatcher1, context1)
 
         assertEquals(instance1, instance2, "instances must match")
     }
 
-    Test fun differentInstanceContext() {
+    @Test fun differentInstanceContext() {
         val instance1 = factory(dispatcher1, context1)
         val instance2 = factory(dispatcher1, context2)
 
         assertNotEquals(instance1, instance2, "instances must differ")
     }
 
-    Test fun differentInstanceDispatcher() {
+    @Test fun differentInstanceDispatcher() {
         val instance1 = factory(dispatcher1, context1)
         val instance2 = factory(dispatcher2, context1)
 
@@ -79,7 +79,7 @@ class MultipleContextsTest {
     val alternateDispatcher = ImmediateDispatcher()
     var context = KovenantUi.uiContext //gets overridden by setup, avoids null checks
 
-    Before fun setup() {
+    @Before fun setup() {
         KovenantUi.uiContext {
             dispatcher = defaultDispatcher
         }
@@ -89,7 +89,7 @@ class MultipleContextsTest {
         }
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         var defaultCalls = 0
         defaultDispatcher.onOffered = { ++defaultCalls }
         var alternateCalls = 0
@@ -100,7 +100,7 @@ class MultipleContextsTest {
         assertEquals(0, alternateCalls, "should not be called on alternate dispatcher")
     }
 
-    Test fun alternateContext() {
+    @Test fun alternateContext() {
         var alternateCalls = 0
         alternateDispatcher.onOffered = { ++alternateCalls }
         var defaultCalls = 0

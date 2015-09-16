@@ -31,14 +31,14 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class BindTest {
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun bindSuccess() {
+    @Test fun bindSuccess() {
         fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2)
 
         var result = 0
@@ -46,7 +46,7 @@ class BindTest {
         assertEquals(26, result, "should chain")
     }
 
-    Test fun bindFail() {
+    @Test fun bindFail() {
         fun error(): Promise<Int, Exception> = Promise.ofFail(Exception())
         var count = 0
         Promise.of(13) bind  { error() } fail { count++ }
@@ -65,25 +65,25 @@ class BindContextTest {
         workerContext.dispatcher = DirectDispatcher.instance
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2)
         val p = Promise.of(13) bind { timesTwo(it) }
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeSecondContext() {
+    @Test fun alternativeSecondContext() {
         fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2, alternativeContext)
         val p = Promise.of(13) bind { timesTwo(it) }
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeFirstContext() {
+    @Test fun alternativeFirstContext() {
         fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2)
         val p = Promise.of(13, alternativeContext) bind { timesTwo(it) }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
-    Test fun specifiedContext() {
+    @Test fun specifiedContext() {
         fun timesTwo(i: Int): Promise<Int, Exception> = Promise.of(i * 2)
         val p = Promise.of(13).bind(alternativeContext) { timesTwo(it) }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")

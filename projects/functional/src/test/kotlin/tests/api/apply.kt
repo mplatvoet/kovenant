@@ -31,20 +31,20 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class ApplyTest {
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun bindSuccess() {
+    @Test fun bindSuccess() {
         var result = 0
         Promise.of(13) apply Promise.of({ i: Int -> i * 2 })  success { result = it }
         assertEquals(26, result, "should chain")
     }
 
-    Test fun bindFail() {
+    @Test fun bindFail() {
         var count = 0
         Promise.of(13) apply Promise.ofFail<(Int) -> Int, Exception>(Exception()) fail { count++ }
         assertEquals(1, count, "should report a failure")
@@ -62,22 +62,22 @@ class ApplyContextTest {
         workerContext.dispatcher = DirectDispatcher.instance
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         val p = Promise.of(13) apply Promise.of({ i: Int -> i * 2 })
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeSecondContext() {
+    @Test fun alternativeSecondContext() {
         val p = Promise.of(13) apply Promise.of({ i: Int -> i * 2 }, alternativeContext)
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeFirstContext() {
+    @Test fun alternativeFirstContext() {
         val p = Promise.of(13, alternativeContext) apply Promise.of({ i: Int -> i * 2 })
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
-    Test fun specifiedContext() {
+    @Test fun specifiedContext() {
         val p = Promise.of(13).apply(alternativeContext, Promise.of({ i: Int -> i * 2 }))
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }

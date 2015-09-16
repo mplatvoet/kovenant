@@ -31,20 +31,20 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class MapTest {
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun mapSuccess() {
+    @Test fun mapSuccess() {
         var result = 0
         Promise.of(13) map { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
-    Test fun mapFail() {
+    @Test fun mapFail() {
         var count = 0
         Promise.of(13) map { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
@@ -62,17 +62,17 @@ class MapContextTest {
         workerContext.dispatcher = DirectDispatcher.instance
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         val p = Promise.of(13) map { it + 2 }
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeFirstContext() {
+    @Test fun alternativeFirstContext() {
         val p = Promise.of(13, alternativeContext) map { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
-    Test fun specifiedContext() {
+    @Test fun specifiedContext() {
         val p = Promise.of(13).map(alternativeContext) { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
