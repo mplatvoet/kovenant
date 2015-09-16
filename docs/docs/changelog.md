@@ -6,11 +6,11 @@ Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 
 ##Upcomming
 
-###v2.5.0
+###v2.6.0
 
 **expected**
 
-* Kotlin M13
+* n/a
 
 **certain**
 
