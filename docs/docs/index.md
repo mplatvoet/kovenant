@@ -25,13 +25,13 @@ Developed with the following [goals](misc/goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-This version is build against `kotlin-stdlib:0.12.1230`.
+This version is build against `kotlin-stdlib:0.13.xxxx`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:2.4.+'
+    compile 'nl.komponents.kovenant:kovenant:2.5.+'
 }
 ```
 
@@ -40,7 +40,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[2.4.0,2.5.0)</version>
+	<version>[2.5.0,2.6.0)</version>
 </dependency>
 ```
 
