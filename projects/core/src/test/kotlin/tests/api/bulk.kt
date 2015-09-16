@@ -29,14 +29,14 @@ import kotlin.test.assertEquals
 
 class AllTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun emptyCallVerify() {
+    @Test fun emptyCallVerify() {
         var success = 0
         var fails = 0
         all<Int>() success { success++ } fail { fails++ }
@@ -44,7 +44,7 @@ class AllTest {
         assertEquals(0, fails, "fail should not be called")
     }
 
-    Test fun oneCallVerify() {
+    @Test fun oneCallVerify() {
         var success = 0
         var fails = 0
         all(Promise.of(13)) success { success++ } fail { fails++ }
@@ -52,7 +52,7 @@ class AllTest {
         assertEquals(0, fails, "fail should not be called")
     }
 
-    Test fun oneCallErrorVerify() {
+    @Test fun oneCallErrorVerify() {
         var success = 0
         var fails = 0
         all<Int>(Promise.ofFail(Exception())) success { success++ } fail { fails++ }
@@ -60,7 +60,7 @@ class AllTest {
         assertEquals(1, fails, "fail should be called once")
     }
 
-    Test fun multipleCallVerify() {
+    @Test fun multipleCallVerify() {
         var success = 0
         var fails = 0
         all(Promise.of(13), Promise.of(13), Promise.of(13)) success { success++ } fail { fails++ }
@@ -68,7 +68,7 @@ class AllTest {
         assertEquals(0, fails, "fail should not be called")
     }
 
-    Test fun multipleCallErrorVerify() {
+    @Test fun multipleCallErrorVerify() {
         var success = 0
         var fails = 0
         all<Int>(Promise.ofFail(Exception()), Promise.ofFail(Exception()), Promise.ofFail(Exception())) success { success++ } fail { fails++ }
@@ -76,25 +76,25 @@ class AllTest {
         assertEquals(1, fails, "fail should be called once")
     }
 
-    Test fun emptyCallResult() {
+    @Test fun emptyCallResult() {
         all<Int>() success {
             assertEquals(0, it.size(), "result list should be empty")
         }
     }
 
-    Test fun oneCallResult() {
+    @Test fun oneCallResult() {
         all(Promise.of(13)) success {
             assertEquals(1, it.size(), "result list should be size == 1")
         }
     }
 
-    Test fun multipleCallResult() {
+    @Test fun multipleCallResult() {
         all(Promise.of(13), Promise.of(13), Promise.of(13)) success {
             assertEquals(3, it.size(), "result list should be size == 3")
         }
     }
 
-    Test fun multipleCallResultOrder() {
+    @Test fun multipleCallResultOrder() {
         all(Promise.of(5), Promise.of(9), Promise.of(8)) success {
             assertEquals(5, it[0], "wrong order")
             assertEquals(9, it[1], "wrong order")
@@ -103,7 +103,7 @@ class AllTest {
     }
 
 
-    Test fun properContextMultiple() {
+    @Test fun properContextMultiple() {
         val context = Kovenant.createContext {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
@@ -113,7 +113,7 @@ class AllTest {
         assertEquals(context, p.context, "Wrong context")
     }
 
-    Test fun properContextEmpty() {
+    @Test fun properContextEmpty() {
         val context = Kovenant.createContext {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
@@ -126,14 +126,14 @@ class AllTest {
 
 class AnyTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun emptyCallVerify() {
+    @Test fun emptyCallVerify() {
         var success = 0
         var fails = 0
         any<Int>() success { success++ } fail { fails++ }
@@ -141,7 +141,7 @@ class AnyTest {
         assertEquals(0, success, "success should not be called")
     }
 
-    Test fun oneCallVerify() {
+    @Test fun oneCallVerify() {
         var success = 0
         var fails = 0
         any(Promise.of(13)) success { success++ } fail { fails++ }
@@ -149,7 +149,7 @@ class AnyTest {
         assertEquals(0, fails, "fails should not be called")
     }
 
-    Test fun oneCallErrorVerify() {
+    @Test fun oneCallErrorVerify() {
         var success = 0
         var fails = 0
         any<Int>(Promise.ofFail(Exception())) success { success++ } fail { fails++ }
@@ -157,7 +157,7 @@ class AnyTest {
         assertEquals(0, success, "success should not be called")
     }
 
-    Test fun multipleCallVerify() {
+    @Test fun multipleCallVerify() {
         var success = 0
         var fails = 0
         any(Promise.of(13), Promise.of(13), Promise.of(13)) success { success++ } fail { fails++ }
@@ -165,25 +165,25 @@ class AnyTest {
         assertEquals(0, fails, "fails should not be called")
     }
 
-    Test fun emptyCallResult() {
+    @Test fun emptyCallResult() {
         any<Int>() fail {
             assertEquals(0, it.size(), "result list should be empty")
         }
     }
 
-    Test fun oneCallResult() {
+    @Test fun oneCallResult() {
         any<Int>(Promise.ofFail(Exception())) fail {
             assertEquals(1, it.size(), "result list should be size == 1")
         }
     }
 
-    Test fun multipleErrorResult() {
+    @Test fun multipleErrorResult() {
         any<Int>(Promise.ofFail(Exception()), Promise.ofFail(Exception()), Promise.ofFail(Exception())) fail  {
             assertEquals(3, it.size(), "result list should be size == 3")
         }
     }
 
-    Test fun multipleCallErrorOrder() {
+    @Test fun multipleCallErrorOrder() {
         val one = Exception()
         val two = Exception()
         val three = Exception()
@@ -194,7 +194,7 @@ class AnyTest {
         }
     }
 
-    Test fun properContextMultiple() {
+    @Test fun properContextMultiple() {
         val context = Kovenant.createContext {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
@@ -204,7 +204,7 @@ class AnyTest {
         assertEquals(context, p.context, "Wrong context")
     }
 
-    Test fun properContextEmpty() {
+    @Test fun properContextEmpty() {
         val context = Kovenant.createContext {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance

@@ -32,19 +32,19 @@ import kotlin.test.fail
 
 class GetTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun successResult() {
+    @Test fun successResult() {
         val promise = Promise.of(13)
         assertEquals(13, promise.get(), "should return the proper value")
     }
 
-    Test fun failResultException() {
+    @Test fun failResultException() {
         val promise = Promise.ofFail<Int, Exception>(Exception("bummer"))
         var thrown = false
         try {
@@ -55,10 +55,10 @@ class GetTest {
         } catch(e: Exception) {
             thrown = true
         }
-        assert(thrown, "should throw an exception")
+        assert(thrown) { "should throw an exception" }
     }
 
-    Test fun failResultValue() {
+    @Test fun failResultValue() {
         val promise = Promise.ofFail<Int, String>("bummer")
         var thrown = false
         try {
@@ -69,14 +69,14 @@ class GetTest {
         } catch(e: Exception) {
             fail("Should be of type FailedException")
         }
-        assert(thrown, "should throw a FailedException")
+        assert(thrown) { "should throw a FailedException" }
     }
 }
 
 class GetAsyncTest {
 
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             val dispatcher = buildDispatcher { concurrentTasks = 1 }
             callbackContext.dispatcher = dispatcher
@@ -84,11 +84,11 @@ class GetAsyncTest {
         }
     }
 
-    After fun shutdown() {
+    @After fun shutdown() {
         Kovenant.stop()
     }
 
-    Test(timeout = 10000) fun blockingGet() {
+    @Test(timeout = 10000) fun blockingGet() {
         val deferred = deferred<Int, Exception>()
 
         verifyBlocking({ deferred.resolve(42) }) {

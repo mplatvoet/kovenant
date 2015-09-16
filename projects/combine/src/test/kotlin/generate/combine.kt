@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
 
 /*
 
-[suppress("UNCHECKED_CAST")]
+[@Suppress("UNCHECKED_CAST")]
 public fun concreteCombine<V1, V2, E>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> {
@@ -63,7 +63,7 @@ public fun concreteCombine<V1, V2, E>
 
 fun generateConcreteCombine(n: Int) {
     (2..n) forEach { i ->
-        println("@suppress(\"UNCHECKED_CAST\")")
+        println("@Suppress(\"UNCHECKED_CAST\")")
         print("fun concreteCombine<")
         (1..i).forEach {
             print("V$it : Any, ")

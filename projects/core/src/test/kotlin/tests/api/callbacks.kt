@@ -30,50 +30,50 @@ import kotlin.test.assertEquals
 
 class PromiseCallbackTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun success() {
+    @Test fun success() {
         var numberOfCalls = 0
         async { 13 } success { numberOfCalls++ }
         assertEquals(1, numberOfCalls, "success should be called once")
     }
 
-    Test fun alwaysSuccess() {
+    @Test fun alwaysSuccess() {
         var numberOfCalls = 0
         async { 13 } always { numberOfCalls++ }
         assertEquals(1, numberOfCalls, "success should be called once")
     }
 
-    Test fun fail() {
+    @Test fun fail() {
         var numberOfCalls = 0
         async { throw Exception() } fail { numberOfCalls++ }
         assertEquals(1, numberOfCalls, "fail should be called once")
     }
 
-    Test fun alwaysFail() {
+    @Test fun alwaysFail() {
         var numberOfCalls = 0
         async { throw Exception() } always { numberOfCalls++ }
         assertEquals(1, numberOfCalls, "always should be called once")
     }
 
-    Test fun multipleSuccesses() {
+    @Test fun multipleSuccesses() {
         var numberOfCalls = 0
         async { 13 } success { numberOfCalls++ } success { numberOfCalls++ } success { numberOfCalls++ }
         assertEquals(3, numberOfCalls, "success should be called 3 times")
     }
 
-    Test fun multipleFails() {
+    @Test fun multipleFails() {
         var numberOfCalls = 0
         async { throw Exception() } fail { numberOfCalls++ } fail { numberOfCalls++ } fail { numberOfCalls++ }
         assertEquals(3, numberOfCalls, "fail should be called 3 times")
     }
 
-    Test fun mixedSuccessAndAlways() {
+    @Test fun mixedSuccessAndAlways() {
         var successess = 0
         var always = 0
         async { 13 } success { successess++ } always  { always++ } success { successess++ }
@@ -81,7 +81,7 @@ class PromiseCallbackTest {
         assertEquals(1, always, "always should be called once")
     }
 
-    Test fun mixedFailAndAlways() {
+    @Test fun mixedFailAndAlways() {
         var fails = 0
         var always = 0
         async { throw Exception() } fail { fails++ } always  { always++ } fail { fails++ }
@@ -89,7 +89,7 @@ class PromiseCallbackTest {
         assertEquals(1, always, "always should be called once")
     }
 
-    Test fun eitherFail() {
+    @Test fun eitherFail() {
         var fails = 0
         var success = 0
         async { throw Exception() } fail { fails++ } success { success++ }
@@ -97,7 +97,7 @@ class PromiseCallbackTest {
         assertEquals(0, success, "success shouldn't be called")
     }
 
-    Test fun eitherSuccess() {
+    @Test fun eitherSuccess() {
         var fails = 0
         var success = 0
         async { 13 } fail { fails++ } success { success++ }
@@ -108,14 +108,14 @@ class PromiseCallbackTest {
 
 class PromiseCallbackOrderTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun orderAlwaysSuccessAlways() {
+    @Test fun orderAlwaysSuccessAlways() {
         var calls = 0
         async { 13 } always {
             calls++
@@ -130,7 +130,7 @@ class PromiseCallbackOrderTest {
         assertEquals(3, calls, "All should be called")
     }
 
-    Test fun orderSuccessSuccessAlways() {
+    @Test fun orderSuccessSuccessAlways() {
         var calls = 0
         async { 13 } success {
             calls++
@@ -145,7 +145,7 @@ class PromiseCallbackOrderTest {
         assertEquals(3, calls, "All should be called")
     }
 
-    Test fun orderAlwaysSuccessSuccess() {
+    @Test fun orderAlwaysSuccessSuccess() {
         var calls = 0
         async { 13 } always {
             calls++
@@ -160,7 +160,7 @@ class PromiseCallbackOrderTest {
         assertEquals(3, calls, "All should be called")
     }
 
-    Test fun orderAlwaysFailAlways() {
+    @Test fun orderAlwaysFailAlways() {
         var calls = 0
         async { throw Exception() } always {
             calls++
@@ -175,7 +175,7 @@ class PromiseCallbackOrderTest {
         assertEquals(3, calls, "All should be called")
     }
 
-    Test fun orderFailFailAlways() {
+    @Test fun orderFailFailAlways() {
         var calls = 0
         async { throw Exception() } fail {
             calls++
@@ -190,7 +190,7 @@ class PromiseCallbackOrderTest {
         assertEquals(3, calls, "All should be called")
     }
 
-    Test fun orderAlwaysFailFail() {
+    @Test fun orderAlwaysFailFail() {
         var calls = 0
         async { throw Exception() } always {
             calls++

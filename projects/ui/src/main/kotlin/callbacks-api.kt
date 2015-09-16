@@ -24,7 +24,7 @@ package nl.komponents.kovenant.ui
 import nl.komponents.kovenant.*
 
 
-public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
+public fun <V : Any> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
                            context: Context = Kovenant.context,
                            alwaysSchedule: Boolean = false,
                            body: () -> V): Promise<V, Exception> {
@@ -49,9 +49,9 @@ public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
 }
 
 
-public fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(alwaysSchedule = false, body = body)
+public fun <V : Any, E : Any> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(alwaysSchedule = false, body = body)
 
-public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiContext,
+public fun <V : Any, E : Any> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiContext,
                                           alwaysSchedule: Boolean,
                                           body: (value: V) -> Unit): Promise<V, E> {
 
@@ -71,9 +71,9 @@ public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiCo
 }
 
 
-public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(alwaysSchedule = false, body = body)
+public fun <V : Any, E : Any> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(alwaysSchedule = false, body = body)
 
-public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
+public fun <V : Any, E : Any> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
                                        alwaysSchedule: Boolean,
                                        body: (error: E) -> Unit): Promise<V, E> {
     val dispatcherContext = uiContext dispatcherContextFor context
@@ -92,9 +92,9 @@ public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiConte
 }
 
 
-public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(alwaysSchedule = false, body = body)
+public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(alwaysSchedule = false, body = body)
 
-public fun <V, E> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
+public fun <V : Any, E : Any> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
                                          alwaysSchedule: Boolean,
                                          body: () -> Unit): Promise<V, E> {
     val dispatcherContext = uiContext dispatcherContextFor context

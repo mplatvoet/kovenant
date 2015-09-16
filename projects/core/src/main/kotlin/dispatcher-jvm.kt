@@ -33,7 +33,7 @@ public fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() 
 
 public fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
-private fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
+internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
     builder.body()
     return builder.build()
@@ -263,9 +263,9 @@ private class NonBlockingDispatcher(val name: String,
 
         private val state = AtomicInteger(pending)
         private val thread: Thread
-        private volatile var alive = true
-        private volatile var keepAlive: Boolean = true
-        private volatile var pollResult: (() -> Unit)? = null
+        private @Volatile var alive = true
+        private @Volatile var keepAlive: Boolean = true
+        private @Volatile var pollResult: (() -> Unit)? = null
 
 
         init {

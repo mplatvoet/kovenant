@@ -32,14 +32,14 @@ import kotlin.test.assertEquals
 
 class UnwrapTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun successUnwrap() {
+    @Test fun successUnwrap() {
         var success = 0
         var fails = 0
         Promise.of(Promise.of(42)).unwrap() success {
@@ -62,25 +62,25 @@ class UnwrapContextTest {
         workerContext.dispatcher = DirectDispatcher.instance
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         val nestedPromise = Promise.of(42)
         val unwrapped = Promise.of(nestedPromise).unwrap()
         assertEquals(defaultContext, unwrapped.context, "Expected the default context")
     }
 
-    Test fun alternativeNestedContext() {
+    @Test fun alternativeNestedContext() {
         val nestedPromise = Promise.of(42, alternativeContext)
         val unwrapped = Promise.of(nestedPromise).unwrap()
         assertEquals(defaultContext, unwrapped.context, "Expected the default context")
     }
 
-    Test fun alternativeUnwrappedContext() {
+    @Test fun alternativeUnwrappedContext() {
         val nestedPromise = Promise.of(42)
         val unwrapped = Promise.of(nestedPromise, alternativeContext).unwrap()
         assertEquals(alternativeContext, unwrapped.context, "Expected the alternative context")
     }
 
-    Test fun specifiedContext() {
+    @Test fun specifiedContext() {
         val nestedPromise = Promise.of(42)
         val unwrapped = Promise.of(nestedPromise).unwrap(alternativeContext)
         assertEquals(alternativeContext, unwrapped.context, "Expected the alternative context")
