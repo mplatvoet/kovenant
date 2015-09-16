@@ -26,7 +26,13 @@ Updated Kovenant to Kotlin M13.
 
 **general**
 
-* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13
+* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13**general**
+
+**core**
+
+* [KOV-51](http://issues.komponents.nl/youtrack/issue/KOV-51) public interfaces
+* [KOV-52](http://issues.komponents.nl/youtrack/issue/KOV-52) default getError bug
+
 
 ###v2.4.0
 
