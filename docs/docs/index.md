@@ -25,7 +25,7 @@ Developed with the following [goals](misc/goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-This version is build against `kotlin-stdlib:0.13.xxxx`.
+This version is build against `kotlin-stdlib:0.13.1513`.
 Source and target compatibility is `1.6`
 
 ###Gradle

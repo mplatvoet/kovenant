@@ -31,21 +31,21 @@ import kotlin.test.assertTrue
 
 class StateTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun uncompleted() {
+    @Test fun uncompleted() {
         val deferred = deferred<Int, Exception>()
         assertFalse(deferred.promise.isDone(), "Should not be done")
         assertFalse(deferred.promise.isSuccess(), "Should not be successful")
         assertFalse(deferred.promise.isFailure(), "Should not be a failure")
     }
 
-    Test fun success() {
+    @Test fun success() {
         val deferred = deferred<Int, Exception>()
         deferred.resolve(13)
         assertTrue(deferred.promise.isDone(), "Should be done")
@@ -53,7 +53,7 @@ class StateTest {
         assertFalse(deferred.promise.isFailure(), "Should not be a failure")
     }
 
-    Test fun failure() {
+    @Test fun failure() {
         val deferred = deferred<Int, Exception>()
         deferred.reject(Exception())
         assertTrue(deferred.promise.isDone(), "Should be done")

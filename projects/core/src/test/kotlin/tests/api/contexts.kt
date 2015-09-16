@@ -33,7 +33,7 @@ class MultipleContextsTest {
     val alternateDispatcher = ImmediateDispatcher()
     var context = Kovenant.context //gets overridden by setup, avoids null checks
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext {
                 dispatcher = defaultDispatcher
@@ -49,14 +49,14 @@ class MultipleContextsTest {
         }
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         var calls = 0
         defaultDispatcher.onOffered = { ++calls }
         async { 13 }
         assertEquals(1, calls, "should by called on default dispatcher")
     }
 
-    Test fun alternateContext() {
+    @Test fun alternateContext() {
         var calls = 0
         alternateDispatcher.onOffered = { ++calls }
         async(context) { 13 }

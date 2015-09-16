@@ -28,20 +28,20 @@ import kotlin.test.assertEquals
 
 class ThenTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun thenSuccess() {
+    @Test fun thenSuccess() {
         var result = 0
         async { 13 } then { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
-    Test fun thenFail() {
+    @Test fun thenFail() {
         var count = 0
         async { 13 } then { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
@@ -61,17 +61,17 @@ class ThenContextTest {
         workerContext.dispatcher = DirectDispatcher.instance
     }
 
-    Test fun defaultContext() {
+    @Test fun defaultContext() {
         val p = Promise.of(13) then { it + 2 }
         assertEquals(defaultContext, p.context, "Expected the default context")
     }
 
-    Test fun alternativeFirstContext() {
+    @Test fun alternativeFirstContext() {
         val p = Promise.of(13, alternativeContext) then { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }
 
-    Test fun specifiedContext() {
+    @Test fun specifiedContext() {
         val p = Promise.of(13).then(alternativeContext) { it + 2 }
         assertEquals(alternativeContext, p.context, "Expected the alternative context")
     }

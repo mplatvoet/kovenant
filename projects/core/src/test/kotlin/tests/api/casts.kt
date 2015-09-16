@@ -24,35 +24,34 @@ package tests.api.casts
 import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class CastTest {
 
-    Before fun setup() {
+    @Before fun setup() {
         Kovenant.context {
             callbackContext.dispatcher = DirectDispatcher.instance
             workerContext.dispatcher = DirectDispatcher.instance
         }
     }
 
-    Test fun asyncPromise() {
+    @Test fun asyncPromise() {
         val promise = async { 13 }
         assertFalse(promise is Deferred<*,*>, "Promise created by async shouldn't be castable to a Deferred")
     }
 
-    Test fun thenPromise() {
+    @Test fun thenPromise() {
         val promise = async { 13 }.then { 14 }
         assertFalse(promise is Deferred<*,*>, "Promise created by then shouldn't be castable to a Deferred")
     }
 
-    Test fun deferredPromise() {
+    @Test fun deferredPromise() {
         val promise = deferred<Int, Int>().promise
         assertFalse(promise is Deferred<*,*>, "Promise created by 'deferred()' shouldn't be castable to a Deferred")
     }
 
-    Test fun promiseDeferred() {
+    @Test fun promiseDeferred() {
         val deferred = deferred<Int, Int>()
         assertTrue(deferred is Promise<*,*>, "Deferred created by 'deferred()' should be castable to a Promise")
     }
