@@ -260,10 +260,7 @@ private data class DispatcherExecutorService(private val dispatcher: Dispatcher)
             throw e
         }
 
-        val finished = finishedFutures.entrySet() sortBy { entry -> entry.key } map { entry -> entry.value }
-
-        //TODO, M13 implementation
-        /*val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }*/
+        val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }
 
         //Can happen when we are using a timeout on the latch
         if (finished.size() < allFutures.size()) {
@@ -306,11 +303,11 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
                                 private val doneFn: (FutureFunction<V>) -> Unit = {}) : Function0<Unit>, Future<V> {
     enum class State {PENDING, SUCCESS, ERROR }
 
-    private volatile var state = State.PENDING
-    private volatile var result: Any? = null
-    private volatile var queue = 0
+    private @Volatile var state = State.PENDING
+    private @Volatile var result: Any? = null
+    private @Volatile var queue = 0
 
-    @suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
+    @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
     private val mutex: Object = Object()
 
 
@@ -318,14 +315,12 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
 
     override fun get(timeout: Long, unit: TimeUnit): V = get(TimeUnit.MILLISECONDS.convert(timeout, unit))
 
-    @suppress("UNREACHABLE_CODE")
+    @Suppress("UNREACHABLE_CODE")
     private fun get(timeout: Long): V {
         do {
-            @suppress("UNCHECKED_CAST")
-            when (state) {
-                State.SUCCESS -> return result as V
-                State.ERROR -> throw result as Exception
-            }
+            @Suppress("UNCHECKED_CAST")
+            if (state == State.SUCCESS) return result as V
+            if (state == State.ERROR) throw result as Exception
 
             synchronized(mutex) {
                 ++queue

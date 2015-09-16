@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> {
@@ -59,7 +59,7 @@ fun concreteCombine<V1 : Any, V2 : Any, E : Any>
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -93,7 +93,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, E : Any>
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -130,7 +130,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, E : Any>
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -170,7 +170,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, E : Any>
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -213,7 +213,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -259,7 +259,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -308,7 +308,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -360,7 +360,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -415,7 +415,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -473,7 +473,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -534,7 +534,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -598,7 +598,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -665,7 +665,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -735,7 +735,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, V16 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -808,7 +808,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, V16 : Any, V17 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -884,7 +884,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, V16 : Any, V17 : Any, V18 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -963,7 +963,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, V16 : Any, V17 : Any, V18 : Any, V19 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,
@@ -1045,7 +1045,7 @@ fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, 
     return deferred.promise
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1 : Any, V2 : Any, V3 : Any, V4 : Any, V5 : Any, V6 : Any, V7 : Any, V8 : Any, V9 : Any, V10 : Any, V11 : Any, V12 : Any, V13 : Any, V14 : Any, V15 : Any, V16 : Any, V17 : Any, V18 : Any, V19 : Any, V20 : Any, E : Any>
         (p1: Promise<V1, E>,
          p2: Promise<V2, E>,

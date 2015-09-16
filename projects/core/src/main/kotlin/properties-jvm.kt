@@ -25,11 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.ReadWriteProperty
 
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
-    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
-    private volatile var initializer: (() -> T)?
-    private volatile var value: Any? = null
+    private @Volatile var threadCount: AtomicInteger? = AtomicInteger(0)
+    private @Volatile var initializer: (() -> T)?
+    private @Volatile var value: Any? = null
 
     init {
         this.initializer = initializer
@@ -63,9 +63,9 @@ public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?
     val initialized: Boolean get() = value != null
 }
 
-@suppress("UNCHECKED_CAST")
+@Suppress("UNCHECKED_CAST")
 public class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
-    private volatile var value: Any? = null
+    private @Volatile var value: Any? = null
 
     public override fun get(thisRef: Any?, property: PropertyMetadata): T {
         val curVal = value

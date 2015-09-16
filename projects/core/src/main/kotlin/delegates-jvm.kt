@@ -81,10 +81,9 @@ private class LazyPromise<T : Any>(
         initializer: () -> T) : Lazy<Promise<T, Exception>>() {
 
 
-
-    private volatile var initializer: (() -> T)?
-    private volatile var promise: Promise<T, Exception>? = null
-    private volatile var threadCount: AtomicInteger? = AtomicInteger(0)
+    private @Volatile var initializer: (() -> T)?
+    private @Volatile var promise: Promise<T, Exception>? = null
+    private @Volatile var threadCount: AtomicInteger? = AtomicInteger(0)
 
     init {
         this.initializer = initializer
