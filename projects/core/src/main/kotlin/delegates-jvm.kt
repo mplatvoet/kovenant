@@ -28,13 +28,13 @@ import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
 
 
-internal class LazyPromise<T>(
+public class LazyPromise<T>(
         //Need to allow `null` context because we could easily
         //create this property before Kovenant gets configured.
         //that would lead to this property using another Context
         //than the rest of the program.
         private val context: Context?,
-        initializer: () -> T) : Lazy<Promise<T, Exception>>() {
+        initializer: () -> T) /*: Lazy<Promise<T, Exception>>() */{
 
 
     private @Volatile var initializer: (() -> T)?
@@ -45,8 +45,12 @@ internal class LazyPromise<T>(
         this.initializer = initializer
     }
 
+    fun get(thisRef: Any?, property: PropertyMetadata): Promise<T, Exception> = initOrGetPromise()
+/*
+    //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()
     override fun isInitialized(): Boolean = promise != null
+*/
 
     private fun initOrGetPromise(): Promise<T, Exception> {
         // Busy/Spin lock, expecting async to return quickly
