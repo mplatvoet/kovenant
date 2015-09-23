@@ -28,6 +28,6 @@ public open class CancelException : KovenantException()
 
 public open class ConfigurationException(message: String) : KovenantException(message)
 
-public open class FailedException(val error: Any) : KovenantException(error.toString())
+public open class FailedException(val error: Any?) : KovenantException(error.toString())
 
 public open class UnsupportedException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)

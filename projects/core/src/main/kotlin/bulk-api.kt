@@ -38,7 +38,7 @@ package nl.komponents.kovenant
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnError whether an error of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun all<V : Any>(vararg promises: Promise<V, Exception>,
+public fun all<V>(vararg promises: Promise<V, Exception>,
                         context: Context = Kovenant.context,
                         cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
     return when (promises.size()) {
@@ -64,7 +64,7 @@ public fun all<V : Any>(vararg promises: Promise<V, Exception>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnError whether an error of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun all<V : Any>(promises: List<Promise<V, Exception>>,
+public fun all<V>(promises: List<Promise<V, Exception>>,
                         context: Context = Kovenant.context,
                         cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
     return when (promises.size()) {
@@ -90,7 +90,7 @@ public fun all<V : Any>(promises: List<Promise<V, Exception>>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnSuccess whether a success of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun any<V : Any>(vararg promises: Promise<V, Exception>,
+public fun any<V>(vararg promises: Promise<V, Exception>,
                         context: Context = Kovenant.context,
                         cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
     return when (promises.size()) {
@@ -115,7 +115,7 @@ public fun any<V : Any>(vararg promises: Promise<V, Exception>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnSuccess whether a success of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun any<V : Any>(promises: List<Promise<V, Exception>>,
+public fun any<V>(promises: List<Promise<V, Exception>>,
                         context: Context = Kovenant.context,
                         cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
     return when (promises.size()) {

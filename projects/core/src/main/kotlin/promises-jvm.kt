@@ -25,19 +25,19 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-internal fun concretePromise<V : Any>(context: Context, callable: () -> V): Promise<V, Exception>
+internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
         = AsyncPromise(context, callable)
 
-internal fun concretePromise<V : Any, R : Any>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
 
-internal fun concreteSuccessfulPromise<V : Any, E : Any>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
+internal fun concreteSuccessfulPromise<V, E>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
 
-internal fun concreteFailedPromise<V : Any, E : Any>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
+internal fun concreteFailedPromise<V, E>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
-internal fun concreteDeferred<V : Any, E : Any>(context: Context): Deferred<V, E> = DeferredPromise(context)
+internal fun concreteDeferred<V, E>(context: Context): Deferred<V, E> = DeferredPromise(context)
 
-private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : AbstractPromise<V, E>(context) {
+private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
     }
@@ -47,7 +47,7 @@ private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : 
     // the callbacks essentially get ignored anyway
 }
 
-private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : AbstractPromise<V, E>(context) {
+private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<V, E>(context) {
     init {
         trySetFailResult(value)
     }
@@ -57,7 +57,7 @@ private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : Abst
     // the callbacks essentially get ignored anyway
 }
 
-private class ThenPromise<V : Any, R : Any>(context: Context,
+private class ThenPromise<V, R>(context: Context,
                                             promise: Promise<V, Exception>,
                                             callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
@@ -102,7 +102,7 @@ private class ThenPromise<V : Any, R : Any>(context: Context,
 
 }
 
-private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
+private class AsyncPromise<V>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private @Volatile var task: (() -> Unit)?
@@ -140,7 +140,7 @@ private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
     }
 }
 
-private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context) {
+private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPromise<V, E>(context) {
     protected fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -158,7 +158,7 @@ private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) 
     }
 }
 
-private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
+private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override public fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -176,7 +176,7 @@ private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractProm
     }
 
     //Only call this method if we know resolving is eminent.
-    private fun multipleCompletion(newValue: Any) {
+    private fun multipleCompletion(newValue: Any?) {
         while (!isDoneInternal()) {
             Thread.yield()
         }
@@ -186,7 +186,7 @@ private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractProm
     override val promise: Promise<V, E> = object : Promise<V, E> by this {}
 }
 
-private abstract class AbstractPromise<V : Any, E : Any>(override val context: Context) : Promise<V, E> {
+private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
     private val state = AtomicReference(State.PENDING)
     private val waitingThreads = AtomicInteger(0)
 
@@ -501,7 +501,7 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
 
 }
 
-internal fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
+internal fun <V, E> defaultGet(promise: Promise<V, E>): V {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
@@ -521,7 +521,7 @@ internal fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
     return v.get()
 }
 
-internal fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
+internal fun <V, E> defaultGetError(promise: Promise<V, E>): E {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
@@ -571,7 +571,7 @@ internal fun Promise<*, *>.defaultIsSuccess(): Boolean {
     return called
 }
 
-private fun <T : Any> T.asException(): Exception {
+private fun <T> T.asException(): Exception {
     return when (this) {
         is Exception -> this
         else -> FailedException(this)

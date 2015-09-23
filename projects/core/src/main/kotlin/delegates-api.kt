@@ -24,5 +24,5 @@ package nl.komponents.kovenant.properties
 import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Promise
 
-public fun lazyPromise<T : Any>(context: Context? = null, initializer: () -> T)
+public fun lazyPromise<T>(context: Context? = null, initializer: () -> T)
         : Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)

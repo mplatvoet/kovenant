@@ -36,7 +36,7 @@ import nl.komponents.kovenant.deferred
  * @param context The `Context` on which the returned promise should operate
  * @return the same `Promise` if the `Context` matches, a new promise otherwise with the provided context
  */
-public fun <V : Any, E : Any>Promise<V, E>.withContext(context: Context): Promise<V, E> {
+public fun <V, E>Promise<V, E>.withContext(context: Context): Promise<V, E> {
     // Already same context, just return self
     if (this.context == context) return this
 

@@ -28,7 +28,7 @@ import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
 
 
-internal class LazyPromise<T : Any>(
+internal class LazyPromise<T>(
         //Need to allow `null` context because we could easily
         //create this property before Kovenant gets configured.
         //that would lead to this property using another Context
