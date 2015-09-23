@@ -66,6 +66,18 @@ public interface Deferred<V, E> {
     public val promise: Promise<V, E>
 }
 
+/**
+ * Resolves a Deferred of type <Unit, E> with Unit.
+ * This makes it just a bit more natural looking
+ */
+public fun <E> Deferred<Unit, E>.resolve() = resolve(Unit)
+
+/**
+ * Rejects a Deferred of type <V, Unit> with Unit.
+ * This makes it just a bit more natural looking
+ */
+public fun <V> Deferred<V, Unit>.reject() = reject(Unit)
+
 
 /**
  * Mark a class to be cancelable
@@ -314,3 +326,63 @@ public fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): 
  */
 public inline fun <V, R> Promise<V, Exception>.thenUse(
         crossinline bind: V.() -> R): Promise<R, Exception> = then { it.bind() }
+
+
+/**
+ * Transforms any `Promise<V, E>` into a Promise<Unit, Unit>.
+ *
+ * The purpose is to hide any result from the consumer but still give the ability to know when something is ready.
+ *
+ * @return returns the Promise<Unit, Unit> with both value and error hidden
+ */
+public fun <V, E> Promise<V, E>.toVoid(context: Context = this.context): Promise<Unit, Unit> {
+    if (isDone()) {
+        if (isSuccess()) return Promise.ofSuccess(Unit, context)
+        if (isFailure()) return Promise.ofFail(Unit, context)
+    }
+
+    val deferred = deferred<Unit, Unit>(context)
+    success { deferred.resolve() }
+    fail { deferred.reject() }
+    return deferred.promise
+}
+
+/**
+ * Transforms any `Promise<V, E>` into a Promise<V, Unit>.
+ *
+ * The purpose is to hide any result from the consumer but still give the ability to know when something is ready.
+ * Hides the error only
+ *
+ * @return returns the Promise<V, Unit> with the error hidden
+ */
+public fun <V, E> Promise<V, E>.toFailVoid(context: Context = this.context): Promise<V, Unit> {
+    if (isDone()) {
+        if (isSuccess()) return Promise.ofSuccess<V, Unit>(get(), context)
+        if (isFailure()) return Promise.ofFail(Unit, context)
+    }
+
+    val deferred = deferred<V, Unit>(context)
+    success { deferred.resolve(it) }
+    fail { deferred.reject() }
+    return deferred.promise
+}
+
+/**
+ * Transforms any `Promise<V, E>` into a Promise<Unit, E>.
+ *
+ * The purpose is to hide any result from the consumer but still give the ability to know when something is ready.
+ * Hides the value only.
+ *
+ * @return returns the Promise<Unit, V> with the value hidden
+ */
+public fun <V, E> Promise<V, E>.toSuccessVoid(context: Context = this.context): Promise<Unit, E> {
+    if (isDone()) {
+        if (isSuccess()) return Promise.ofSuccess<Unit, E>(Unit, context)
+        if (isFailure()) return Promise.ofFail(getError(), context)
+    }
+
+    val deferred = deferred<Unit, E>(context)
+    success { deferred.resolve() }
+    fail { deferred.reject(it) }
+    return deferred.promise
+}
