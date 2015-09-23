@@ -53,7 +53,7 @@ public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?
             //Since another thread is initializing this property
             Thread.yield()
         }
-        return unmask(value) as T
+        return unmask<T>(value)
     }
 
     public override fun set(thisRef: Any?, property: PropertyMetadata, value: T) {
@@ -69,7 +69,7 @@ public class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty
 
     public override fun get(thisRef: Any?, property: PropertyMetadata): T {
         val curVal = value
-        return if (curVal != null) unmask(curVal) as T else source()
+        return if (curVal != null) unmask<T>(curVal) else source()
     }
 
     public override fun set(thisRef: Any?, property: PropertyMetadata, value: T) {
@@ -80,5 +80,9 @@ public class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty
 }
 
 private val NULL_VALUE: Any = Any()
-private fun mask(value: Any?): Any = value ?: NULL_VALUE
-private fun unmask(value: Any?): Any? = if (value == NULL_VALUE) null else value
+
+@Suppress("UNCHECKED_CAST")
+internal fun <V>mask(value: V): V = value ?: NULL_VALUE as V
+
+@Suppress("UNCHECKED_CAST")
+internal fun <V>unmask(value: Any?): V = if (value == NULL_VALUE) null as V else value as V

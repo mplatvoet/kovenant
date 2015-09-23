@@ -21,6 +21,8 @@
 
 package nl.komponents.kovenant
 
+import nl.komponents.kovenant.properties.mask
+import nl.komponents.kovenant.properties.unmask
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -58,8 +60,8 @@ private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<
 }
 
 private class ThenPromise<V, R>(context: Context,
-                                            promise: Promise<V, Exception>,
-                                            callable: (V) -> R) :
+                                promise: Promise<V, Exception>,
+                                callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
     private @Volatile var task: (() -> Unit)? = null
@@ -501,6 +503,9 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
 }
 
+// Function introduced solely to remain backwards compatible.
+// The default implementation doesn't use these.
+@Deprecated("inefficient, to be removed in version 3.0.0")
 internal fun <V, E> defaultGet(promise: Promise<V, E>): V {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
@@ -510,24 +515,27 @@ internal fun <V, E> defaultGet(promise: Promise<V, E>): V {
         v.set(it)
         latch.countDown()
     } fail {
-        e.set(it)
+        e.set(mask(it))
         latch.countDown()
     }
     latch.await()
     val error = e.get()
     if (error != null) {
-        throw error.asException()
+        throw unmask<E>(error).asException()
     }
     return v.get()
 }
 
+// Function introduced solely to remain backwards compatible.
+// The default implementation doesn't use these.
+@Deprecated("inefficient, to be removed in version 3.0.0")
 internal fun <V, E> defaultGetError(promise: Promise<V, E>): E {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
 
     promise.success {
-        v.set(it)
+        v.set(mask(it))
         latch.countDown()
     } fail {
         e.set(it)
@@ -536,10 +544,11 @@ internal fun <V, E> defaultGetError(promise: Promise<V, E>): E {
     latch.await()
     val value = v.get()
     if (value != null) {
-        throw FailedException(value)
+        throw FailedException(unmask<V>(value))
     }
     return e.get()
 }
+
 
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
