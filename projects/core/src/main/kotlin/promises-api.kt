@@ -99,7 +99,7 @@ public interface CancelablePromise<V, E> : Promise<V, E> {
  * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
  * they where added to this Promise.
  */
-public interface Promise<V, E> {
+public interface Promise<out V, out E> {
     companion object {
         /**
          * Takes any value `V` and wraps it as a successfully resolved promise.
