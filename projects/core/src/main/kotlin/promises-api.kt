@@ -34,7 +34,7 @@ package nl.komponents.kovenant
  * resolved or rejected multiple times. It may simply be ignored or throw
  * an Exception.
  */
-public interface Deferred<V : Any, E : Any> {
+public interface Deferred<V, E> {
     /**
      * Resolves this deferred with the provided value
      *
@@ -73,7 +73,7 @@ public interface Deferred<V : Any, E : Any> {
  * What cancelling exactly means is up to the implementor.
  * But the intention is stopping.
  */
-public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
+public interface CancelablePromise<V, E> : Promise<V, E> {
     public fun cancel(error: E): Boolean
 }
 
@@ -87,7 +87,7 @@ public interface CancelablePromise<V : Any, E : Any> : Promise<V, E> {
  * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
  * they where added to this Promise.
  */
-public interface Promise<V : Any, E : Any> {
+public interface Promise<V, E> {
     companion object {
         /**
          * Takes any value `V` and wraps it as a successfully resolved promise.
@@ -95,7 +95,7 @@ public interface Promise<V : Any, E : Any> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, Exception>
          */
-        public fun of<V : Any>(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
+        public fun of<V>(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -105,7 +105,7 @@ public interface Promise<V : Any, E : Any> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, E>
          */
-        public fun ofSuccess<V : Any, E : Any>(value: V, context: Context = Kovenant.context): Promise<V, E> {
+        public fun ofSuccess<V, E>(value: V, context: Context = Kovenant.context): Promise<V, E> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -115,7 +115,7 @@ public interface Promise<V : Any, E : Any> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a failed Promise<V, E>
          */
-        public fun ofFail<V : Any, E : Any>(value: E, context: Context = Kovenant.context): Promise<V, E> {
+        public fun ofFail<V, E>(value: E, context: Context = Kovenant.context): Promise<V, E> {
             return concreteFailedPromise(context, value)
         }
 
@@ -254,7 +254,7 @@ public interface Promise<V : Any, E : Any> {
  * @param context the context on which the associated [Promise] operates on
  * @return newly created [Deferred]
  */
-public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
+public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
 
 /**
@@ -265,8 +265,8 @@ public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Defe
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
-public fun async<V : Any>(context: Context = Kovenant.context,
-                          body: () -> V): Promise<V, Exception> = concretePromise(context, body)
+public fun async<V>(context: Context = Kovenant.context,
+                    body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -280,7 +280,7 @@ public fun async<V : Any>(context: Context = Kovenant.context,
  *
  * @param bind the transform function.
  */
-public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 
@@ -296,7 +296,7 @@ public fun <V : Any, R : Any> Promise<V, Exception>.then(bind: (V) -> R): Promis
  * @param context the on which the bind and returned Promise operate
  * @param bind the transform function.
  */
-public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
+public fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 
@@ -312,5 +312,5 @@ public fun <V : Any, R : Any> Promise<V, Exception>.then(context: Context, bind:
  *
  * @param bind the transform function.
  */
-public inline fun <V : Any, R : Any> Promise<V, Exception>.thenUse(
+public inline fun <V, R> Promise<V, Exception>.thenUse(
         crossinline bind: V.() -> R): Promise<R, Exception> = then { it.bind() }

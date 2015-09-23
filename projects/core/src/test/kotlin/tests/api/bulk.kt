@@ -60,6 +60,14 @@ class AllTest {
         assertEquals(1, fails, "fail should be called once")
     }
 
+    @Test fun nullCallVerify() {
+        var success = 0
+        var fails = 0
+        all(Promise.of(null)) success { success++ } fail { fails++ }
+        assertEquals(1, success, "success should be called once")
+        assertEquals(0, fails, "fail should not be called")
+    }
+
     @Test fun multipleCallVerify() {
         var success = 0
         var fails = 0
@@ -145,6 +153,14 @@ class AnyTest {
         var success = 0
         var fails = 0
         any(Promise.of(13)) success { success++ } fail { fails++ }
+        assertEquals(1, success, "success should be called once")
+        assertEquals(0, fails, "fails should not be called")
+    }
+
+    @Test fun nullCallVerify() {
+        var success = 0
+        var fails = 0
+        any(Promise.of(null)) success { success++ } fail { fails++ }
         assertEquals(1, success, "success should be called once")
         assertEquals(0, fails, "fails should not be called")
     }

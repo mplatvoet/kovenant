@@ -41,7 +41,7 @@ public object Kovenant {
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
+    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
     fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
         return context.stop(force, timeOutMs, block)
@@ -50,7 +50,7 @@ public object Kovenant {
 }
 
 public interface Context {
-    val multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+    val multipleCompletion: (curVal: Any?, newVal: Any?) -> Unit
 
     val callbackContext: DispatcherContext
     val workerContext: DispatcherContext
@@ -78,7 +78,7 @@ public interface MutableContext : Context {
     override val callbackContext: MutableDispatcherContext
     override val workerContext: MutableDispatcherContext
 
-    override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit
+    override var multipleCompletion: (curVal: Any?, newVal: Any?) -> Unit
 
     fun callbackContext(body: MutableDispatcherContext.() -> Unit) {
         callbackContext.body()

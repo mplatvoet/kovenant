@@ -66,9 +66,9 @@ fun generateConcreteCombine(n: Int) {
         println("@Suppress(\"UNCHECKED_CAST\")")
         print("fun concreteCombine<")
         (1..i).forEach {
-            print("V$it : Any, ")
+            print("V$it, ")
         }
-        println("E : Any>")
+        println("E>")
 
         print("(")
         (1..i).forEach {
@@ -144,9 +144,9 @@ fun generateApiCombine(n: Int) {
         println("public fun combine")
         print("<")
         (1..i).forEach {
-            print("V$it : Any, ")
+            print("V$it, ")
         }
-        println("E : Any>")
+        println("E>")
 
         print("(")
         (1..i).forEach {

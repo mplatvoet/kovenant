@@ -21,18 +21,18 @@
 
 package nl.komponents.kovenant
 
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-internal fun concreteAll<V : Any>(vararg promises: Promise<V, Exception>,
+internal fun concreteAll<V>(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
     return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
 }
 
-internal fun concreteAll<V : Any>(promises: List<Promise<V, Exception>>,
+internal fun concreteAll<V>(promises: List<Promise<V, Exception>>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
     // this might fail with concurrent mutating list, revisit in the future
@@ -40,7 +40,7 @@ internal fun concreteAll<V : Any>(promises: List<Promise<V, Exception>>,
     return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
 }
 
-internal fun concreteAll<V : Any>(promises: Sequence<Promise<V, Exception>>,
+internal fun concreteAll<V>(promises: Sequence<Promise<V, Exception>>,
                            sequenceSize: Int,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
@@ -77,13 +77,13 @@ internal fun concreteAll<V : Any>(promises: Sequence<Promise<V, Exception>>,
     return deferred.promise
 }
 
-internal fun concreteAny<V : Any>(vararg promises: Promise<V, Exception>,
+internal fun concreteAny<V>(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
     return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
 }
 
-internal fun concreteAny<V : Any>(promises: List<Promise<V, Exception>>,
+internal fun concreteAny<V>(promises: List<Promise<V, Exception>>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
     // this might fail with concurrent mutating list, revisit in the future
@@ -91,7 +91,7 @@ internal fun concreteAny<V : Any>(promises: List<Promise<V, Exception>>,
     return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
 }
 
-internal fun concreteAny<V : Any>(promises: Sequence<Promise<V, Exception>>,
+internal fun concreteAny<V>(promises: Sequence<Promise<V, Exception>>,
                            sequenceSize: Int,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
