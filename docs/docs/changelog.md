@@ -3,6 +3,18 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v2.6.0
+
+**general**
+
+* [KOV-53](http://issues.komponents.nl/youtrack/issue/KOV-53) Allow `null` values
+
+**core**
+
+* [KOV-49](http://issues.komponents.nl/youtrack/issue/KOV-49) Better `void`/`Unit` support
+* [KOV-54](http://issues.komponents.nl/youtrack/issue/KOV-54) Covariant promise API
+* [KOV-55](http://issues.komponents.nl/youtrack/issue/KOV-55) `then` optimizations
+
 ##v2.5.0
 
 Updated Kovenant to Kotlin M13.

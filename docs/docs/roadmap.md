@@ -3,18 +3,15 @@
 Some indication of the course of Kovenant. Nothing is written in stone, it's just a general idea.
 Input is always welcome.
 
-##v2.6.0
+##v2.7.0
 
 **expected**
 
-* n/a
+* Control over the order of executing async bodies, e.g. [KOV-15](http://issues.komponents.nl/youtrack/issue/KOV-15)
 
 **certain**
 
-* [KOV-53](http://issues.komponents.nl/youtrack/issue/KOV-53) Allow `null` values
-* [KOV-49](http://issues.komponents.nl/youtrack/issue/KOV-49) Better `void`/`Unit` support
-* [KOV-54](http://issues.komponents.nl/youtrack/issue/KOV-54) Covariant promise API
-* [KOV-55](http://issues.komponents.nl/youtrack/issue/KOV-55) `then` optimizations
+* n/a
 
 ---
 
