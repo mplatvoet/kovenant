@@ -21,7 +21,7 @@ Updated Kovenant to Kotlin M13.
 
 **general**
 
-* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13**general**
+* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13
 
 **core**
 
