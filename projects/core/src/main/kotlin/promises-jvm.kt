@@ -64,27 +64,58 @@ private class ThenPromise<V, R>(context: Context,
                                 callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
+
+    /* Use a DirectDispatcherContext to avoid scheduling and use to resolving
+     * thread to set up (not execute) the execution
+     */
+    object DirectDispatcherContext : DispatcherContext {
+        val errorFn: (Exception) -> Unit = { e -> e.printStackTrace() }
+
+        override val dispatcher: Dispatcher = DirectDispatcher.instance
+        override val errorHandler: (Exception) -> Unit get() = errorFn
+    }
+
+    //need to hold the task to be able to cancel
     private @Volatile var task: (() -> Unit)? = null
 
     init {
-        promise success {
-            val wrapper = {
-                try {
-                    val result = callable(it)
-                    resolve(result)
-                } catch(e: Exception) {
-                    reject(e)
-                } finally {
-                    //avoid leaking memory after a reject/resolve
-                    task = null
-                }
+        if (promise.isDone()) {
+            if (promise.isSuccess()) {
+                schedule(context, promise.get(), callable)
+            } else {
+                reject(promise.getError())
             }
-            task = wrapper
-            context.workerContext offer wrapper
-        } fail {
+        } else {
+            triggered(callable, context, promise)
+        }
+    }
+
+    private fun triggered(callable: (V) -> R, context: Context, promise: Promise<V, Exception>) {
+        promise.success(DirectDispatcherContext) {
+            schedule(context, it, callable)
+        }
+
+        promise.fail(DirectDispatcherContext) {
             reject(it)
         }
     }
+
+    private fun schedule(context: Context, value: V, callable: (V) -> R) {
+        val wrapper = {
+            try {
+                val result = callable(value)
+                resolve(result)
+            } catch(e: Exception) {
+                reject(e)
+            } finally {
+                //avoid leaking memory after a reject/resolve
+                task = null
+            }
+        }
+        task = wrapper
+        context.workerContext offer wrapper
+    }
+
 
     override public fun cancel(error: Exception): Boolean {
         val wrapper = task
