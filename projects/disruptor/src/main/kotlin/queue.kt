@@ -62,7 +62,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
     override fun tryOffer(elem: V): Boolean {
         val idx = buffer.next()
         try {
-            buffer[idx].value = elem
+            buffer.get(idx).value = elem
         } finally {
             buffer.publish(idx)
         }
@@ -81,7 +81,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
                 // There is a published item try to get exclusive
                 // right on this slot by comparing and setting
                 // multiple threads might be fighting for this
-                val value = buffer[probeIdx].value
+                val value = buffer.get(probeIdx).value
                 if (seq.compareAndSet(probeIdx - 1, probeIdx)) {
                     return value
                 }
