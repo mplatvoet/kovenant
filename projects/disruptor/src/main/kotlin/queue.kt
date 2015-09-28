@@ -40,7 +40,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
 
     init {
         buffer.addGatingSequences(seq)
-        seq.set(buffer.getCursor())
+        seq.set(buffer.cursor)
     }
 
     public override fun size(): Int {
@@ -49,7 +49,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
         // the other way around, the tail might be beyond the head
         // so don't change this to a one-liner
         val tail = seq.get()
-        val head = buffer.getCursor()
+        val head = buffer.cursor
         return (head - tail).toInt()
     }
 

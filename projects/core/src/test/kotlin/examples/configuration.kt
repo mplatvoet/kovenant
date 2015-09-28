@@ -94,7 +94,7 @@ fun main(args: Array<String>) {
         // can for instance choose to throw
         // an Exception here
         multipleCompletion =
-                fun(a: Any, b: Any): Unit
+                fun(a: Any?, b: Any?): Unit
                         = System.err.println(
                         "Tried resolving with $b, but is $a")
     }

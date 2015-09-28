@@ -21,23 +21,25 @@
 
 package nl.komponents.kovenant
 
+import nl.komponents.kovenant.properties.mask
+import nl.komponents.kovenant.properties.unmask
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-internal fun concretePromise<V : Any>(context: Context, callable: () -> V): Promise<V, Exception>
+internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
         = AsyncPromise(context, callable)
 
-internal fun concretePromise<V : Any, R : Any>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
 
-internal fun concreteSuccessfulPromise<V : Any, E : Any>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
+internal fun concreteSuccessfulPromise<V, E>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
 
-internal fun concreteFailedPromise<V : Any, E : Any>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
+internal fun concreteFailedPromise<V, E>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
-internal fun concreteDeferred<V : Any, E : Any>(context: Context): Deferred<V, E> = DeferredPromise(context)
+internal fun concreteDeferred<V, E>(context: Context): Deferred<V, E> = DeferredPromise(context)
 
-private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : AbstractPromise<V, E>(context) {
+private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
     }
@@ -47,7 +49,7 @@ private class SuccessfulPromise<V : Any, E : Any>(context: Context, value: V) : 
     // the callbacks essentially get ignored anyway
 }
 
-private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : AbstractPromise<V, E>(context) {
+private class FailedPromise<V, E>(context: Context, value: E) : AbstractPromise<V, E>(context) {
     init {
         trySetFailResult(value)
     }
@@ -57,32 +59,63 @@ private class FailedPromise<V : Any, E : Any>(context: Context, value: E) : Abst
     // the callbacks essentially get ignored anyway
 }
 
-private class ThenPromise<V : Any, R : Any>(context: Context,
-                                            promise: Promise<V, Exception>,
-                                            callable: (V) -> R) :
+private class ThenPromise<V, R>(context: Context,
+                                promise: Promise<V, Exception>,
+                                callable: (V) -> R) :
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
+
+    /* Use a DirectDispatcherContext to avoid scheduling and use to resolving
+     * thread to set up (not execute) the execution
+     */
+    object DirectDispatcherContext : DispatcherContext {
+        val errorFn: (Exception) -> Unit = { e -> e.printStackTrace() }
+
+        override val dispatcher: Dispatcher = DirectDispatcher.instance
+        override val errorHandler: (Exception) -> Unit get() = errorFn
+    }
+
+    //need to hold the task to be able to cancel
     private @Volatile var task: (() -> Unit)? = null
 
     init {
-        promise success {
-            val wrapper = {
-                try {
-                    val result = callable(it)
-                    resolve(result)
-                } catch(e: Exception) {
-                    reject(e)
-                } finally {
-                    //avoid leaking memory after a reject/resolve
-                    task = null
-                }
+        if (promise.isDone()) {
+            if (promise.isSuccess()) {
+                schedule(context, promise.get(), callable)
+            } else {
+                reject(promise.getError())
             }
-            task = wrapper
-            context.workerContext offer wrapper
-        } fail {
+        } else {
+            triggered(callable, context, promise)
+        }
+    }
+
+    private fun triggered(callable: (V) -> R, context: Context, promise: Promise<V, Exception>) {
+        promise.success(DirectDispatcherContext) {
+            schedule(context, it, callable)
+        }
+
+        promise.fail(DirectDispatcherContext) {
             reject(it)
         }
     }
+
+    private fun schedule(context: Context, value: V, callable: (V) -> R) {
+        val wrapper = {
+            try {
+                val result = callable(value)
+                resolve(result)
+            } catch(e: Exception) {
+                reject(e)
+            } finally {
+                //avoid leaking memory after a reject/resolve
+                task = null
+            }
+        }
+        task = wrapper
+        context.workerContext offer wrapper
+    }
+
 
     override public fun cancel(error: Exception): Boolean {
         val wrapper = task
@@ -102,7 +135,7 @@ private class ThenPromise<V : Any, R : Any>(context: Context,
 
 }
 
-private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
+private class AsyncPromise<V>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private @Volatile var task: (() -> Unit)?
@@ -140,7 +173,7 @@ private class AsyncPromise<V : Any>(context: Context, callable: () -> V) :
     }
 }
 
-private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context) {
+private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPromise<V, E>(context) {
     protected fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -158,7 +191,7 @@ private abstract class SelfResolvingPromise<V : Any, E : Any>(context: Context) 
     }
 }
 
-private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
+private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
     override public fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
@@ -176,7 +209,7 @@ private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractProm
     }
 
     //Only call this method if we know resolving is eminent.
-    private fun multipleCompletion(newValue: Any) {
+    private fun multipleCompletion(newValue: Any?) {
         while (!isDoneInternal()) {
             Thread.yield()
         }
@@ -186,7 +219,7 @@ private class DeferredPromise<V : Any, E : Any>(context: Context) : AbstractProm
     override val promise: Promise<V, E> = object : Promise<V, E> by this {}
 }
 
-private abstract class AbstractPromise<V : Any, E : Any>(override val context: Context) : Promise<V, E> {
+private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
     private val state = AtomicReference(State.PENDING)
     private val waitingThreads = AtomicInteger(0)
 
@@ -501,7 +534,10 @@ private abstract class AbstractPromise<V : Any, E : Any>(override val context: C
 
 }
 
-internal fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
+// Function introduced solely to remain backwards compatible.
+// The default implementation doesn't use these.
+@Deprecated("inefficient, to be removed in version 3.0.0")
+internal fun <V, E> defaultGet(promise: Promise<V, E>): V {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
@@ -510,24 +546,27 @@ internal fun <V : Any, E : Any> defaultGet(promise: Promise<V, E>): V {
         v.set(it)
         latch.countDown()
     } fail {
-        e.set(it)
+        e.set(mask(it))
         latch.countDown()
     }
     latch.await()
     val error = e.get()
     if (error != null) {
-        throw error.asException()
+        throw unmask<E>(error).asException()
     }
     return v.get()
 }
 
-internal fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
+// Function introduced solely to remain backwards compatible.
+// The default implementation doesn't use these.
+@Deprecated("inefficient, to be removed in version 3.0.0")
+internal fun <V, E> defaultGetError(promise: Promise<V, E>): E {
     val latch = CountDownLatch(1)
     val e = AtomicReference<E>()
     val v = AtomicReference<V>()
 
     promise.success {
-        v.set(it)
+        v.set(mask(it))
         latch.countDown()
     } fail {
         e.set(it)
@@ -536,10 +575,11 @@ internal fun <V : Any, E : Any> defaultGetError(promise: Promise<V, E>): E {
     latch.await()
     val value = v.get()
     if (value != null) {
-        throw FailedException(value)
+        throw FailedException(unmask<V>(value))
     }
     return e.get()
 }
+
 
 // Function introduced solely to remain backwards compatible.
 // The default implementation doesn't use these.
@@ -571,7 +611,7 @@ internal fun Promise<*, *>.defaultIsSuccess(): Boolean {
     return called
 }
 
-private fun <T : Any> T.asException(): Exception {
+private fun <T> T.asException(): Exception {
     return when (this) {
         is Exception -> this
         else -> FailedException(this)

@@ -44,6 +44,21 @@ class GetTest {
         assertEquals(13, promise.get(), "should return the proper value")
     }
 
+    @Test fun errorResult() {
+        val promise = Promise.ofFail<Int, Int>(13)
+        assertEquals(13, promise.getError(), "should return the proper value")
+    }
+
+    @Test fun nullSuccessResult() {
+        val promise = Promise.of(null)
+        assertEquals(null, promise.get(), "should return null")
+    }
+
+    @Test fun nullErrorResult() {
+        val promise = Promise.ofFail<Int, Int?>(null)
+        assertEquals(null, promise.getError(), "should return null")
+    }
+
     @Test fun failResultException() {
         val promise = Promise.ofFail<Int, Exception>(Exception("bummer"))
         var thrown = false

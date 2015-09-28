@@ -65,14 +65,14 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun deferred<V : Any, E : Any>(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
+    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
 
     private class ThreadSafeContext() : ReconfigurableContext {
 
-        private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any, Any) -> Unit> {
-            { curVal: Any, newVal: Any -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
+        private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any?, Any?) -> Unit> {
+            { curVal: Any?, newVal: Any? -> throw IllegalStateException("Value[$curVal] is set, can't override with new value[$newVal]") }
         }
-        override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
+        override var multipleCompletion: (curVal: Any?, newVal: Any?) -> Unit by multipleCompletionDelegate
 
         val threadSafeCallbackContext = ThreadSafeMutableDispatcherContext() {
             buildDispatcher {
@@ -117,7 +117,7 @@ class ConcreteKovenant {
 
     private class TrackingContext(private val currentContext: Context) : MutableContext {
         private val multipleCompletionDelegate = TrackChangesVar { currentContext.multipleCompletion }
-        override var multipleCompletion: (curVal: Any, newVal: Any) -> Unit by multipleCompletionDelegate
+        override var multipleCompletion: (curVal: Any?, newVal: Any?) -> Unit by multipleCompletionDelegate
 
         val trackingCallbackContext = TrackingMutableDispatcherContext(currentContext.callbackContext)
         override val callbackContext: MutableDispatcherContext = object : MutableDispatcherContext by trackingCallbackContext {}

@@ -16,13 +16,29 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package nl.komponents.kovenant.properties
 
-import nl.komponents.kovenant.Context
+package examples.covariance
+
 import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.async
+import nl.komponents.kovenant.functional.unwrap
 
-public fun lazyPromise<T>(context: Context? = null, initializer: () -> T)
-        : Lazy<Promise<T, Exception>> = LazyPromise(context, initializer)
+fun main(args: Array<String>) {
+    createBase() success {
+        println(it)
+    }
+}
+
+fun createBase() : Promise<Base, Exception> {
+    return async {
+        createDerived()
+    }.unwrap()
+}
+
+fun createDerived() : Promise<Derived, Exception> = async { Derived() }
+
+open class Base
+open class Derived : Base()
+

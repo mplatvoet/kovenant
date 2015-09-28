@@ -337,3 +337,15 @@ from [`async`](#async), [`then`](#then) and [`thenUse`](#thenUse) are `Cancelabl
 Cancelling a promises is quite similar to [`Deferred.reject`](#deferred) as it finishes the promises as failed. Thus
 the callbacks `fail` and `always` are still executed. Cancel does also try to prevent the promised work from ever being 
  scheduled. If the promised work is already running it gets [interrupted](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupt()) (when using default dispatchers).
+ 
+ ---
+ 
+ ##Void
+ There are those times where just knowing that something has either failed or succeeded is enough information. So for
+ the ultimate "on a need to know basis" Kovenant provides three methods that hide the results:
+ 
+ * `toVoid()`, creates a `Promise<Unit, Unit>` of an existing `Promise<V, E>`
+ * `toSuccessVoid()`, creates a `Promise<Unit, E>` of an existing `Promise<V, E>`
+ * `toFailVoid()`, creates a `Promise<V, Unit>` of an existing `Promise<V, E>`
+ 
+ 

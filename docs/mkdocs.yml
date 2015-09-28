@@ -22,7 +22,8 @@ pages:
 - ['misc/goals.md', 'Misc', 'Goals']
 - ['misc/performance.md', 'Misc', 'Performance']
 - ['misc/considerations.md','Misc', 'Considerations']
-- ['changelog.md', 'Changelog']
+- ['changelog.md', 'Changelog', 'Released']
+- ['roadmap.md', 'Changelog', 'Roadmap']
 
 #theme: bootstrap
 theme_dir: theme/yeti
