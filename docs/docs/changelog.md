@@ -1,32 +1,27 @@
 #Changelog
 
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
+Please refer to [roadmap](roadmap.md) for upcoming releases.
 
----
+##v2.6.0
 
-##Upcomming
+**general**
 
-###v2.6.0
+* [KOV-53](http://issues.komponents.nl/youtrack/issue/KOV-53) Allow `null` values
 
-**expected**
+**core**
 
-* n/a
+* [KOV-49](http://issues.komponents.nl/youtrack/issue/KOV-49) Better `void`/`Unit` support
+* [KOV-54](http://issues.komponents.nl/youtrack/issue/KOV-54) Covariant promise API
+* [KOV-55](http://issues.komponents.nl/youtrack/issue/KOV-55) `then` optimizations
 
-**certain**
-
-* n/a
-
----
-
-##Released
-
-###v2.5.0
+##v2.5.0
 
 Updated Kovenant to Kotlin M13.
 
 **general**
 
-* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13**general**
+* [KOV-50](http://issues.komponents.nl/youtrack/issue/KOV-50) Kotlin M13
 
 **core**
 
@@ -34,7 +29,7 @@ Updated Kovenant to Kotlin M13.
 * [KOV-52](http://issues.komponents.nl/youtrack/issue/KOV-52) default getError bug
 
 
-###v2.4.0
+##v2.4.0
 
 **general**
 
@@ -46,26 +41,26 @@ For more information see the [Kovenant document site](http://kovenant.komponents
 * [KOV-35](http://issues.komponents.nl/youtrack/issue/KOV-35) JFX Dispatcher
 
 
-###v2.3.3
+##v2.3.3
 
 **progress**
 
 * [KOV-45](http://issues.komponents.nl/youtrack/issue/KOV-45) Updated progress
 
-###v2.3.2
+##v2.3.2
 
 **general**
 
 * Updated kotlin version to 0.12.1230
 * Improved testing of get()
 
-###v2.3.1
+##v2.3.1
 
 **core**
 
 * [KOV-43](http://issues.komponents.nl/youtrack/issue/KOV-43) Fix for broken get()
 
-###v2.3.0
+##v2.3.0
 
 **core**
 
@@ -77,14 +72,14 @@ For more information see the [Kovenant document site](http://kovenant.komponents
 * [KOV-38](http://issues.komponents.nl/youtrack/issue/KOV-38) Functional constructs. [map](http://kovenant.komponents.nl/api/functional_usage/#map)  / [bind](http://kovenant.komponents.nl/api/functional_usage/#bind)  / [apply](http://kovenant.komponents.nl/api/functional_usage/#apply)  / [withContext](http://kovenant.komponents.nl/api/functional_usage/#withcontext)  
 
 
-###v2.2.1
+##v2.2.1
 
 **general**
 
 * Updated kotlin version to 0.12.1218
 
 
-###v2.2.0
+##v2.2.0
 
 **kovenant-android**
 
@@ -96,7 +91,7 @@ For more information see the [Kovenant document site](http://kovenant.komponents
 * [KOV-31](http://issues.komponents.nl/youtrack/issue/KOV-31) Allow wait strategies to be properly interrupted
 
 
-###v2.1.1
+##v2.1.1
 
 **kovenant-disruptor**
 
@@ -106,7 +101,7 @@ For more information see the [Kovenant document site](http://kovenant.komponents
 
 * [KOV-32](http://issues.komponents.nl/youtrack/issue/KOV-32) Empty collections with bulk operations are not properly handled
 
-###v2.1.0
+##v2.1.0
 
 **kovenant-core**
 
@@ -124,7 +119,7 @@ For more information see the [Kovenant document site](http://kovenant.komponents
 
 * [KOV-7](http://issues.komponents.nl/youtrack/issue/KOV-7) LMAX Disruptor queues
 
-###v2.0.0
+##v2.0.0
 [KOV-21](http://issues.komponents.nl/youtrack/issue/KOV-21) Kovenant has a new home which is [komponents.nl](http://komponents.nl) and thus the project is now available as `nl.komponents.kovenant:kovenant:2.0.0`
 
 **general:**
@@ -140,7 +135,7 @@ Mostly breaking API changes in this release:
 * [KOV-19](http://issues.komponents.nl/youtrack/issue/KOV-19) Fixed an bug where interrupted flags might not be properly cleared by the dispatcher
 * [KOV-24](http://issues.komponents.nl/youtrack/issue/KOV-24) Changed the configuration structure (breaking)
 
-###v1.1.0
+##v1.1.0
 
 **general:**
 
@@ -157,7 +152,7 @@ Mostly breaking API changes in this release:
 
 * [KOV-10](http://issues.komponents.nl/youtrack/issue/KOV-10) added easier [Android configuration](android/config.md)
 
-###v1.0.0
+##v1.0.0
 The focus of this release has been on Android support.
 
 * KOV-1 Android Dispatcher
@@ -165,14 +160,14 @@ The focus of this release has been on Android support.
 * KOV-4 Improve project structure
 * KOV-5 Introduce a blocking WaitStrategy
 
-###v0.1.2
+##v0.1.2
 
 * Fixed a concurrency issue in the callback queue that could lead to NPE's 
 
-###v0.1.1
+##v0.1.1
 
 * Made kotlin library an optional dependency to not interfere with peoples projects
 
-###v0.1.0
+##v0.1.0
 Initial release.
 Bringing Promises to Kotlin. Configuration free.
