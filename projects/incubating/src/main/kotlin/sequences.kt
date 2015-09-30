@@ -16,22 +16,36 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+package nl.komponents.kovenant.incubating
 
-package examples.aforEach
+import nl.komponents.kovenant.*
+import java.util.*
 
-import nl.komponents.kovenant.functional.mapEach
 
-fun main(args: Array<String>) {
-    val promise = sequenceOf(12, 13, 14, 15, 16).mapEach {
-        it - 1
-    }
-
-    promise success {
-        it forEach {
-            println(it)
+/**
+ * Undocumented API. Added as a public testable experimental feature. Implementation and signature might change.
+ */
+public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
+    val deferred = deferred<List<R>, Exception>(context)
+    context.workerContext offer {
+        //TODO ArrayList is jvm only
+        val promises = ArrayList<Promise<R, Exception>>()
+        forEach {
+            value ->
+            promises add async(context) { bind(value) }
+        }
+        val masterPromise = all(promises)
+        masterPromise success {
+            deferred resolve it
+        }
+        masterPromise fail {
+            deferred reject it
         }
     }
+
+    return deferred.promise
 }
 
