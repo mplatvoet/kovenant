@@ -24,7 +24,5 @@ project.description = "Progress tracking Kovenant extensions"
 
 dependencies {
     compile project(':kovenant-core')
-    //TODO used released version
-    compile 'nl.komponents.progress:progress-core:0.3.0-kotlinM-SS+20150929T1815Z'
-//    compile 'nl.komponents.progress:progress-core:0.3.0'
+    compile 'nl.komponents.progress:progress-core:0.4.0'
 }
