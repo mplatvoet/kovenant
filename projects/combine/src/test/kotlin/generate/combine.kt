@@ -23,8 +23,8 @@ package generate.combine
 
 
 fun main(args: Array<String>) {
-    generateApiCombine(20)
-//    generateConcreteCombine(20)
+//    generateApiCombine(20)
+    generateConcreteCombine(20)
 
 }
 
@@ -99,7 +99,7 @@ fun generateConcreteCombine(n: Int) {
         println("> {")
         println("return Tuple$i(")
         (1..i).forEach {
-            print("results[${it - 1}] as V$it")
+            print("results.get(${it - 1}) as V$it")
             if (it < i) println(", ")
         }
         println(")")
@@ -107,7 +107,7 @@ fun generateConcreteCombine(n: Int) {
         println("""
          fun Promise<*,*>.registerSuccess( idx: Int) {
             success { v ->
-                results[idx] = v
+                results.set(idx, v)
                 if (successCount.decrementAndGet() == 0) {
                     deferred.resolve(createTuple())
                 }

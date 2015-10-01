@@ -27,7 +27,6 @@ import nl.komponents.kovenant.deferred
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
-
 @Suppress("UNCHECKED_CAST")
 fun concreteCombine<V1, V2, E>
         (p1: Promise<V1, E>,
@@ -39,13 +38,13 @@ fun concreteCombine<V1, V2, E>
 
     fun createTuple(): Tuple2<V1, V2> {
         return Tuple2(
-                results[0] as V1,
-                results[1] as V2)
+                results.get(0) as V1,
+                results.get(1) as V2)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -71,14 +70,14 @@ fun concreteCombine<V1, V2, V3, E>
 
     fun createTuple(): Tuple3<V1, V2, V3> {
         return Tuple3(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -106,15 +105,15 @@ fun concreteCombine<V1, V2, V3, V4, E>
 
     fun createTuple(): Tuple4<V1, V2, V3, V4> {
         return Tuple4(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -144,16 +143,16 @@ fun concreteCombine<V1, V2, V3, V4, V5, E>
 
     fun createTuple(): Tuple5<V1, V2, V3, V4, V5> {
         return Tuple5(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -185,17 +184,17 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, E>
 
     fun createTuple(): Tuple6<V1, V2, V3, V4, V5, V6> {
         return Tuple6(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -229,18 +228,18 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, E>
 
     fun createTuple(): Tuple7<V1, V2, V3, V4, V5, V6, V7> {
         return Tuple7(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -276,19 +275,19 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, E>
 
     fun createTuple(): Tuple8<V1, V2, V3, V4, V5, V6, V7, V8> {
         return Tuple8(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -326,20 +325,20 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
 
     fun createTuple(): Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9> {
         return Tuple9(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -379,21 +378,21 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
 
     fun createTuple(): Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10> {
         return Tuple10(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -435,22 +434,22 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
 
     fun createTuple(): Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11> {
         return Tuple11(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -494,23 +493,23 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
 
     fun createTuple(): Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12> {
         return Tuple12(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -556,24 +555,24 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
 
     fun createTuple(): Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13> {
         return Tuple13(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -621,25 +620,25 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14> {
         return Tuple14(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -689,26 +688,26 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15> {
         return Tuple15(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -760,27 +759,27 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16> {
         return Tuple16(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15,
-                results[15] as V16)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15,
+                results.get(15) as V16)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -834,28 +833,28 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17> {
         return Tuple17(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15,
-                results[15] as V16,
-                results[16] as V17)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15,
+                results.get(15) as V16,
+                results.get(16) as V17)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -911,29 +910,29 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18> {
         return Tuple18(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15,
-                results[15] as V16,
-                results[16] as V17,
-                results[17] as V18)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15,
+                results.get(15) as V16,
+                results.get(16) as V17,
+                results.get(17) as V18)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -991,30 +990,30 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19> {
         return Tuple19(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15,
-                results[15] as V16,
-                results[16] as V17,
-                results[17] as V18,
-                results[18] as V19)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15,
+                results.get(15) as V16,
+                results.get(16) as V17,
+                results.get(17) as V18,
+                results.get(18) as V19)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -1074,31 +1073,31 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
 
     fun createTuple(): Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20> {
         return Tuple20(
-                results[0] as V1,
-                results[1] as V2,
-                results[2] as V3,
-                results[3] as V4,
-                results[4] as V5,
-                results[5] as V6,
-                results[6] as V7,
-                results[7] as V8,
-                results[8] as V9,
-                results[9] as V10,
-                results[10] as V11,
-                results[11] as V12,
-                results[12] as V13,
-                results[13] as V14,
-                results[14] as V15,
-                results[15] as V16,
-                results[16] as V17,
-                results[17] as V18,
-                results[18] as V19,
-                results[19] as V20)
+                results.get(0) as V1,
+                results.get(1) as V2,
+                results.get(2) as V3,
+                results.get(3) as V4,
+                results.get(4) as V5,
+                results.get(5) as V6,
+                results.get(6) as V7,
+                results.get(7) as V8,
+                results.get(8) as V9,
+                results.get(9) as V10,
+                results.get(10) as V11,
+                results.get(11) as V12,
+                results.get(12) as V13,
+                results.get(13) as V14,
+                results.get(14) as V15,
+                results.get(15) as V16,
+                results.get(16) as V17,
+                results.get(17) as V18,
+                results.get(18) as V19,
+                results.get(19) as V20)
     }
 
     fun Promise<*, *>.registerSuccess(idx: Int) {
         success { v ->
-            results[idx] = v
+            results.set(idx, v)
             if (successCount.decrementAndGet() == 0) {
                 deferred.resolve(createTuple())
             }
@@ -1141,11 +1140,3 @@ private fun <V, E>Deferred<V, E>.registerFail(vararg promises: Promise<*, E>) {
         }
     }
 }
-
-
-
-
-
-
-
-

@@ -44,7 +44,7 @@ public class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V)
      *
      * @return the value for this key
      */
-    fun get(key: K): V {
+    operator fun get(key: K): V {
         iterate {
             k, v ->
             if (k == key) return v

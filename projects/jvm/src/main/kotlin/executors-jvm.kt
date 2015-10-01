@@ -24,7 +24,7 @@ package nl.komponents.kovenant.jvm
 import nl.komponents.kovenant.Dispatcher
 import java.lang.ref.Reference
 import java.lang.ref.WeakReference
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -49,7 +49,7 @@ public fun Dispatcher.asExecutorService(): ExecutorService = when (this) {
     else -> DispatcherExecutorService(this)
 }
 
-private data open class ExecutorDispatcher(private val executor: Executor) : Dispatcher, Executor by executor {
+private open class ExecutorDispatcher(private val executor: Executor) : Dispatcher, Executor by executor {
     override val terminated: Boolean get() {
         throw UnsupportedOperationException("Don't know how to determine if $executor is terminated")
     }
@@ -72,9 +72,10 @@ private data open class ExecutorDispatcher(private val executor: Executor) : Dis
             return false
         }
     }
+
 }
 
-private data class ExecutorServiceDispatcher(private val executor: ExecutorService) :
+private class ExecutorServiceDispatcher(private val executor: ExecutorService) :
         ExecutorDispatcher(executor), ExecutorService by executor {
     override fun isTerminated(): Boolean = executor.isTerminated()
 
@@ -107,14 +108,14 @@ private data class ExecutorServiceDispatcher(private val executor: ExecutorServi
 
 
 
-private data open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
+private open class DispatcherExecutor(private val dispatcher: Dispatcher) : Executor, Dispatcher by dispatcher {
     override fun execute(command: Runnable) {
         dispatcher.offer { command.run() }
     }
 }
 
 
-private data class DispatcherExecutorService(private val dispatcher: Dispatcher) : DispatcherExecutor(dispatcher), ExecutorService {
+private class DispatcherExecutorService(private val dispatcher: Dispatcher) : DispatcherExecutor(dispatcher), ExecutorService {
     private val cancelHandle = WeakRefCancelHandle(dispatcher)
 
     override fun <T> submit(task: Callable<T>): Future<T> {
