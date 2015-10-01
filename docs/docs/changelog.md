@@ -3,6 +3,12 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v2.7.0
+
+**general**
+
+* [KOV-56](http://issues.komponents.nl/youtrack/issue/KOV-56) Kotlin M14
+
 ##v2.6.0
 
 **general**
