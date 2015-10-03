@@ -53,7 +53,7 @@ internal fun concreteAll<V>(promises: Sequence<Promise<V, Exception>>,
     promises.forEachIndexed {
         i, promise ->
         promise.success { v ->
-            results[i] = v
+            results.set(i, v)
             if (successCount.decrementAndGet() == 0) {
 
                 deferred.resolve(results.asList())
@@ -117,7 +117,7 @@ internal fun concreteAny<V>(promises: Sequence<Promise<V, Exception>>,
             }
         }
         promise.fail { e ->
-            errors[i] = e
+            errors.set(i, e)
             if (failCount.decrementAndGet() == 0) {
                 deferred.reject(errors.asList())
             }
@@ -131,7 +131,7 @@ internal fun concreteAny<V>(promises: Sequence<Promise<V, Exception>>,
 private fun <V> AtomicReferenceArray<V>.asList(): List<V> {
     val list = ArrayList<V>()
     for (i in 0..this.length() - 1) {
-        list add this[i]
+        list.add(this.get(i))
     }
     return list
 }

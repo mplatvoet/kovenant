@@ -21,7 +21,7 @@
 
 package nl.komponents.kovenant
 
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -383,7 +383,7 @@ private class NonBlockingDispatcher(val name: String,
         }
 
         fun cancel(task: () -> Unit): Boolean {
-            while (task identityEquals pollResult) {
+            while (task === pollResult) {
                 //Can't catch this at state pending or polling, loop while we are running
 
                 //if we're in running state try interrupting it
@@ -393,7 +393,7 @@ private class NonBlockingDispatcher(val name: String,
 
                     //Though we successfully changed from running to mutating it might
                     //just be a complete different task already. check again
-                    val cancelable = task identityEquals pollResult
+                    val cancelable = task === pollResult
                     if (cancelable) {
                         //interrupt this thread so any running process can catch that
                         thread.interrupt()

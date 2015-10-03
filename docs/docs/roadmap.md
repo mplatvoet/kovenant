@@ -3,7 +3,7 @@
 Some indication of the course of Kovenant. Nothing is written in stone, it's just a general idea.
 Input is always welcome.
 
-##v2.7.0
+##v2.8.0
 
 **expected**
 
