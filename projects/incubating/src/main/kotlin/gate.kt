@@ -34,7 +34,7 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
             throw ConfigurationException("maxConcurrentTasks must be at least 1, but was $maxConcurrentTasks")
     }
 
-    private val workQueue = NonBlockingWorkQueue<Task<*, *>>()
+    private val workQueue = NonBlockingWorkQueue<Task>()
 
     public fun <V> async(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
         if (semaphore.tryAcquire()) {
@@ -72,14 +72,13 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
 
 }
 
-private interface Task<V, E> {
-    val promise: Promise<V, E>
+private interface Task {
     fun schedule()
 }
 
-private class AsyncTask<V>(private val context: Context, private val fn: () -> V) : Task<V, Exception> {
+private class AsyncTask<V>(private val context: Context, private val fn: () -> V) : Task {
     private val deferred: Deferred<V, Exception> = deferred(context)
-    override val promise: Promise<V, Exception>
+    val promise: Promise<V, Exception>
         get() = deferred.promise
 
     override fun schedule() {
