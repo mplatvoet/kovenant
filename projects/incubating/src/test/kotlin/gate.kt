@@ -53,4 +53,6 @@ fun main(args: Array<String>) {
             println("fib($n) = $fib")
         }
     }
+
+    println("all tasks created")
 }
