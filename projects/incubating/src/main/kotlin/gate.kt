@@ -22,56 +22,68 @@
 package nl.komponents.kovenant.incubating
 
 import nl.komponents.kovenant.*
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.Semaphore
 import nl.komponents.kovenant.async as baseAsync
 
 
-public class Gate<V>(val maxConcurrentTasks: Int = 1, val context: Context = Kovenant.context) {
+public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context = Kovenant.context) {
+    private val semaphore = Semaphore(maxConcurrentTasks)
+
     init {
         if (maxConcurrentTasks < 1)
             throw ConfigurationException("maxConcurrentTasks must be at least 1, but was $maxConcurrentTasks")
     }
 
+    private val workQueue = NonBlockingWorkQueue<Task<*, *>>()
 
-    private val concurrentTasks = AtomicInteger(0)
-    private val workQueue = NonBlockingWorkQueue<() -> V>()
+    public fun <V> async(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
 
-    public fun async(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
-        val taskNumber = concurrentTasks.incrementAndGet()
-        val promise = if (taskNumber > maxConcurrentTasks) {
-
-            val deferred = deferred<V, Exception>(context)
-            //TODO, queue work
-
-            deferred.promise
-        } else {
+        val promise = if (semaphore.tryAcquire()) {
             baseAsync(context, fn)
+
+        } else {
+            val asyncTask = AsyncTask(context, fn)
+            workQueue.offer(asyncTask)
+
+            //Could be missed, try acquire again
+            if (semaphore.tryAcquire()) {
+                workQueue.poll()?.schedule()
+            }
+            asyncTask.promise
         }
         addDonePromise(promise)
         return promise
     }
 
-    public fun <V, E> addDonePromise(promise: Promise<V, E>): Promise<V, E> = promise.always() {
+    private fun <V, E> addDonePromise(promise: Promise<V, E>): Promise<V, E> = promise.always() {
         //TODO, use direct dispatcher bypassing the callback dispatcher
-
-        while (true) {
-            val remainingTasks = concurrentTasks.decrementAndGet()
-            if (remainingTasks < maxConcurrentTasks && workQueue.isNotEmpty()) {
-                val taskNumber = concurrentTasks.incrementAndGet()
-                if (taskNumber <= maxConcurrentTasks) {
-                    //TODO schedule
-                    break
-                }
-                continue
-            }
-            break
+        semaphore.release()
+        if (workQueue.isNotEmpty() && semaphore.tryAcquire()) {
+            workQueue.poll()?.schedule()
         }
     }
 
-    private fun scheduleTaskFromQueue(): Boolean {
-        return false
+}
 
+private interface Task<V, E> {
+    val promise: Promise<V, E>
+    fun schedule()
+}
+
+private class AsyncTask<V>(private val context: Context, private val fn: () -> V) : Task<V, Exception> {
+    private val deferred: Deferred<V, Exception> = deferred(context)
+    override val promise: Promise<V, Exception>
+        get() = deferred.promise
+
+    override fun schedule() {
+        //TODO, use direct dispatcher bypassing the callback dispatcher
+        baseAsync(context, fn).success {
+            deferred.resolve(it)
+        }.fail {
+            deferred.reject(it)
+        }
     }
+
 }
 
 
