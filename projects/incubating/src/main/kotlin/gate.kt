@@ -54,8 +54,7 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
         return promise
     }
 
-    //TODO, use direct dispatcher bypassing the callback dispatcher
-    private fun <V, E> addDonePromise(promise: Promise<V, E>): Promise<V, E> = promise.always() {
+    private fun <V, E> addDonePromise(promise: Promise<V, E>): Promise<V, E> = promise.always(DirectDispatcherContext) {
         semaphore.release()
         tryScheduleTasks()
     }
@@ -84,10 +83,9 @@ private class AsyncTask<V>(private val context: Context, private val fn: () -> V
         get() = deferred.promise
 
     override fun schedule() {
-        //TODO, use direct dispatcher bypassing the callback dispatcher
-        baseAsync(context, fn).success {
+        baseAsync(context, fn).success(DirectDispatcherContext) {
             deferred.resolve(it)
-        }.fail {
+        }.fail(DirectDispatcherContext) {
             deferred.reject(it)
         }
     }
