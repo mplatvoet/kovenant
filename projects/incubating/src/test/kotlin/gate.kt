@@ -25,25 +25,33 @@ package incubating.gate
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.incubating.Gate
 
+
 fun main(args: Array<String>) {
     Kovenant.context {
         workerContext.dispatcher { concurrentTasks = 8 }
     }
 
-    val sleepGate = Gate(2)
+    val sleepGate = Gate(4)
+    val snoozeGate = Gate(2)
 
-    (1..10).forEach { number ->
-        sleepGate.async { Thread.sleep(1000) } success {
-            println("#$number sleeper awakes")
+    val promises = (1..10).map { number ->
+        sleepGate.async {
+            Thread.sleep(1000)
+            number
+        } success {
+            println("${delta}ms, #$it sleeper awakes")
         }
     }
 
-    val snoozeGate = Gate(4)
-    (1..20).forEach { number ->
-        snoozeGate.async { Thread.sleep(750) } success {
-            println("#$number snoozer bleeped")
+    promises.forEach { promise ->
+        snoozeGate.then(promise) { Thread.sleep(700) } success {
+            println("${delta}ms, #${promise.get()} snoozer bleeped")
         }
     }
 
     println("all tasks created")
 }
+
+val start = System.currentTimeMillis()
+val delta: Long  get() = System.currentTimeMillis() - start
+
