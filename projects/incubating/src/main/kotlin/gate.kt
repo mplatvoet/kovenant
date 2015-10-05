@@ -37,29 +37,37 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
     private val workQueue = NonBlockingWorkQueue<Task<*, *>>()
 
     public fun <V> async(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
-
-        val promise = if (semaphore.tryAcquire()) {
-            baseAsync(context, fn)
-
-        } else {
-            val asyncTask = AsyncTask(context, fn)
-            workQueue.offer(asyncTask)
-
-            //Could be missed, try acquire again
-            if (semaphore.tryAcquire()) {
-                workQueue.poll()?.schedule()
+        if (semaphore.tryAcquire()) {
+            if (workQueue.isEmpty()) {
+                val promise = baseAsync(context, fn)
+                return addDonePromise(promise)
             }
-            asyncTask.promise
+            semaphore.release()
         }
-        addDonePromise(promise)
+
+
+        val asyncTask = AsyncTask(context, fn)
+        workQueue.offer(asyncTask)
+        val promise = addDonePromise(asyncTask.promise)
+
+        tryScheduleTasks()
         return promise
     }
 
+    //TODO, use direct dispatcher bypassing the callback dispatcher
     private fun <V, E> addDonePromise(promise: Promise<V, E>): Promise<V, E> = promise.always() {
-        //TODO, use direct dispatcher bypassing the callback dispatcher
         semaphore.release()
-        if (workQueue.isNotEmpty() && semaphore.tryAcquire()) {
-            workQueue.poll()?.schedule()
+        tryScheduleTasks()
+    }
+
+    private fun tryScheduleTasks() {
+        while (workQueue.isNotEmpty() && semaphore.tryAcquire()) {
+            val task = workQueue.poll()
+            if (task != null) {
+                task.schedule()
+            } else {
+                semaphore.release()
+            }
         }
     }
 

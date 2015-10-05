@@ -150,7 +150,7 @@ private class NonBlockingDispatcher(val name: String,
             val threadSize = contextCount.get()
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
-                if (threadNumber <= numberOfThreads && (threadNumber == 1 || threadNumber < workQueue.size())) {
+                if (threadNumber <= numberOfThreads && workQueue.size() > 0) {
                     val newThreadContext = newThreadContext()
                     threadContexts offer newThreadContext
                     if (!running.get()) {

@@ -24,7 +24,6 @@ package incubating.gate
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.incubating.Gate
-import support.fib
 
 fun main(args: Array<String>) {
     Kovenant.context {
@@ -34,23 +33,15 @@ fun main(args: Array<String>) {
     val sleepGate = Gate(2)
 
     (1..10).forEach { number ->
-        sleepGate.async {
-            //mimic work by sleeping
-            Thread.sleep(1000)
-            number
-        }.success {
-            println("$number is done")
+        sleepGate.async { Thread.sleep(1000) } success {
+            println("#$number sleeper awakes")
         }
     }
 
-    val fibGate = Gate(4)
-    (1..10).forEach { number ->
-        fibGate.async {
-            val n = 35 + number
-            Pair(n, fib(n))
-        } .success {
-            val (n, fib) = it
-            println("fib($n) = $fib")
+    val snoozeGate = Gate(4)
+    (1..20).forEach { number ->
+        snoozeGate.async { Thread.sleep(750) } success {
+            println("#$number snoozer bleeped")
         }
     }
 
