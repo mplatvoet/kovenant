@@ -141,6 +141,14 @@ public interface DispatcherContext {
     }
 }
 
+/* Use a DirectDispatcherContext to avoid scheduling. */
+object DirectDispatcherContext : DispatcherContext {
+    val errorFn: (Exception) -> Unit = { e -> e.printStackTrace() }
+
+    override val dispatcher: Dispatcher = DirectDispatcher.instance
+    override val errorHandler: (Exception) -> Unit get() = errorFn
+}
+
 public interface MutableDispatcherContext : DispatcherContext {
     override var dispatcher: Dispatcher
     override var errorHandler: (Exception) -> Unit

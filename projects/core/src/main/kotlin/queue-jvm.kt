@@ -24,7 +24,7 @@ package nl.komponents.kovenant
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-internal class NonBlockingWorkQueue<V : Any>() : BlockingSupportWorkQueue<V>() {
+public class NonBlockingWorkQueue<V : Any>() : BlockingSupportWorkQueue<V>() {
     private val queue = ConcurrentLinkedQueue<V>()
 
     override fun tryPoll(): V? = queue.poll()
