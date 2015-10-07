@@ -19,34 +19,45 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+package examples.throttle
 
-include 'core'
-include 'combine'
-include 'jvm'
-include 'ui'
-include 'jfx'
-include 'kovenant'
-include 'android'
-include 'disruptor'
-include 'progress'
-include 'functional'
-include 'incubating'
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.jvm.Throttle
+import nl.komponents.kovenant.then
 
-rootProject.children.each { project ->
-    String projectFileName = project.name.replaceAll("\\p{Upper}") { "-${it.toLowerCase()}" }
-    String projectDirName = "projects/$projectFileName"
-    project.projectDir = new File(settingsDir, projectDirName)
-    project.buildFileName = "${projectFileName}.gradle"
+fun main(args: Array<String>) {
+    Kovenant.context {
+        workerContext.dispatcher { concurrentTasks = 8 }
+    }
+
+    val sleepThrottle = Throttle(4)
+    val snoozeThrottle = Throttle(2)
+
+    val promises = (1..10).map { number ->
+        sleepThrottle.task {
+            Thread.sleep(1000)
+            number
+        } success {
+            println("#$it sleeper awakes")
+        }
+    }
+
+    promises.forEach { promise ->
+        val registeredPromise = snoozeThrottle.registerTask(promise) {
+            Thread.sleep(700)
+        }
+
+        val finalPromise = registeredPromise then {
+            "#${promise.get()} snoozing"
+        }
+
+        snoozeThrottle.registerDone(finalPromise)
+
+        finalPromise success {
+            println(it)
+        }
+
+    }
+
+    println("all tasks created")
 }
-
-project(':core').name = 'kovenant-core'
-project(':combine').name = 'kovenant-combine'
-project(':jvm').name = 'kovenant-jvm'
-project(':ui').name = 'kovenant-ui'
-project(':jfx').name = 'kovenant-jfx'
-project(':android').name = 'kovenant-android'
-project(':disruptor').name = 'kovenant-disruptor'
-project(':progress').name = 'kovenant-progress'
-project(':functional').name = 'kovenant-functional'
-project(':incubating').name = 'kovenant-incubating'

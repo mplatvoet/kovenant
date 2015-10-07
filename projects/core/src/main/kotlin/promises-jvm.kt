@@ -65,15 +65,6 @@ private class ThenPromise<V, R>(context: Context,
         SelfResolvingPromise<R, Exception>(context),
         CancelablePromise<R, Exception> {
 
-    /* Use a DirectDispatcherContext to avoid scheduling and use to resolving
-     * thread to set up (not execute) the execution
-     */
-    object DirectDispatcherContext : DispatcherContext {
-        val errorFn: (Exception) -> Unit = { e -> e.printStackTrace() }
-
-        override val dispatcher: Dispatcher = DirectDispatcher.instance
-        override val errorHandler: (Exception) -> Unit get() = errorFn
-    }
 
     //need to hold the task to be able to cancel
     private @Volatile var task: (() -> Unit)? = null
