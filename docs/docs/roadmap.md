@@ -3,11 +3,11 @@
 Some indication of the course of Kovenant. Nothing is written in stone, it's just a general idea.
 Input is always welcome.
 
-##v2.8.0
+##v2.9.0
 
 **expected**
 
-* Control over the order of executing async bodies, e.g. [KOV-15](http://issues.komponents.nl/youtrack/issue/KOV-15)
+* n/a
 
 **certain**
 
