@@ -16,42 +16,48 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-package incubating.gate
+package examples.throttle
 
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.incubating.Gate
-
+import nl.komponents.kovenant.jvm.Throttle
+import nl.komponents.kovenant.then
 
 fun main(args: Array<String>) {
     Kovenant.context {
         workerContext.dispatcher { concurrentTasks = 8 }
     }
 
-    val sleepGate = Gate(4)
-    val snoozeGate = Gate(2)
+    val sleepThrottle = Throttle(4)
+    val snoozeThrottle = Throttle(2)
 
     val promises = (1..10).map { number ->
-        sleepGate.async {
+        sleepThrottle.task {
             Thread.sleep(1000)
             number
         } success {
-            println("${delta}ms, #$it sleeper awakes")
+            println("#$it sleeper awakes")
         }
     }
 
     promises.forEach { promise ->
-        snoozeGate.then(promise) { Thread.sleep(700) } success {
-            println("${delta}ms, #${promise.get()} snoozer bleeped")
+        val registeredPromise = snoozeThrottle.registerTask(promise) {
+            Thread.sleep(700)
         }
+
+        val finalPromise = registeredPromise then {
+            "#${promise.get()} snoozing"
+        }
+
+        snoozeThrottle.registerDone(finalPromise)
+
+        finalPromise success {
+            println(it)
+        }
+
     }
 
     println("all tasks created")
 }
-
-val start = System.currentTimeMillis()
-val delta: Long  get() = System.currentTimeMillis() - start
-

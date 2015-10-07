@@ -19,14 +19,20 @@
  * THE SOFTWARE.
  */
 
-package nl.komponents.kovenant.incubating
+package nl.komponents.kovenant.jvm
 
 import nl.komponents.kovenant.*
 import java.util.concurrent.Semaphore
 import nl.komponents.kovenant.async as baseAsync
 
-
-public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context = Kovenant.context) {
+/**
+ * A Throttle restricts the number of concurrent tasks that are being executed. This runs on top of
+ * existing Dispatchers. This is useful for situations where some Promises represent large amount of memory.
+ *
+ * @constructor maxConcurrentTasks set the maximum of parallel processes, must be at least 1
+ * @constructor context the default context on which all tasks operate
+ */
+public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Kovenant.context) {
     private val semaphore = Semaphore(maxConcurrentTasks)
 
     init {
@@ -36,10 +42,15 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
 
     private val workQueue = NonBlockingWorkQueue<Task>()
 
-    public fun <V> async(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
+
+    /**
+     * Registers an async task to be executed somewhere in the near future. Callers must ensure that they call
+     * registerDone() with some promise that signals this process is done.
+     */
+    public fun <V> registerTask(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
         if (semaphore.tryAcquire()) {
             if (workQueue.isEmpty()) {
-                return baseAsync(context, fn).registerDone()
+                return baseAsync(context, fn)
             }
             semaphore.release()
         }
@@ -47,21 +58,33 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
 
         val asyncTask = AsyncTask(context, fn)
         workQueue.offer(asyncTask)
-        val promise = asyncTask.promise.registerDone()
+        val promise = asyncTask.promise
 
         tryScheduleTasks()
         return promise
     }
 
-    public fun <V, R> then(promise: Promise<V, Exception>,
-                           context: Context = promise.context,
-                           fn: (V) -> R): Promise<R, Exception> {
+    /**
+     * Registers an async task to be executed somewhere in the near future. When this task is done the process is
+     * considered to be finished and other tasks are allowed to execute.
+     */
+    public fun <V> task(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
+        return registerTask(context, fn).addDone()
+    }
+
+
+    /**
+     * Registers an async task to be executed somewhere in the near future based on an existing Promise.
+     * Callers must ensure that they call registerDone() with some promise that signals this process is done.
+     */
+    public fun <V, R> registerTask(promise: Promise<V, Exception>,
+                                   context: Context = promise.context,
+                                   fn: (V) -> R): Promise<R, Exception> {
         if (promise.isDone() && workQueue.isEmpty() && semaphore.tryAcquire()) {
-            return promise.then(context, fn).registerDone()
+            return promise.then(context, fn)
         }
 
         val deferred = deferred<R, Exception>(context)
-        deferred.promise.registerDone()
 
         if (promise.isDone()) {
             workQueue.offer(ThenTask(promise, deferred, fn))
@@ -80,7 +103,22 @@ public class Gate(val maxConcurrentTasks: Int = 1, public val context: Context =
         return deferred.promise
     }
 
-    private fun <V, E>Promise<V, E>.registerDone(): Promise<V, E> = this.always(DirectDispatcherContext) {
+    /**
+     * Registers an async task to be executed somewhere in the near future based on a existing Promise.
+     * When this task is done the process is considered to be finished and other tasks are allowed to execute.
+     */
+    public fun <V, R> task(promise: Promise<V, Exception>,
+                           context: Context = promise.context,
+                           fn: (V) -> R): Promise<R, Exception> {
+        return registerTask(promise, context, fn).addDone()
+    }
+
+    /**
+     * Register a promise that signals that a previous registered task has finished
+     */
+    public fun <V, E> registerDone(promise: Promise<V, E>): Promise<V, E> = promise.addDone()
+
+    private fun <V, E> Promise<V, E>.addDone(): Promise<V, E> = this.always(DirectDispatcherContext) {
         semaphore.release()
         tryScheduleTasks()
     }
@@ -133,8 +171,4 @@ private class ThenTask<V, R>(private val promise: Promise<V, Exception>,
             }
         }
     }
-
 }
-
-
-
