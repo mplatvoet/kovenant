@@ -36,7 +36,7 @@ public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
         }
     } else {
         val deferred = deferred<V, Exception>(context)
-        uiContext.dispatcher offer {
+        uiContext.dispatcher.offer {
             try {
                 val result = body()
                 deferred.resolve(result)
@@ -55,7 +55,7 @@ public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiCo
                                           alwaysSchedule: Boolean,
                                           body: (value: V) -> Unit): Promise<V, E> {
 
-    val dispatcherContext = uiContext dispatcherContextFor context
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
         if (isSuccess()) {
             try {
@@ -76,7 +76,7 @@ public fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> 
 public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
                                        alwaysSchedule: Boolean,
                                        body: (error: E) -> Unit): Promise<V, E> {
-    val dispatcherContext = uiContext dispatcherContextFor context
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
         if (isFailure()) {
             try {
@@ -97,7 +97,7 @@ public fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwa
 public fun <V, E> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
                                          alwaysSchedule: Boolean,
                                          body: () -> Unit): Promise<V, E> {
-    val dispatcherContext = uiContext dispatcherContextFor context
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
         try {
             body()

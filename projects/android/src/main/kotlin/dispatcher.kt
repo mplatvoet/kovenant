@@ -22,8 +22,7 @@ package nl.komponents.kovenant.android
 
 import android.os.Looper
 import nl.komponents.kovenant.Dispatcher
-import java.util.ArrayList
-import java.util.Queue
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
@@ -83,7 +82,7 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
 
         val trackingId = looperExecutor.claimTrackingId()
         val runnable = ControllableFnRunnable(trackingId, task)
-        queue add runnable
+        queue.add(runnable)
         unfinishedCount.incrementAndGet()
         looperExecutor.submit(runnable, trackingId)
 
@@ -124,8 +123,8 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
     private fun drainAll(): List<() -> Unit> {
         val cancelled = ArrayList<() -> Unit>(queue.size())
         queue.pollEach {
-            cancelled add it.body
-            looperExecutor tryRemove it.trackingId
+            cancelled.add(it.body)
+            looperExecutor.tryRemove(it.trackingId)
         }
         return cancelled
     }
@@ -141,7 +140,7 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
 
     override fun tryCancel(task: () -> Unit): Boolean {
         val controllable = findControllableForFn(task)
-        if ( controllable != null && queue remove controllable ) {
+        if ( controllable != null && queue.remove(controllable) ) {
             looperExecutor.tryRemove(controllable.trackingId)
             return true
         }
@@ -149,7 +148,7 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
     }
 
     private fun findControllableForFn(task: () -> Unit): ControllableFnRunnable? {
-        queue forEach {
+        queue.forEach {
             if (it.body == task) {
                 return it
             }
@@ -168,7 +167,7 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
             val body: () -> Unit) : Runnable {
 
         override fun run() {
-            if (queue remove this) {
+            if (queue.remove(this)) {
                 //only execute if we are the one removing ourselves from the queue
                 //otherwise this job has been cancelled
                 body()
