@@ -28,9 +28,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> {
+fun <V1, V2, E> concreteCombine(p1: Promise<V1, E>,
+                                p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> {
     val deferred = deferred<Tuple2<V1, V2>, E>()
 
     val results = AtomicReferenceArray<Any?>(2)
@@ -52,17 +51,16 @@ fun concreteCombine<V1, V2, E>
     }
 
     deferred.registerFail(p1, p2)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>): Promise<Tuple3<V1, V2, V3>, E> {
+fun <V1, V2, V3, E> concreteCombine(p1: Promise<V1, E>,
+                                    p2: Promise<V2, E>,
+                                    p3: Promise<V3, E>): Promise<Tuple3<V1, V2, V3>, E> {
     val deferred = deferred<Tuple3<V1, V2, V3>, E>()
 
     val results = AtomicReferenceArray<Any?>(3)
@@ -85,19 +83,18 @@ fun concreteCombine<V1, V2, V3, E>
     }
 
     deferred.registerFail(p1, p2, p3)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>): Promise<Tuple4<V1, V2, V3, V4>, E> {
+fun <V1, V2, V3, V4, E> concreteCombine(p1: Promise<V1, E>,
+                                        p2: Promise<V2, E>,
+                                        p3: Promise<V3, E>,
+                                        p4: Promise<V4, E>): Promise<Tuple4<V1, V2, V3, V4>, E> {
     val deferred = deferred<Tuple4<V1, V2, V3, V4>, E>()
 
     val results = AtomicReferenceArray<Any?>(4)
@@ -121,21 +118,20 @@ fun concreteCombine<V1, V2, V3, V4, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>): Promise<Tuple5<V1, V2, V3, V4, V5>, E> {
+fun <V1, V2, V3, V4, V5, E> concreteCombine(p1: Promise<V1, E>,
+                                            p2: Promise<V2, E>,
+                                            p3: Promise<V3, E>,
+                                            p4: Promise<V4, E>,
+                                            p5: Promise<V5, E>): Promise<Tuple5<V1, V2, V3, V4, V5>, E> {
     val deferred = deferred<Tuple5<V1, V2, V3, V4, V5>, E>()
 
     val results = AtomicReferenceArray<Any?>(5)
@@ -160,23 +156,22 @@ fun concreteCombine<V1, V2, V3, V4, V5, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>): Promise<Tuple6<V1, V2, V3, V4, V5, V6>, E> {
+fun <V1, V2, V3, V4, V5, V6, E> concreteCombine(p1: Promise<V1, E>,
+                                                p2: Promise<V2, E>,
+                                                p3: Promise<V3, E>,
+                                                p4: Promise<V4, E>,
+                                                p5: Promise<V5, E>,
+                                                p6: Promise<V6, E>): Promise<Tuple6<V1, V2, V3, V4, V5, V6>, E> {
     val deferred = deferred<Tuple6<V1, V2, V3, V4, V5, V6>, E>()
 
     val results = AtomicReferenceArray<Any?>(6)
@@ -202,25 +197,24 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>): Promise<Tuple7<V1, V2, V3, V4, V5, V6, V7>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, E> concreteCombine(p1: Promise<V1, E>,
+                                                    p2: Promise<V2, E>,
+                                                    p3: Promise<V3, E>,
+                                                    p4: Promise<V4, E>,
+                                                    p5: Promise<V5, E>,
+                                                    p6: Promise<V6, E>,
+                                                    p7: Promise<V7, E>): Promise<Tuple7<V1, V2, V3, V4, V5, V6, V7>, E> {
     val deferred = deferred<Tuple7<V1, V2, V3, V4, V5, V6, V7>, E>()
 
     val results = AtomicReferenceArray<Any?>(7)
@@ -247,27 +241,26 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>): Promise<Tuple8<V1, V2, V3, V4, V5, V6, V7, V8>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, E> concreteCombine(p1: Promise<V1, E>,
+                                                        p2: Promise<V2, E>,
+                                                        p3: Promise<V3, E>,
+                                                        p4: Promise<V4, E>,
+                                                        p5: Promise<V5, E>,
+                                                        p6: Promise<V6, E>,
+                                                        p7: Promise<V7, E>,
+                                                        p8: Promise<V8, E>): Promise<Tuple8<V1, V2, V3, V4, V5, V6, V7, V8>, E> {
     val deferred = deferred<Tuple8<V1, V2, V3, V4, V5, V6, V7, V8>, E>()
 
     val results = AtomicReferenceArray<Any?>(8)
@@ -295,29 +288,28 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>): Promise<Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, E> concreteCombine(p1: Promise<V1, E>,
+                                                            p2: Promise<V2, E>,
+                                                            p3: Promise<V3, E>,
+                                                            p4: Promise<V4, E>,
+                                                            p5: Promise<V5, E>,
+                                                            p6: Promise<V6, E>,
+                                                            p7: Promise<V7, E>,
+                                                            p8: Promise<V8, E>,
+                                                            p9: Promise<V9, E>): Promise<Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9>, E> {
     val deferred = deferred<Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9>, E>()
 
     val results = AtomicReferenceArray<Any?>(9)
@@ -346,31 +338,30 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>): Promise<Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E> concreteCombine(p1: Promise<V1, E>,
+                                                                 p2: Promise<V2, E>,
+                                                                 p3: Promise<V3, E>,
+                                                                 p4: Promise<V4, E>,
+                                                                 p5: Promise<V5, E>,
+                                                                 p6: Promise<V6, E>,
+                                                                 p7: Promise<V7, E>,
+                                                                 p8: Promise<V8, E>,
+                                                                 p9: Promise<V9, E>,
+                                                                 p10: Promise<V10, E>): Promise<Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10>, E> {
     val deferred = deferred<Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10>, E>()
 
     val results = AtomicReferenceArray<Any?>(10)
@@ -400,33 +391,32 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>): Promise<Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E> concreteCombine(p1: Promise<V1, E>,
+                                                                      p2: Promise<V2, E>,
+                                                                      p3: Promise<V3, E>,
+                                                                      p4: Promise<V4, E>,
+                                                                      p5: Promise<V5, E>,
+                                                                      p6: Promise<V6, E>,
+                                                                      p7: Promise<V7, E>,
+                                                                      p8: Promise<V8, E>,
+                                                                      p9: Promise<V9, E>,
+                                                                      p10: Promise<V10, E>,
+                                                                      p11: Promise<V11, E>): Promise<Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11>, E> {
     val deferred = deferred<Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11>, E>()
 
     val results = AtomicReferenceArray<Any?>(11)
@@ -457,35 +447,34 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>): Promise<Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E> concreteCombine(p1: Promise<V1, E>,
+                                                                           p2: Promise<V2, E>,
+                                                                           p3: Promise<V3, E>,
+                                                                           p4: Promise<V4, E>,
+                                                                           p5: Promise<V5, E>,
+                                                                           p6: Promise<V6, E>,
+                                                                           p7: Promise<V7, E>,
+                                                                           p8: Promise<V8, E>,
+                                                                           p9: Promise<V9, E>,
+                                                                           p10: Promise<V10, E>,
+                                                                           p11: Promise<V11, E>,
+                                                                           p12: Promise<V12, E>): Promise<Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12>, E> {
     val deferred = deferred<Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12>, E>()
 
     val results = AtomicReferenceArray<Any?>(12)
@@ -517,37 +506,36 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>): Promise<Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                p2: Promise<V2, E>,
+                                                                                p3: Promise<V3, E>,
+                                                                                p4: Promise<V4, E>,
+                                                                                p5: Promise<V5, E>,
+                                                                                p6: Promise<V6, E>,
+                                                                                p7: Promise<V7, E>,
+                                                                                p8: Promise<V8, E>,
+                                                                                p9: Promise<V9, E>,
+                                                                                p10: Promise<V10, E>,
+                                                                                p11: Promise<V11, E>,
+                                                                                p12: Promise<V12, E>,
+                                                                                p13: Promise<V13, E>): Promise<Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13>, E> {
     val deferred = deferred<Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13>, E>()
 
     val results = AtomicReferenceArray<Any?>(13)
@@ -580,39 +568,38 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>): Promise<Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                     p2: Promise<V2, E>,
+                                                                                     p3: Promise<V3, E>,
+                                                                                     p4: Promise<V4, E>,
+                                                                                     p5: Promise<V5, E>,
+                                                                                     p6: Promise<V6, E>,
+                                                                                     p7: Promise<V7, E>,
+                                                                                     p8: Promise<V8, E>,
+                                                                                     p9: Promise<V9, E>,
+                                                                                     p10: Promise<V10, E>,
+                                                                                     p11: Promise<V11, E>,
+                                                                                     p12: Promise<V12, E>,
+                                                                                     p13: Promise<V13, E>,
+                                                                                     p14: Promise<V14, E>): Promise<Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14>, E> {
     val deferred = deferred<Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14>, E>()
 
     val results = AtomicReferenceArray<Any?>(14)
@@ -646,41 +633,40 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>): Promise<Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                          p2: Promise<V2, E>,
+                                                                                          p3: Promise<V3, E>,
+                                                                                          p4: Promise<V4, E>,
+                                                                                          p5: Promise<V5, E>,
+                                                                                          p6: Promise<V6, E>,
+                                                                                          p7: Promise<V7, E>,
+                                                                                          p8: Promise<V8, E>,
+                                                                                          p9: Promise<V9, E>,
+                                                                                          p10: Promise<V10, E>,
+                                                                                          p11: Promise<V11, E>,
+                                                                                          p12: Promise<V12, E>,
+                                                                                          p13: Promise<V13, E>,
+                                                                                          p14: Promise<V14, E>,
+                                                                                          p15: Promise<V15, E>): Promise<Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>, E> {
     val deferred = deferred<Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>, E>()
 
     val results = AtomicReferenceArray<Any?>(15)
@@ -715,43 +701,42 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>): Promise<Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                               p2: Promise<V2, E>,
+                                                                                               p3: Promise<V3, E>,
+                                                                                               p4: Promise<V4, E>,
+                                                                                               p5: Promise<V5, E>,
+                                                                                               p6: Promise<V6, E>,
+                                                                                               p7: Promise<V7, E>,
+                                                                                               p8: Promise<V8, E>,
+                                                                                               p9: Promise<V9, E>,
+                                                                                               p10: Promise<V10, E>,
+                                                                                               p11: Promise<V11, E>,
+                                                                                               p12: Promise<V12, E>,
+                                                                                               p13: Promise<V13, E>,
+                                                                                               p14: Promise<V14, E>,
+                                                                                               p15: Promise<V15, E>,
+                                                                                               p16: Promise<V16, E>): Promise<Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16>, E> {
     val deferred = deferred<Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16>, E>()
 
     val results = AtomicReferenceArray<Any?>(16)
@@ -787,45 +772,44 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
-    p16 registerSuccess 15
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
+    p16.registerSuccess(15)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>): Promise<Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                                    p2: Promise<V2, E>,
+                                                                                                    p3: Promise<V3, E>,
+                                                                                                    p4: Promise<V4, E>,
+                                                                                                    p5: Promise<V5, E>,
+                                                                                                    p6: Promise<V6, E>,
+                                                                                                    p7: Promise<V7, E>,
+                                                                                                    p8: Promise<V8, E>,
+                                                                                                    p9: Promise<V9, E>,
+                                                                                                    p10: Promise<V10, E>,
+                                                                                                    p11: Promise<V11, E>,
+                                                                                                    p12: Promise<V12, E>,
+                                                                                                    p13: Promise<V13, E>,
+                                                                                                    p14: Promise<V14, E>,
+                                                                                                    p15: Promise<V15, E>,
+                                                                                                    p16: Promise<V16, E>,
+                                                                                                    p17: Promise<V17, E>): Promise<Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17>, E> {
     val deferred = deferred<Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17>, E>()
 
     val results = AtomicReferenceArray<Any?>(17)
@@ -862,47 +846,46 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
-    p16 registerSuccess 15
-    p17 registerSuccess 16
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
+    p16.registerSuccess(15)
+    p17.registerSuccess(16)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>): Promise<Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                                         p2: Promise<V2, E>,
+                                                                                                         p3: Promise<V3, E>,
+                                                                                                         p4: Promise<V4, E>,
+                                                                                                         p5: Promise<V5, E>,
+                                                                                                         p6: Promise<V6, E>,
+                                                                                                         p7: Promise<V7, E>,
+                                                                                                         p8: Promise<V8, E>,
+                                                                                                         p9: Promise<V9, E>,
+                                                                                                         p10: Promise<V10, E>,
+                                                                                                         p11: Promise<V11, E>,
+                                                                                                         p12: Promise<V12, E>,
+                                                                                                         p13: Promise<V13, E>,
+                                                                                                         p14: Promise<V14, E>,
+                                                                                                         p15: Promise<V15, E>,
+                                                                                                         p16: Promise<V16, E>,
+                                                                                                         p17: Promise<V17, E>,
+                                                                                                         p18: Promise<V18, E>): Promise<Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18>, E> {
     val deferred = deferred<Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18>, E>()
 
     val results = AtomicReferenceArray<Any?>(18)
@@ -940,49 +923,48 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
-    p16 registerSuccess 15
-    p17 registerSuccess 16
-    p18 registerSuccess 17
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
+    p16.registerSuccess(15)
+    p17.registerSuccess(16)
+    p18.registerSuccess(17)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>,
-         p19: Promise<V19, E>): Promise<Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                                              p2: Promise<V2, E>,
+                                                                                                              p3: Promise<V3, E>,
+                                                                                                              p4: Promise<V4, E>,
+                                                                                                              p5: Promise<V5, E>,
+                                                                                                              p6: Promise<V6, E>,
+                                                                                                              p7: Promise<V7, E>,
+                                                                                                              p8: Promise<V8, E>,
+                                                                                                              p9: Promise<V9, E>,
+                                                                                                              p10: Promise<V10, E>,
+                                                                                                              p11: Promise<V11, E>,
+                                                                                                              p12: Promise<V12, E>,
+                                                                                                              p13: Promise<V13, E>,
+                                                                                                              p14: Promise<V14, E>,
+                                                                                                              p15: Promise<V15, E>,
+                                                                                                              p16: Promise<V16, E>,
+                                                                                                              p17: Promise<V17, E>,
+                                                                                                              p18: Promise<V18, E>,
+                                                                                                              p19: Promise<V19, E>): Promise<Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19>, E> {
     val deferred = deferred<Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19>, E>()
 
     val results = AtomicReferenceArray<Any?>(19)
@@ -1021,51 +1003,50 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
-    p16 registerSuccess 15
-    p17 registerSuccess 16
-    p18 registerSuccess 17
-    p19 registerSuccess 18
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
+    p16.registerSuccess(15)
+    p17.registerSuccess(16)
+    p18.registerSuccess(17)
+    p19.registerSuccess(18)
 
     return deferred.promise
 }
 
 @Suppress("UNCHECKED_CAST")
-fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>,
-         p19: Promise<V19, E>,
-         p20: Promise<V20, E>): Promise<Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20>, E> {
+fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, E> concreteCombine(p1: Promise<V1, E>,
+                                                                                                                   p2: Promise<V2, E>,
+                                                                                                                   p3: Promise<V3, E>,
+                                                                                                                   p4: Promise<V4, E>,
+                                                                                                                   p5: Promise<V5, E>,
+                                                                                                                   p6: Promise<V6, E>,
+                                                                                                                   p7: Promise<V7, E>,
+                                                                                                                   p8: Promise<V8, E>,
+                                                                                                                   p9: Promise<V9, E>,
+                                                                                                                   p10: Promise<V10, E>,
+                                                                                                                   p11: Promise<V11, E>,
+                                                                                                                   p12: Promise<V12, E>,
+                                                                                                                   p13: Promise<V13, E>,
+                                                                                                                   p14: Promise<V14, E>,
+                                                                                                                   p15: Promise<V15, E>,
+                                                                                                                   p16: Promise<V16, E>,
+                                                                                                                   p17: Promise<V17, E>,
+                                                                                                                   p18: Promise<V18, E>,
+                                                                                                                   p19: Promise<V19, E>,
+                                                                                                                   p20: Promise<V20, E>): Promise<Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20>, E> {
     val deferred = deferred<Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20>, E>()
 
     val results = AtomicReferenceArray<Any?>(20)
@@ -1105,32 +1086,32 @@ fun concreteCombine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14,
     }
 
     deferred.registerFail(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20)
-    p1 registerSuccess 0
-    p2 registerSuccess 1
-    p3 registerSuccess 2
-    p4 registerSuccess 3
-    p5 registerSuccess 4
-    p6 registerSuccess 5
-    p7 registerSuccess 6
-    p8 registerSuccess 7
-    p9 registerSuccess 8
-    p10 registerSuccess 9
-    p11 registerSuccess 10
-    p12 registerSuccess 11
-    p13 registerSuccess 12
-    p14 registerSuccess 13
-    p15 registerSuccess 14
-    p16 registerSuccess 15
-    p17 registerSuccess 16
-    p18 registerSuccess 17
-    p19 registerSuccess 18
-    p20 registerSuccess 19
+    p1.registerSuccess(0)
+    p2.registerSuccess(1)
+    p3.registerSuccess(2)
+    p4.registerSuccess(3)
+    p5.registerSuccess(4)
+    p6.registerSuccess(5)
+    p7.registerSuccess(6)
+    p8.registerSuccess(7)
+    p9.registerSuccess(8)
+    p10.registerSuccess(9)
+    p11.registerSuccess(10)
+    p12.registerSuccess(11)
+    p13.registerSuccess(12)
+    p14.registerSuccess(13)
+    p15.registerSuccess(14)
+    p16.registerSuccess(15)
+    p17.registerSuccess(16)
+    p18.registerSuccess(17)
+    p19.registerSuccess(18)
+    p20.registerSuccess(19)
 
     return deferred.promise
 }
 
 
-private fun <V, E>Deferred<V, E>.registerFail(vararg promises: Promise<*, E>) {
+private fun <V, E> Deferred<V, E>.registerFail(vararg promises: Promise<*, E>) {
     val failCount = AtomicInteger(0)
     promises.forEach { promise ->
         promise.fail { e ->
