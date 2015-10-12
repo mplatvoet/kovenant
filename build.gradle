@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '0.1-SNAPSHOT'
+    ext.kotlinVersion = '0.14.451'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -36,11 +36,9 @@ buildscript {
     }
 }
 
-apply from: "${rootProject.projectDir}/gradle/versions.gradle"
-
 allprojects {
     ext {
-        appVersion = '2.8.0'
+        appVersion = '2.9.0'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -185,10 +183,10 @@ subprojects {
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
-        enrichVersion()
-    } else {
+    if ('master'.equals(branchName) || taskGraph.hasTask(release)) {
         allprojects*.version = appVersion
+    } else {
+        allprojects*.version = "$appVersion-SNAPSHOT"
     }
     allprojects*.group = appGroup
 }
@@ -199,8 +197,8 @@ task jars() {
     dependsOn subprojects.findAll { it.name != 'kovenant' }.javadocJar
 }
 
-task release {
-    dependsOn subprojects.findAll { it.name != 'kovenant' }.releaseSub
+task release() {
+    dependsOn subprojects.uploadArchives
 }
 
 task wrapper(type: Wrapper) {
