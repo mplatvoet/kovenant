@@ -65,7 +65,7 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
+    public fun <V, E>deferred(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
 
     private class ThreadSafeContext() : ReconfigurableContext {
 
@@ -92,8 +92,8 @@ class ConcreteKovenant {
 
         override fun copy(): ReconfigurableContext {
             val copy = ThreadSafeContext()
-            threadSafeCallbackContext copyTo copy.callbackContext
-            threadSafeWorkerContext copyTo copy.workerContext
+            threadSafeCallbackContext.copyTo(copy.callbackContext)
+            threadSafeWorkerContext.copyTo(copy.workerContext)
             if (multipleCompletionDelegate.initialized) copy.multipleCompletion = multipleCompletion
             return copy
         }

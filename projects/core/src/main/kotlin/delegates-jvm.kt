@@ -45,7 +45,7 @@ public class LazyPromise<T>(
         this.initializer = initializer
     }
 
-    fun get(thisRef: Any?, property: PropertyMetadata): Promise<T, Exception> = initOrGetPromise()
+    operator fun get(thisRef: Any?, property: PropertyMetadata): Promise<T, Exception> = initOrGetPromise()
 /*
     //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()

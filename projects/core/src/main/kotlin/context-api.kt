@@ -41,7 +41,7 @@ public object Kovenant {
 
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
+    public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
     fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
         return context.stop(force, timeOutMs, block)

@@ -91,23 +91,23 @@ class ConcretePollStrategyBuilder() : PollStrategyBuilder {
     fun clear() = factories.clear()
 
     override fun yielding(numberOfPolls: Int) {
-        factories add YieldingPollStrategyFactory(attempts = numberOfPolls)
+        factories.add(YieldingPollStrategyFactory(attempts = numberOfPolls))
     }
 
     override fun sleeping(numberOfPolls: Int, sleepTimeInMs: Long) {
-        factories add SleepingPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+        factories.add(SleepingPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs))
     }
 
     override fun busy(numberOfPolls: Int) {
-        factories add BusyPollStrategyFactory(attempts = numberOfPolls)
+        factories.add(BusyPollStrategyFactory(attempts = numberOfPolls))
     }
 
     override fun blocking() {
-        factories add BlockingPollStrategyFactory()
+        factories.add(BlockingPollStrategyFactory())
     }
 
     override fun blockingSleep(numberOfPolls: Int, sleepTimeInMs: Long) {
-        factories add BlockingSleepPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs)
+        factories.add(BlockingSleepPollStrategyFactory(attempts = numberOfPolls, sleepTimeMs = sleepTimeInMs))
     }
 
     private fun buildDefaultStrategy(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> {
@@ -115,7 +115,7 @@ class ConcretePollStrategyBuilder() : PollStrategyBuilder {
         return ChainPollStrategyFactory(defaultFactories).build(pollable)
     }
 
-    fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
+    public fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty) {
         buildDefaultStrategy(pollable)
     } else {
         ChainPollStrategyFactory(factories).build(pollable)
@@ -146,13 +146,13 @@ private class NonBlockingDispatcher(val name: String,
 
     override fun offer(task: () -> Unit): Boolean {
         if (running.get()) {
-            workQueue offer task
+            workQueue.offer(task)
             val threadSize = contextCount.get()
             if (threadSize < numberOfThreads) {
                 val threadNumber = contextCount.incrementAndGet()
                 if (threadNumber <= numberOfThreads && workQueue.size() > 0) {
                     val newThreadContext = newThreadContext()
-                    threadContexts offer newThreadContext
+                    threadContexts.offer(newThreadContext)
                     if (!running.get()) {
                         //it can be the case that during initialization of the context the dispatcher has been shutdown
                         //and this newly created created is missed. So request shutdown again.
@@ -222,7 +222,7 @@ private class NonBlockingDispatcher(val name: String,
         if (workQueue.remove(task)) return true
 
         //try any of the running threadContexts
-        threadContexts forEach {
+        threadContexts.forEach {
             if (it.cancel(task)) return true
         }
         return false
@@ -241,7 +241,7 @@ private class NonBlockingDispatcher(val name: String,
     internal fun deRegisterRequest(context: ThreadContext, force: Boolean = false): Boolean {
 
         val succeeded = threadContexts.remove(context)
-        if (!force && succeeded && threadContexts.isEmpty() && workQueue.isNotEmpty() && running.get()) {
+        if (!force && succeeded && threadContexts.isEmpty && workQueue.isNotEmpty() && running.get()) {
             //that, hopefully rare, state where all threadContexts thought they had nothing to do
             //but the queue isn't empty. Reinstate anyone that notes this.
             threadContexts.add(context)
@@ -426,7 +426,7 @@ private class NonBlockingDispatcher(val name: String,
 }
 
 
-private interface PollStrategy<V : Any> {
+public interface PollStrategy<V : Any> {
     fun get(): V?
 }
 
@@ -436,7 +436,7 @@ private interface PollStrategyFactory<V : Any> {
 
 private class ChainPollStrategyFactory<V : Any>(private val factories: List<PollStrategyFactory<V>>) : PollStrategyFactory<V> {
     override fun build(pollable: Pollable<V>): PollStrategy<V> {
-        val strategies = factories map { it.build(pollable) }
+        val strategies = factories.map { it.build(pollable) }
         return ChainPollStrategy(strategies)
     }
 }
