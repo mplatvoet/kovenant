@@ -103,7 +103,7 @@ private class ExecutorServiceDispatcher(private val executor: ExecutorService) :
     override fun tryCancel(task: () -> Unit): Boolean = false
 
 
-    private fun List<Runnable>.toFunctions() : List<() -> Unit> = this map {{it.run()}}
+    private fun List<Runnable>.toFunctions() : List<() -> Unit> = this.map {{it.run()}}
 }
 
 
@@ -142,16 +142,16 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
 
         //Use a copy because if the provided list is modified (in size) this can become a deadlock
         val copy = ArrayList(tasks)
-        if (copy.isEmpty()) throw IllegalArgumentException("empty task list")
+        if (copy.isEmpty) throw IllegalArgumentException("empty task list")
 
-        val taskCount = AtomicInteger(copy.size())
+        val taskCount = AtomicInteger(copy.size)
         val singleLatch = CountDownLatch(1)
 
 
 
         val result = AtomicReference<T>(null)
         val error = AtomicReference<Exception>(null)
-        val allFutures = tasks mapIndexed { idx, task ->
+        val allFutures = tasks.mapIndexed { idx, task ->
             val function = FutureFunction(cancelHandle, task) {
                 self ->
                 try {
@@ -181,13 +181,13 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
                 singleLatch.await(interval, TimeUnit.MILLISECONDS)
             } catch(e: InterruptedException) {
                 //cancel all futures that haven't started
-                allFutures forEach { future -> future.cancel(false) }
+                allFutures.forEach { future -> future.cancel(false) }
                 throw e
             }
         }
 
         //Cancel all
-        allFutures forEach { future -> future.cancel(false) }
+        allFutures.forEach { future -> future.cancel(false) }
 
         val value = result.get()
         if (value != null) {
@@ -222,25 +222,25 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
         val timeOutMs = TimeUnit.MILLISECONDS.convert(timeout, unit)
         val remains = dispatcher.stop(timeOutMs = timeOutMs)
-        return remains.isEmpty()
+        return remains.isEmpty
     }
 
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>): MutableList<Future<T>> = invokeAll(tasks, 0, TimeUnit.DAYS)
 
     override fun <T> invokeAll(tasks: MutableCollection<out Callable<T>>, timeout: Long, unit: TimeUnit): MutableList<Future<T>> {
-        if (tasks.isEmpty()) return ArrayList()
+        if (tasks.isEmpty) return ArrayList()
 
         //Use a copy because if the provided list is modified (in size) this can become a deadlock
         val copy = ArrayList(tasks)
 
-        val latch = CountDownLatch(copy.size())
+        val latch = CountDownLatch(copy.size)
 
         //Leveraging a concurrent HashMap for the finished tasks. Using the array index
         //as a key. This way order can be retained of the original list. It's no requirement but is
         //what might be expected
         val finishedFutures = ConcurrentHashMap<Int, Future<T>?>()
 
-        val allFutures = tasks mapIndexed { idx, task ->
+        val allFutures = tasks.mapIndexed { idx, task ->
             val function = FutureFunction(cancelHandle, task) {
                 self ->
                 finishedFutures.put(idx, self)
@@ -257,15 +257,15 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
             if (timeout <= 0L) latch.await() else latch.await(timeout, unit)
         } catch(e: InterruptedException) {
             //cancel all futures that haven't started
-            allFutures forEach { future -> future.cancel(false) }
+            allFutures.forEach { future -> future.cancel(false) }
             throw e
         }
 
-        val finished = finishedFutures.entrySet() sortedBy { entry -> entry.key } map { entry -> entry.value }
+        val finished = finishedFutures.entrySet().sortedBy { entry -> entry.key }.map { entry -> entry.value }
 
         //Can happen when we are using a timeout on the latch
-        if (finished.size() < allFutures.size()) {
-            val toCancel = allFutures subtract finished
+        if (finished.size < allFutures.size) {
+            val toCancel = allFutures.subtract(finished)
             toCancel.forEach { task -> task?.cancel(false) }
         }
 
@@ -391,7 +391,7 @@ private fun <T> Iterable<T>.toMutableList(): MutableList<T> {
     }
     val result = ArrayList<T>()
 
-    this forEach {
+    this.forEach {
         e ->
         result.add(e)
     }

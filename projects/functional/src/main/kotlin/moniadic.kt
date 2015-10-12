@@ -34,7 +34,7 @@ import nl.komponents.kovenant.*
  *
  * @param fn the transform function.
  */
-public fun <V, R> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exception> = then(fn)
+public infix fun <V, R> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exception> = then(fn)
 
 /**
  * Asynchronously map the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -63,7 +63,7 @@ public fun <V, R> Promise<V, Exception>.map(context: Context, bind: (V) -> R): P
  *
  * @param bind the transform function.
  */
-public fun <V, R> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Exception>): Promise<R, Exception> = bind(context, fn)
+public infix fun <V, R> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Exception>): Promise<R, Exception> = bind(context, fn)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -104,7 +104,7 @@ private fun <R, V> bindAsync(bind: (V) -> Promise<R, Exception>,
                                          context: Context,
                                          deferred: Deferred<R, Exception>,
                                          value: V) {
-    context.workerContext offer {
+    context.workerContext.offer {
         try {
             val p = bind(value)
             p success { deferred resolve it }
@@ -125,7 +125,7 @@ private fun <R, V> bindAsync(bind: (V) -> Promise<R, Exception>,
  *
  * @param promise Promise containing the map function
  */
-public fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+public infix fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
     return this.apply(this.context, promise)
 }
 
@@ -174,7 +174,7 @@ private fun <R, V> applyAsync(promise: Promise<(V) -> R, Exception>, context: Co
 }
 
 private fun <R, V> applyAsync(context: Context, deferred: Deferred<R, Exception>, fn: (V) -> R, value: V) {
-    context.workerContext offer {
+    context.workerContext.offer {
         try {
             deferred resolve fn(value)
         } catch (e: Exception) {

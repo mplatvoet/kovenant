@@ -44,7 +44,7 @@ public interface Deferred<V, E> {
      *
      * @param [value] the value to resolve this deferred with
      */
-    public fun resolve(value: V)
+    public infix fun resolve(value: V)
 
     /**
      * Rejects this deferred with the provided error
@@ -55,7 +55,7 @@ public interface Deferred<V, E> {
      *
      * @param [error] the value to reject this deferred with
      */
-    public fun reject(error: E)
+    public infix fun reject(error: E)
 
     /**
      * Holds the accompanied [Promise]
@@ -107,7 +107,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, Exception>
          */
-        public fun of<V>(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
+        public fun <V> of(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -117,7 +117,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, E>
          */
-        public fun ofSuccess<V, E>(value: V, context: Context = Kovenant.context): Promise<V, E> {
+        public fun <V, E> ofSuccess(value: V, context: Context = Kovenant.context): Promise<V, E> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -127,7 +127,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a failed Promise<V, E>
          */
-        public fun ofFail<V, E>(value: E, context: Context = Kovenant.context): Promise<V, E> {
+        public fun <V, E> ofFail(value: E, context: Context = Kovenant.context): Promise<V, E> {
             return concreteFailedPromise(context, value)
         }
 
@@ -152,7 +152,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback that gets executed on successful completion
      */
-    public fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
+    public infix fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
 
     /**
      * Adds a fail callback to this Promise
@@ -164,7 +164,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback to be executed on failure or cancellation
      */
-    public fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+    public infix fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
 
     /**
      * Adds a always callback to this Promise
@@ -177,7 +177,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback to be executed on success, failure or cancellation
      */
-    public fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
+    public infix fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
 
     /**
      * Adds a success callback to this Promise
@@ -266,7 +266,7 @@ public interface Promise<out V, out E> {
  * @param context the context on which the associated [Promise] operates on
  * @return newly created [Deferred]
  */
-public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
+public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
 
 /**
@@ -277,7 +277,7 @@ public fun deferred<V, E>(context: Context = Kovenant.context): Deferred<V, E> =
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
-public fun async<V>(context: Context = Kovenant.context,
+public fun <V> async(context: Context = Kovenant.context,
                     body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 /**
@@ -292,7 +292,7 @@ public fun async<V>(context: Context = Kovenant.context,
  *
  * @param bind the transform function.
  */
-public fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+public infix fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 

@@ -121,7 +121,7 @@ private class FullAndroidDispatcher(private val looperExecutor: LooperExecutor) 
     }
 
     private fun drainAll(): List<() -> Unit> {
-        val cancelled = ArrayList<() -> Unit>(queue.size())
+        val cancelled = ArrayList<() -> Unit>(queue.size)
         queue.pollEach {
             cancelled.add(it.body)
             looperExecutor.tryRemove(it.trackingId)
