@@ -115,7 +115,7 @@ class ConcretePollStrategyBuilder() : PollStrategyBuilder {
         return ChainPollStrategyFactory(defaultFactories).build(pollable)
     }
 
-    public fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty) {
+    public fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
         buildDefaultStrategy(pollable)
     } else {
         ChainPollStrategyFactory(factories).build(pollable)
@@ -241,7 +241,7 @@ private class NonBlockingDispatcher(val name: String,
     internal fun deRegisterRequest(context: ThreadContext, force: Boolean = false): Boolean {
 
         val succeeded = threadContexts.remove(context)
-        if (!force && succeeded && threadContexts.isEmpty && workQueue.isNotEmpty() && running.get()) {
+        if (!force && succeeded && threadContexts.isEmpty() && workQueue.isNotEmpty() && running.get()) {
             //that, hopefully rare, state where all threadContexts thought they had nothing to do
             //but the queue isn't empty. Reinstate anyone that notes this.
             threadContexts.add(context)

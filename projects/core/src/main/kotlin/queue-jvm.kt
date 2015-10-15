@@ -32,7 +32,7 @@ public class NonBlockingWorkQueue<V : Any>() : BlockingSupportWorkQueue<V>() {
 
     public override fun size(): Int = queue.size
 
-    public override fun isEmpty(): Boolean = queue.isEmpty
+    public override fun isEmpty(): Boolean = queue.isEmpty()
     public override fun isNotEmpty(): Boolean = !isEmpty()
 
     public override fun remove(elem: Any?): Boolean = queue.remove(elem)
