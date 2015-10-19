@@ -27,7 +27,7 @@ import nl.komponents.kovenant.async
 import nl.komponents.kovenant.buildDispatcher
 import support.fib
 import java.text.DecimalFormat
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -81,7 +81,7 @@ fun main(args: Array<String>) {
         val deltaExc = System.currentTimeMillis() - startExc
 
         println("Futures attempt $i took $deltaExc ms")
-        futureDeltas add deltaExc
+        futureDeltas.add(deltaExc)
 
 
     }
@@ -94,7 +94,7 @@ fun main(args: Array<String>) {
         val deltaDis = System.currentTimeMillis() - startDis
 
         println("Promises attempt $i took $deltaDis ms")
-        promiseDeltas add deltaDis
+        promiseDeltas.add(deltaDis)
         //napTime()
 
     }
@@ -103,19 +103,19 @@ fun main(args: Array<String>) {
     if (quarter > 0) {
         fun ArrayList<Long>.firstQR(): ArrayList<Long> {
             sort { a, b -> (b - a).toInt() }
-            val maxIdx = size() - quarter
+            val maxIdx = size - quarter
             return ArrayList(subList(quarter, maxIdx))
         }
         futureDeltas = futureDeltas.firstQR()
         promiseDeltas = promiseDeltas.firstQR()
     }
 
-    fun ArrayList<Long>.avarage(): Long = sum() / size()
-    val avarageMsPromise = promiseDeltas.avarage()
-    val avarageMsFutures = futureDeltas.avarage()
-    val factor = avarageMsFutures.toDouble() / avarageMsPromise.toDouble()
+    fun ArrayList<Long>.avarage(): Long = sum() / size
+    val averageMsPromise = promiseDeltas.avarage()
+    val averageMsFutures = futureDeltas.avarage()
+    val factor = averageMsFutures.toDouble() / averageMsPromise.toDouble()
 
-    println("On average with ${futureDeltas.size()} samples of the 1QR, " +
+    println("On average with ${futureDeltas.size} samples of the 1QR, " +
             "Promises where a factor ${fasterOrSlower(factor)}")
 
     executorService.shutdownNow()
@@ -146,17 +146,17 @@ fun validateFutures(n: Int) {
 
     (1..n).forEach {
         n ->
-        callables add Callable {
+        callables.add(Callable {
 
             Pair(fibN, fib(fibN))
-        }
+        })
     }
     executorService.invokeAll(callables)
 }
 
 private fun await(vararg promises: Promise<*, *>) {
-    val latch = CountDownLatch(promises.size())
-    promises forEach {
+    val latch = CountDownLatch(promises.size)
+    promises.forEach {
         p ->
         p always { latch.countDown() }
     }

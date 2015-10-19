@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray
 internal fun <V> concreteAll(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
-    return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
+    return concreteAll(promises.asSequence(), promises.size, context, cancelOthersOnError)
 }
 
 internal fun <V> concreteAll(promises: List<Promise<V, Exception>>,
@@ -80,7 +80,7 @@ internal fun <V> concreteAll(promises: Sequence<Promise<V, Exception>>,
 internal fun <V> concreteAny(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
-    return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
+    return concreteAny(promises.asSequence(), promises.size, context, cancelOthersOnSuccess)
 }
 
 internal fun <V> concreteAny(promises: List<Promise<V, Exception>>,

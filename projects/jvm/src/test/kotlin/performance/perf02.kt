@@ -27,7 +27,7 @@ import nl.komponents.kovenant.async
 import nl.komponents.kovenant.buildDispatcher
 import support.fib
 import java.text.DecimalFormat
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.Callable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -88,7 +88,7 @@ fun main(args: Array<String>) {
 
 
         val factor = deltaExc.toDouble() / deltaDis.toDouble()
-        factors add factor
+        factors.add(factor)
         println("[$i/$attempts] Callables: ${deltaExc}ms, Promises: ${deltaDis}ms. " +
                 "Promises are a factor ${fasterOrSlower(factor)}")
         napTime()
@@ -96,7 +96,7 @@ fun main(args: Array<String>) {
     }
 
     val averageFactor = factors.sum() / attempts.toDouble()
-    println("On average with ${attempts} attempts, " +
+    println("On average with $attempts attempts, " +
             "Promises where a factor ${fasterOrSlower(averageFactor)}")
 
     executorService.shutdownNow()
@@ -127,17 +127,17 @@ fun validateFutures(n: Int) {
 
     (1..n).forEach {
         n ->
-        callables add Callable {
+        callables.add(Callable {
 
             Pair(fibN, fib(fibN))
-        }
+        })
     }
     executorService.invokeAll(callables)
 }
 
 private fun await(vararg promises: Promise<*, *>) {
-    val latch = CountDownLatch(promises.size())
-    promises forEach {
+    val latch = CountDownLatch(promises.size)
+    promises.forEach {
         p ->
         p always { latch.countDown() }
     }

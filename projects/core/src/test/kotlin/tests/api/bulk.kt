@@ -86,19 +86,19 @@ class AllTest {
 
     @Test fun emptyCallResult() {
         all<Int>() success {
-            assertEquals(0, it.size(), "result list should be empty")
+            assertEquals(0, it.size, "result list should be empty")
         }
     }
 
     @Test fun oneCallResult() {
         all(Promise.of(13)) success {
-            assertEquals(1, it.size(), "result list should be size == 1")
+            assertEquals(1, it.size, "result list should be size == 1")
         }
     }
 
     @Test fun multipleCallResult() {
         all(Promise.of(13), Promise.of(13), Promise.of(13)) success {
-            assertEquals(3, it.size(), "result list should be size == 3")
+            assertEquals(3, it.size, "result list should be size == 3")
         }
     }
 
@@ -183,19 +183,19 @@ class AnyTest {
 
     @Test fun emptyCallResult() {
         any<Int>() fail {
-            assertEquals(0, it.size(), "result list should be empty")
+            assertEquals(0, it.size, "result list should be empty")
         }
     }
 
     @Test fun oneCallResult() {
         any<Int>(Promise.ofFail(Exception())) fail {
-            assertEquals(1, it.size(), "result list should be size == 1")
+            assertEquals(1, it.size, "result list should be size == 1")
         }
     }
 
     @Test fun multipleErrorResult() {
         any<Int>(Promise.ofFail(Exception()), Promise.ofFail(Exception()), Promise.ofFail(Exception())) fail  {
-            assertEquals(3, it.size(), "result list should be size == 3")
+            assertEquals(3, it.size, "result list should be size == 3")
         }
     }
 

@@ -41,7 +41,7 @@ package nl.komponents.kovenant
 public fun <V> all(vararg promises: Promise<V, Exception>,
                         context: Context = Kovenant.context,
                         cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
-    return when (promises.size()) {
+    return when (promises.size) {
         0 -> Promise.ofSuccess(listOf(), context)
         else -> concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
     }
@@ -93,7 +93,7 @@ public fun <V> all(promises: List<Promise<V, Exception>>,
 public fun <V> any(vararg promises: Promise<V, Exception>,
                         context: Context = Kovenant.context,
                         cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
-    return when (promises.size()) {
+    return when (promises.size) {
         0 -> Promise.ofFail(listOf(), context)
         else -> concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
     }

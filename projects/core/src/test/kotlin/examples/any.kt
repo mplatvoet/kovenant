@@ -23,12 +23,12 @@ package examples.any
 
 import nl.komponents.kovenant.any
 import nl.komponents.kovenant.async
-import java.util.Random
+import java.util.*
 
 fun main(args: Array<String>) {
     val promises = Array(10) { n ->
         async {
-            while (!Thread.currentThread().isInterrupted()) {
+            while (!Thread.currentThread().isInterrupted) {
                 val luckyNumber = Random(System.currentTimeMillis() * (n + 1)).nextInt(100)
                 if (luckyNumber == 7) break
             }
@@ -40,7 +40,7 @@ fun main(args: Array<String>) {
         println(msg)
         println()
 
-        promises forEachIndexed { n, p ->
+        promises.forEachIndexed { n, p ->
             p.fail { println("promise[$n] was canceled") }
             p.success { println("promise[$n] finished") }
         }

@@ -62,7 +62,7 @@ public fun concreteCombine<V1, V2, E>
  */
 
 fun generateConcreteCombine(n: Int) {
-    (2..n) forEach { i ->
+    (2..n).forEach { i ->
         println("@Suppress(\"UNCHECKED_CAST\")")
         print("fun <")
         (1..i).forEach {
@@ -105,15 +105,15 @@ fun generateConcreteCombine(n: Int) {
         println(")")
         println("}")
         println("""
-         fun Promise<*,*>.registerSuccess( idx: Int) {
-            success { v ->
-                results.set(idx, v)
-                if (successCount.decrementAndGet() == 0) {
-                    deferred.resolve(createTuple())
-                }
+     fun Promise<*,*>.registerSuccess( idx: Int) {
+        success { v ->
+            results.set(idx, v)
+            if (successCount.decrementAndGet() == 0) {
+                deferred.resolve(createTuple())
             }
         }
-        """)
+    }
+    """)
         print("deferred.registerFail(")
         (1..i).forEach {
             print("p$it")
@@ -140,7 +140,7 @@ public fun combine
 = concreteCombine(p1, p2)
  */
 fun generateApiCombine(n: Int) {
-    (2..n) forEach { i ->
+    (2..n).forEach { i ->
         print("public fun <")
         (1..i).forEach {
             print("V$it, ")

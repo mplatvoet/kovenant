@@ -324,7 +324,7 @@ public fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): 
  *
  * @param bind the transform function.
  */
-public inline fun <V, R> Promise<V, Exception>.thenUse(
+public infix inline fun <V, R> Promise<V, Exception>.thenUse(
         crossinline bind: V.() -> R): Promise<R, Exception> = then { it.bind() }
 
 

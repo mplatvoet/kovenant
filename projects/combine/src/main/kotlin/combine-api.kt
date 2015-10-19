@@ -23,7 +23,7 @@ package nl.komponents.kovenant.combine
 import nl.komponents.kovenant.Promise
 
 
-public fun <V1, V2, E> Promise<V1, E>.and(other: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> = combine(this, other)
+public infix fun <V1, V2, E> Promise<V1, E>.and(other: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> = combine(this, other)
 
 public fun <V1, V2, E> combine(p1: Promise<V1, E>,
                                p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E>

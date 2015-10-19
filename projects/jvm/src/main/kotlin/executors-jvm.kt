@@ -77,9 +77,9 @@ private open class ExecutorDispatcher(private val executor: Executor) : Dispatch
 
 private class ExecutorServiceDispatcher(private val executor: ExecutorService) :
         ExecutorDispatcher(executor), ExecutorService by executor {
-    override fun isTerminated(): Boolean = executor.isTerminated()
+    override fun isTerminated(): Boolean = executor.isTerminated
 
-    override fun isShutdown(): Boolean = executor.isShutdown()
+    override fun isShutdown(): Boolean = executor.isShutdown
 
     override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
         if (force) {
@@ -176,7 +176,7 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
         val interval = Math.min(10, timeoutMs)
         fun keepWaiting() = timeoutMs < 1 || System.currentTimeMillis() - start < timeoutMs
 
-        while (singleLatch.getCount() > 0 && taskCount.get() > 0 && keepWaiting()) {
+        while (singleLatch.count > 0 && taskCount.get() > 0 && keepWaiting()) {
             try {
                 singleLatch.await(interval, TimeUnit.MILLISECONDS)
             } catch(e: InterruptedException) {
@@ -261,7 +261,7 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
             throw e
         }
 
-        val finished = finishedFutures.entrySet().sortedBy { entry -> entry.key }.map { entry -> entry.value }
+        val finished = finishedFutures.entries.sortedBy { entry -> entry.key }.map { entry -> entry.value }
 
         //Can happen when we are using a timeout on the latch
         if (finished.size < allFutures.size) {
@@ -317,7 +317,7 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
     override fun get(timeout: Long, unit: TimeUnit): V = get(TimeUnit.MILLISECONDS.convert(timeout, unit))
 
     @Suppress("UNREACHABLE_CODE")
-    private fun get(timeout: Long): V {
+    private operator fun get(timeout: Long): V {
         do {
             @Suppress("UNCHECKED_CAST")
             if (state == State.SUCCESS) return result as V
@@ -326,7 +326,7 @@ private class FutureFunction<V>(private val cancelHandle: CancelHandle, val call
             synchronized(mutex) {
                 ++queue
                 try {
-                    while (!isDone()) mutex.wait(timeout)
+                    while (!isDone) mutex.wait(timeout)
                 } finally {
                     --queue
                 }

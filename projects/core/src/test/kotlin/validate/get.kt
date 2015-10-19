@@ -32,8 +32,9 @@ fun main(args: Array<String>) {
     val results = ArrayList<Int>(attempts)
 
     for (i in 1..10000) {
-        results add async { fib(i % 23) }.get()
+        val value = async { fib(i % 23) }.get()
+        results.add(value)
     }
 
-    println("got ${results.size()} results")
+    println("got ${results.size} results")
 }
