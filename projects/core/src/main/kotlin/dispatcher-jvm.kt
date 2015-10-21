@@ -53,7 +53,11 @@ private class ConcreteDispatcherBuilder : JvmDispatcherBuilder {
     private val pollStrategyBuilder = ConcretePollStrategyBuilder()
 
     override var threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread
-            = fun(target: Runnable, dispatcherName: String, id: Int) = Thread(target, "$dispatcherName-$id")
+            = fun(target: Runnable, dispatcherName: String, id: Int): Thread {
+        val thread = Thread(target, "$dispatcherName-$id")
+        thread.isDaemon = false
+        return thread
+    }
 
 
     override var concurrentTasks: Int
@@ -270,8 +274,9 @@ private class NonBlockingDispatcher(val name: String,
 
         init {
             thread = threadFactory(this, name, id)
-            thread.setDaemon(false)
-            thread.start()
+            if (!thread.isAlive) {
+                thread.start()
+            }
         }
 
 
