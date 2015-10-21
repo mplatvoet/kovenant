@@ -3,16 +3,6 @@
 Some indication of the course of Kovenant. Nothing is written in stone, it's just a general idea.
 Input is always welcome.
 
-##v2.9.0
-
-**expected**
-
-* n/a
-
-**certain**
-
-* n/a
-
 ---
 
 ##v3.0.0

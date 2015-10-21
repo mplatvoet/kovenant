@@ -3,6 +3,17 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v2.9.0
+
+**general
+
+* [KOV-59](http://issues.komponents.nl/youtrack/issue/KOV-59) Kotlin version 1.0.0-beta
+
+**core**
+
+* [KOV-57](http://issues.komponents.nl/youtrack/issue/KOV-57) Allow for daemon threads
+
+
 ##v2.8.0
 
 **jvm**
