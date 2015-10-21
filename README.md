@@ -20,7 +20,7 @@ Source and target compatibility is `1.6`
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:2.9.+'
+    compile 'nl.komponents.kovenant:kovenant:3.0.+'
 }
 ```
 
@@ -29,7 +29,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[2.9.0,2.10.0)</version>
+	<version>[3.0.0,3.1.0)</version>
 </dependency>
 ```
 
