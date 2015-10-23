@@ -7,7 +7,7 @@ Please refer to [roadmap](roadmap.md) for upcoming releases.
 
 **general
 
-* [KOV-59](http://issues.komponents.nl/youtrack/issue/KOV-59) Kotlin version 1.0.0-beta
+* [KOV-59](http://issues.komponents.nl/youtrack/issue/KOV-59) Kotlin version 1.0.0-beta-1038
 
 **core**
 
