@@ -34,11 +34,6 @@ public object Kovenant {
 
     public fun context(body: MutableContext.() -> Unit): Context = concrete.context(body)
 
-    @Deprecated("use context { ... } instead", ReplaceWith("context(body)"))
-    public fun configure(body: MutableContext.() -> Unit): Unit {
-        context(body)
-    }
-
     public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
     public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
@@ -60,18 +55,6 @@ public interface Context {
         val workerTasks = workerContext.dispatcher.stop(force, timeOutMs, block)
         return callbackTasks + workerTasks
     }
-
-    @Deprecated("use callbackContext.dispatcher instead", ReplaceWith("callbackContext.dispatcher"))
-    val callbackDispatcher: Dispatcher get() = callbackContext.dispatcher
-
-    @Deprecated("use workerContext.dispatcher instead", ReplaceWith("workerContext.dispatcher"))
-    val workerDispatcher: Dispatcher get() = workerContext.dispatcher
-
-    @Deprecated("use callbackContext.errorHandler instead", ReplaceWith("callbackContext.errorHandler"))
-    val callbackError: (Exception) -> Unit get() = callbackContext.errorHandler
-
-    @Deprecated("use workerContext.errorHandler instead", ReplaceWith("workerContext.errorHandler"))
-    val workerError: (Exception) -> Unit get() = workerContext.errorHandler
 }
 
 public interface MutableContext : Context {
@@ -88,33 +71,6 @@ public interface MutableContext : Context {
         workerContext.body()
     }
 
-    @Deprecated("use callbackContext.dispatcher instead", ReplaceWith("callbackContext.dispatcher"))
-    override var callbackDispatcher: Dispatcher
-        get() = callbackContext.dispatcher
-        set(value) {
-            callbackContext.dispatcher = value
-        }
-
-    @Deprecated("use workerContext.dispatcher instead", ReplaceWith("workerContext.dispatcher"))
-    override var workerDispatcher: Dispatcher
-        get() = workerContext.dispatcher
-        set(value) {
-            workerContext.dispatcher = value
-        }
-
-    @Deprecated("use callbackContext.errorHandler instead", ReplaceWith("callbackContext.errorHandler"))
-    override var callbackError: (Exception) -> Unit
-        get() = callbackContext.errorHandler
-        set(value) {
-            callbackContext.errorHandler = value
-        }
-
-    @Deprecated("use workerContext.errorHandler instead", ReplaceWith("workerContext.errorHandler"))
-    override var workerError: (Exception) -> Unit
-        get() = workerContext.errorHandler
-        set(value) {
-            workerContext.errorHandler = value
-        }
 
 }
 
