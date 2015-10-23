@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
     }
 
     promise success {
-        it forEach {
+        it.forEach {
             println(it)
         }
     }

@@ -29,7 +29,7 @@ public data class Tuple2
  */
 
 fun main(args: Array<String>) {
-    (2..20) forEach { i ->
+    (2..20).forEach { i ->
         println("public data class Tuple$i")
 
         print("<")

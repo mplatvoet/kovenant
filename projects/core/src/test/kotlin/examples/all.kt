@@ -34,8 +34,8 @@ fun main(args: Array<String>) {
     }
 
     all(*promises) success {
-        it forEach { pair -> println("fib(${pair.first}) = ${pair.second}") }
+        it.forEach { pair -> println("fib(${pair.first}) = ${pair.second}") }
     } always {
-        println("All ${promises.size()} promises are done.")
+        println("All ${promises.size} promises are done.")
     }
 }

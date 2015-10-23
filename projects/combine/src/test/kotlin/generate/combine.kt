@@ -23,8 +23,8 @@ package generate.combine
 
 
 fun main(args: Array<String>) {
-//    generateApiCombine(20)
-    generateConcreteCombine(20)
+    generateApiCombine(20)
+//    generateConcreteCombine(20)
 
 }
 
@@ -62,13 +62,13 @@ public fun concreteCombine<V1, V2, E>
  */
 
 fun generateConcreteCombine(n: Int) {
-    (2..n) forEach { i ->
+    (2..n).forEach { i ->
         println("@Suppress(\"UNCHECKED_CAST\")")
-        print("fun concreteCombine<")
+        print("fun <")
         (1..i).forEach {
             print("V$it, ")
         }
-        println("E>")
+        println("E> concreteCombine")
 
         print("(")
         (1..i).forEach {
@@ -105,15 +105,15 @@ fun generateConcreteCombine(n: Int) {
         println(")")
         println("}")
         println("""
-         fun Promise<*,*>.registerSuccess( idx: Int) {
-            success { v ->
-                results.set(idx, v)
-                if (successCount.decrementAndGet() == 0) {
-                    deferred.resolve(createTuple())
-                }
+     fun Promise<*,*>.registerSuccess( idx: Int) {
+        success { v ->
+            results.set(idx, v)
+            if (successCount.decrementAndGet() == 0) {
+                deferred.resolve(createTuple())
             }
         }
-        """)
+    }
+    """)
         print("deferred.registerFail(")
         (1..i).forEach {
             print("p$it")
@@ -121,7 +121,7 @@ fun generateConcreteCombine(n: Int) {
         }
         println(")")
         (1..i).forEach {
-            println("p$it registerSuccess ${it - 1}")
+            println("p$it.registerSuccess(${it - 1})")
         }
 
         println()
@@ -140,13 +140,12 @@ public fun combine
 = concreteCombine(p1, p2)
  */
 fun generateApiCombine(n: Int) {
-    (2..n) forEach { i ->
-        println("public fun combine")
-        print("<")
+    (2..n).forEach { i ->
+        print("public fun <")
         (1..i).forEach {
             print("V$it, ")
         }
-        println("E>")
+        println("E> combine")
 
         print("(")
         (1..i).forEach {

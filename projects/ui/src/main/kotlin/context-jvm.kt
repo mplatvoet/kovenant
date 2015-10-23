@@ -107,7 +107,7 @@ class ConcreteUiKovenant {
     private class CurrentCallbackDispatcher() : Dispatcher {
         private val dispatcher: Dispatcher get() = Kovenant.context.callbackContext.dispatcher
 
-        override fun offer(task: () -> Unit): Boolean = dispatcher offer task
+        override fun offer(task: () -> Unit): Boolean = dispatcher.offer(task)
 
         override fun stop(force: Boolean, timeOutMs: Long, block: Boolean): List<() -> Unit> {
             return dispatcher.stop(force, timeOutMs, block)

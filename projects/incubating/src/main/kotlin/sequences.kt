@@ -30,12 +30,12 @@ import java.util.*
  */
 public fun <V, R> Sequence<V>.mapEach(context: Context = Kovenant.context, bind: (V) -> R): Promise<List<R>, Exception> {
     val deferred = deferred<List<R>, Exception>(context)
-    context.workerContext offer {
+    context.workerContext.offer {
         //TODO ArrayList is jvm only
         val promises = ArrayList<Promise<R, Exception>>()
         forEach {
             value ->
-            promises add async(context) { bind(value) }
+            promises.add(async(context) { bind(value) })
         }
         val masterPromise = all(promises)
         masterPromise success {

@@ -27,17 +27,17 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
-internal fun concretePromise<V>(context: Context, callable: () -> V): Promise<V, Exception>
+internal fun <V> concretePromise(context: Context, callable: () -> V): Promise<V, Exception>
         = AsyncPromise(context, callable)
 
-internal fun concretePromise<V, R>(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
+internal fun <V, R> concretePromise(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
 
-internal fun concreteSuccessfulPromise<V, E>(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
+internal fun <V, E> concreteSuccessfulPromise(context: Context, value: V): Promise<V, E> = SuccessfulPromise(context, value)
 
-internal fun concreteFailedPromise<V, E>(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
+internal fun <V, E> concreteFailedPromise(context: Context, value: E): Promise<V, E> = FailedPromise(context, value)
 
-internal fun concreteDeferred<V, E>(context: Context): Deferred<V, E> = DeferredPromise(context)
+internal fun <V, E> concreteDeferred(context: Context): Deferred<V, E> = DeferredPromise(context)
 
 private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
@@ -104,7 +104,7 @@ private class ThenPromise<V, R>(context: Context,
             }
         }
         task = wrapper
-        context.workerContext offer wrapper
+        context.workerContext.offer(wrapper)
     }
 
 
@@ -144,7 +144,7 @@ private class AsyncPromise<V>(context: Context, callable: () -> V) :
             }
         }
         task = wrapper
-        context.workerContext offer wrapper
+        context.workerContext.offer(wrapper)
     }
 
     override public fun cancel(error: Exception): Boolean {
@@ -226,7 +226,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         //Bypass the queue if this promise is resolved and the queue is empty
         //no need to create excess nodes
         if (isSuccessInternal() && isEmptyCallbacks()) {
-            context offer { callback(getAsValueResult()) }
+            context.offer { callback(getAsValueResult()) }
             return this
         }
 
@@ -244,7 +244,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         //Bypass the queue if this promise is resolved and the queue is empty
         //no need to create excess nodes
         if (isFailureInternal() && isEmptyCallbacks()) {
-            context offer { callback(getAsFailResult()) }
+            context.offer { callback(getAsFailResult()) }
             return this
         }
 
@@ -260,7 +260,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         //Bypass the queue if this promise is resolved and the queue is empty
         //no need to create excess nodes
         if ((isSuccessInternal() || isFailureInternal()) && isEmptyCallbacks()) {
-            context offer { callback() }
+            context.offer { callback() }
             return this
         }
 

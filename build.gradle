@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '0.14.449'
+    ext.kotlinVersion = '1.0.0-beta-1038'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -36,11 +36,9 @@ buildscript {
     }
 }
 
-apply from: "${rootProject.projectDir}/gradle/versions.gradle"
-
 allprojects {
     ext {
-        appVersion = '2.8.0'
+        appVersion = '2.9.0'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -133,6 +131,10 @@ subprojects {
                 authentication(userName: sonatypeUsr, password: sonatypePwd)
             }
 
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
+                authentication(userName: sonatypeUsr, password: sonatypePwd)
+            }
+
             pom.whenConfigured { configgedPom ->
                 configgedPom.dependencies.removeAll { dep ->
                     dep.scope == "test"
@@ -185,10 +187,10 @@ subprojects {
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if (!'master'.equals(branchName) && !taskGraph.hasTask(release)) {
-        enrichVersion()
-    } else {
+    if ('master'.equals(branchName) || taskGraph.hasTask(release)) {
         allprojects*.version = appVersion
+    } else {
+        allprojects*.version = "$appVersion-SNAPSHOT"
     }
     allprojects*.group = appGroup
 }
@@ -199,12 +201,12 @@ task jars() {
     dependsOn subprojects.findAll { it.name != 'kovenant' }.javadocJar
 }
 
-task release {
-    dependsOn subprojects.findAll { it.name != 'kovenant' }.releaseSub
+task release() {
+    dependsOn subprojects.uploadArchives
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.7'
+    gradleVersion = '2.8'
 
     doLast() {
         def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"

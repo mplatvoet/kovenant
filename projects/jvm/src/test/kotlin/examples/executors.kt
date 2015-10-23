@@ -32,12 +32,12 @@ fun main(args: Array<String>) {
     val tasks = listOf(*(Array(5) { FibCallable(25 - it) }))
 
 
-    val (n, fib) = executorService invokeAny tasks
+    val (n, fib) = executorService.invokeAny(tasks)
     println("invokeAny: fib($n) = $fib")
     println()
 
-    val results = executorService invokeAll tasks
-    results forEach { future ->
+    val results = executorService.invokeAll(tasks)
+    results.forEach { future ->
         val (i, res) = future.get()
         println("invokeAll: fib($i) = $res")
     }

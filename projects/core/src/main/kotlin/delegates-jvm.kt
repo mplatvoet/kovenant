@@ -26,6 +26,7 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.async
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.reflect.KProperty
 
 
 public class LazyPromise<T>(
@@ -45,7 +46,8 @@ public class LazyPromise<T>(
         this.initializer = initializer
     }
 
-    fun get(thisRef: Any?, property: PropertyMetadata): Promise<T, Exception> = initOrGetPromise()
+    @Suppress("UNUSED_PARAMETER")
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): Promise<T, Exception> = initOrGetPromise()
 /*
     //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()

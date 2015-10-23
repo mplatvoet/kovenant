@@ -26,21 +26,21 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceArray
 
 
-internal fun concreteAll<V>(vararg promises: Promise<V, Exception>,
+internal fun <V> concreteAll(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
-    return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
+    return concreteAll(promises.asSequence(), promises.size, context, cancelOthersOnError)
 }
 
-internal fun concreteAll<V>(promises: List<Promise<V, Exception>>,
+internal fun <V> concreteAll(promises: List<Promise<V, Exception>>,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
     // this might fail with concurrent mutating list, revisit in the future
     // not really a Kovenant issue but can prevent this from ever completing
-    return concreteAll(promises.asSequence(), promises.size(), context, cancelOthersOnError)
+    return concreteAll(promises.asSequence(), promises.size, context, cancelOthersOnError)
 }
 
-internal fun concreteAll<V>(promises: Sequence<Promise<V, Exception>>,
+internal fun <V> concreteAll(promises: Sequence<Promise<V, Exception>>,
                            sequenceSize: Int,
                            context: Context,
                            cancelOthersOnError: Boolean): Promise<List<V>, Exception> {
@@ -77,21 +77,21 @@ internal fun concreteAll<V>(promises: Sequence<Promise<V, Exception>>,
     return deferred.promise
 }
 
-internal fun concreteAny<V>(vararg promises: Promise<V, Exception>,
+internal fun <V> concreteAny(vararg promises: Promise<V, Exception>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
-    return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
+    return concreteAny(promises.asSequence(), promises.size, context, cancelOthersOnSuccess)
 }
 
-internal fun concreteAny<V>(promises: List<Promise<V, Exception>>,
+internal fun <V> concreteAny(promises: List<Promise<V, Exception>>,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {
     // this might fail with concurrent mutating list, revisit in the future
     // not really a Kovenant issue but can prevent this from ever completing
-    return concreteAny(promises.asSequence(), promises.size(), context, cancelOthersOnSuccess)
+    return concreteAny(promises.asSequence(), promises.size, context, cancelOthersOnSuccess)
 }
 
-internal fun concreteAny<V>(promises: Sequence<Promise<V, Exception>>,
+internal fun <V> concreteAny(promises: Sequence<Promise<V, Exception>>,
                            sequenceSize: Int,
                            context: Context,
                            cancelOthersOnSuccess: Boolean): Promise<V, List<Exception>> {

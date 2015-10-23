@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
     } success {
         println("Success: $it")
     } fail {
-        println("Fail: ${it.getMessage()}")
+        println("Fail: ${it.message}")
     }
 }
 

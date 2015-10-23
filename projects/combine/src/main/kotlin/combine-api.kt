@@ -23,272 +23,253 @@ package nl.komponents.kovenant.combine
 import nl.komponents.kovenant.Promise
 
 
-public fun <V1, V2, E> Promise<V1, E>.and(other: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> = combine(this, other)
+public infix fun <V1, V2, E> Promise<V1, E>.and(other: Promise<V2, E>): Promise<Tuple2<V1, V2>, E> = combine(this, other)
 
-public fun combine<V1, V2, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E>
+public fun <V1, V2, E> combine(p1: Promise<V1, E>,
+                               p2: Promise<V2, E>): Promise<Tuple2<V1, V2>, E>
         = concreteCombine(p1, p2)
 
-public fun combine<V1, V2, V3, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>): Promise<Tuple3<V1, V2, V3>, E>
+public fun <V1, V2, V3, E> combine(p1: Promise<V1, E>,
+                                   p2: Promise<V2, E>,
+                                   p3: Promise<V3, E>): Promise<Tuple3<V1, V2, V3>, E>
         = concreteCombine(p1, p2, p3)
 
-public fun combine<V1, V2, V3, V4, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>): Promise<Tuple4<V1, V2, V3, V4>, E>
+public fun <V1, V2, V3, V4, E> combine(p1: Promise<V1, E>,
+                                       p2: Promise<V2, E>,
+                                       p3: Promise<V3, E>,
+                                       p4: Promise<V4, E>): Promise<Tuple4<V1, V2, V3, V4>, E>
         = concreteCombine(p1, p2, p3, p4)
 
-public fun combine<V1, V2, V3, V4, V5, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>): Promise<Tuple5<V1, V2, V3, V4, V5>, E>
+public fun <V1, V2, V3, V4, V5, E> combine(p1: Promise<V1, E>,
+                                           p2: Promise<V2, E>,
+                                           p3: Promise<V3, E>,
+                                           p4: Promise<V4, E>,
+                                           p5: Promise<V5, E>): Promise<Tuple5<V1, V2, V3, V4, V5>, E>
         = concreteCombine(p1, p2, p3, p4, p5)
 
-public fun combine<V1, V2, V3, V4, V5, V6, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>): Promise<Tuple6<V1, V2, V3, V4, V5, V6>, E>
+public fun <V1, V2, V3, V4, V5, V6, E> combine(p1: Promise<V1, E>,
+                                               p2: Promise<V2, E>,
+                                               p3: Promise<V3, E>,
+                                               p4: Promise<V4, E>,
+                                               p5: Promise<V5, E>,
+                                               p6: Promise<V6, E>): Promise<Tuple6<V1, V2, V3, V4, V5, V6>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>): Promise<Tuple7<V1, V2, V3, V4, V5, V6, V7>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, E> combine(p1: Promise<V1, E>,
+                                                   p2: Promise<V2, E>,
+                                                   p3: Promise<V3, E>,
+                                                   p4: Promise<V4, E>,
+                                                   p5: Promise<V5, E>,
+                                                   p6: Promise<V6, E>,
+                                                   p7: Promise<V7, E>): Promise<Tuple7<V1, V2, V3, V4, V5, V6, V7>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>): Promise<Tuple8<V1, V2, V3, V4, V5, V6, V7, V8>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, E> combine(p1: Promise<V1, E>,
+                                                       p2: Promise<V2, E>,
+                                                       p3: Promise<V3, E>,
+                                                       p4: Promise<V4, E>,
+                                                       p5: Promise<V5, E>,
+                                                       p6: Promise<V6, E>,
+                                                       p7: Promise<V7, E>,
+                                                       p8: Promise<V8, E>): Promise<Tuple8<V1, V2, V3, V4, V5, V6, V7, V8>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>): Promise<Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, E> combine(p1: Promise<V1, E>,
+                                                           p2: Promise<V2, E>,
+                                                           p3: Promise<V3, E>,
+                                                           p4: Promise<V4, E>,
+                                                           p5: Promise<V5, E>,
+                                                           p6: Promise<V6, E>,
+                                                           p7: Promise<V7, E>,
+                                                           p8: Promise<V8, E>,
+                                                           p9: Promise<V9, E>): Promise<Tuple9<V1, V2, V3, V4, V5, V6, V7, V8, V9>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>): Promise<Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, E> combine(p1: Promise<V1, E>,
+                                                                p2: Promise<V2, E>,
+                                                                p3: Promise<V3, E>,
+                                                                p4: Promise<V4, E>,
+                                                                p5: Promise<V5, E>,
+                                                                p6: Promise<V6, E>,
+                                                                p7: Promise<V7, E>,
+                                                                p8: Promise<V8, E>,
+                                                                p9: Promise<V9, E>,
+                                                                p10: Promise<V10, E>): Promise<Tuple10<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>): Promise<Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, E> combine(p1: Promise<V1, E>,
+                                                                     p2: Promise<V2, E>,
+                                                                     p3: Promise<V3, E>,
+                                                                     p4: Promise<V4, E>,
+                                                                     p5: Promise<V5, E>,
+                                                                     p6: Promise<V6, E>,
+                                                                     p7: Promise<V7, E>,
+                                                                     p8: Promise<V8, E>,
+                                                                     p9: Promise<V9, E>,
+                                                                     p10: Promise<V10, E>,
+                                                                     p11: Promise<V11, E>): Promise<Tuple11<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>): Promise<Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, E> combine(p1: Promise<V1, E>,
+                                                                          p2: Promise<V2, E>,
+                                                                          p3: Promise<V3, E>,
+                                                                          p4: Promise<V4, E>,
+                                                                          p5: Promise<V5, E>,
+                                                                          p6: Promise<V6, E>,
+                                                                          p7: Promise<V7, E>,
+                                                                          p8: Promise<V8, E>,
+                                                                          p9: Promise<V9, E>,
+                                                                          p10: Promise<V10, E>,
+                                                                          p11: Promise<V11, E>,
+                                                                          p12: Promise<V12, E>): Promise<Tuple12<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>): Promise<Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, E> combine(p1: Promise<V1, E>,
+                                                                               p2: Promise<V2, E>,
+                                                                               p3: Promise<V3, E>,
+                                                                               p4: Promise<V4, E>,
+                                                                               p5: Promise<V5, E>,
+                                                                               p6: Promise<V6, E>,
+                                                                               p7: Promise<V7, E>,
+                                                                               p8: Promise<V8, E>,
+                                                                               p9: Promise<V9, E>,
+                                                                               p10: Promise<V10, E>,
+                                                                               p11: Promise<V11, E>,
+                                                                               p12: Promise<V12, E>,
+                                                                               p13: Promise<V13, E>): Promise<Tuple13<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>): Promise<Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, E> combine(p1: Promise<V1, E>,
+                                                                                    p2: Promise<V2, E>,
+                                                                                    p3: Promise<V3, E>,
+                                                                                    p4: Promise<V4, E>,
+                                                                                    p5: Promise<V5, E>,
+                                                                                    p6: Promise<V6, E>,
+                                                                                    p7: Promise<V7, E>,
+                                                                                    p8: Promise<V8, E>,
+                                                                                    p9: Promise<V9, E>,
+                                                                                    p10: Promise<V10, E>,
+                                                                                    p11: Promise<V11, E>,
+                                                                                    p12: Promise<V12, E>,
+                                                                                    p13: Promise<V13, E>,
+                                                                                    p14: Promise<V14, E>): Promise<Tuple14<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>): Promise<Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, E> combine(p1: Promise<V1, E>,
+                                                                                         p2: Promise<V2, E>,
+                                                                                         p3: Promise<V3, E>,
+                                                                                         p4: Promise<V4, E>,
+                                                                                         p5: Promise<V5, E>,
+                                                                                         p6: Promise<V6, E>,
+                                                                                         p7: Promise<V7, E>,
+                                                                                         p8: Promise<V8, E>,
+                                                                                         p9: Promise<V9, E>,
+                                                                                         p10: Promise<V10, E>,
+                                                                                         p11: Promise<V11, E>,
+                                                                                         p12: Promise<V12, E>,
+                                                                                         p13: Promise<V13, E>,
+                                                                                         p14: Promise<V14, E>,
+                                                                                         p15: Promise<V15, E>): Promise<Tuple15<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>): Promise<Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, E> combine(p1: Promise<V1, E>,
+                                                                                              p2: Promise<V2, E>,
+                                                                                              p3: Promise<V3, E>,
+                                                                                              p4: Promise<V4, E>,
+                                                                                              p5: Promise<V5, E>,
+                                                                                              p6: Promise<V6, E>,
+                                                                                              p7: Promise<V7, E>,
+                                                                                              p8: Promise<V8, E>,
+                                                                                              p9: Promise<V9, E>,
+                                                                                              p10: Promise<V10, E>,
+                                                                                              p11: Promise<V11, E>,
+                                                                                              p12: Promise<V12, E>,
+                                                                                              p13: Promise<V13, E>,
+                                                                                              p14: Promise<V14, E>,
+                                                                                              p15: Promise<V15, E>,
+                                                                                              p16: Promise<V16, E>): Promise<Tuple16<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>): Promise<Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, E> combine(p1: Promise<V1, E>,
+                                                                                                   p2: Promise<V2, E>,
+                                                                                                   p3: Promise<V3, E>,
+                                                                                                   p4: Promise<V4, E>,
+                                                                                                   p5: Promise<V5, E>,
+                                                                                                   p6: Promise<V6, E>,
+                                                                                                   p7: Promise<V7, E>,
+                                                                                                   p8: Promise<V8, E>,
+                                                                                                   p9: Promise<V9, E>,
+                                                                                                   p10: Promise<V10, E>,
+                                                                                                   p11: Promise<V11, E>,
+                                                                                                   p12: Promise<V12, E>,
+                                                                                                   p13: Promise<V13, E>,
+                                                                                                   p14: Promise<V14, E>,
+                                                                                                   p15: Promise<V15, E>,
+                                                                                                   p16: Promise<V16, E>,
+                                                                                                   p17: Promise<V17, E>): Promise<Tuple17<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>): Promise<Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, E> combine(p1: Promise<V1, E>,
+                                                                                                        p2: Promise<V2, E>,
+                                                                                                        p3: Promise<V3, E>,
+                                                                                                        p4: Promise<V4, E>,
+                                                                                                        p5: Promise<V5, E>,
+                                                                                                        p6: Promise<V6, E>,
+                                                                                                        p7: Promise<V7, E>,
+                                                                                                        p8: Promise<V8, E>,
+                                                                                                        p9: Promise<V9, E>,
+                                                                                                        p10: Promise<V10, E>,
+                                                                                                        p11: Promise<V11, E>,
+                                                                                                        p12: Promise<V12, E>,
+                                                                                                        p13: Promise<V13, E>,
+                                                                                                        p14: Promise<V14, E>,
+                                                                                                        p15: Promise<V15, E>,
+                                                                                                        p16: Promise<V16, E>,
+                                                                                                        p17: Promise<V17, E>,
+                                                                                                        p18: Promise<V18, E>): Promise<Tuple18<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>,
-         p19: Promise<V19, E>): Promise<Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, E> combine(p1: Promise<V1, E>,
+                                                                                                             p2: Promise<V2, E>,
+                                                                                                             p3: Promise<V3, E>,
+                                                                                                             p4: Promise<V4, E>,
+                                                                                                             p5: Promise<V5, E>,
+                                                                                                             p6: Promise<V6, E>,
+                                                                                                             p7: Promise<V7, E>,
+                                                                                                             p8: Promise<V8, E>,
+                                                                                                             p9: Promise<V9, E>,
+                                                                                                             p10: Promise<V10, E>,
+                                                                                                             p11: Promise<V11, E>,
+                                                                                                             p12: Promise<V12, E>,
+                                                                                                             p13: Promise<V13, E>,
+                                                                                                             p14: Promise<V14, E>,
+                                                                                                             p15: Promise<V15, E>,
+                                                                                                             p16: Promise<V16, E>,
+                                                                                                             p17: Promise<V17, E>,
+                                                                                                             p18: Promise<V18, E>,
+                                                                                                             p19: Promise<V19, E>): Promise<Tuple19<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19)
 
-public fun combine<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, E>
-        (p1: Promise<V1, E>,
-         p2: Promise<V2, E>,
-         p3: Promise<V3, E>,
-         p4: Promise<V4, E>,
-         p5: Promise<V5, E>,
-         p6: Promise<V6, E>,
-         p7: Promise<V7, E>,
-         p8: Promise<V8, E>,
-         p9: Promise<V9, E>,
-         p10: Promise<V10, E>,
-         p11: Promise<V11, E>,
-         p12: Promise<V12, E>,
-         p13: Promise<V13, E>,
-         p14: Promise<V14, E>,
-         p15: Promise<V15, E>,
-         p16: Promise<V16, E>,
-         p17: Promise<V17, E>,
-         p18: Promise<V18, E>,
-         p19: Promise<V19, E>,
-         p20: Promise<V20, E>): Promise<Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20>, E>
+public fun <V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, E> combine(p1: Promise<V1, E>,
+                                                                                                                  p2: Promise<V2, E>,
+                                                                                                                  p3: Promise<V3, E>,
+                                                                                                                  p4: Promise<V4, E>,
+                                                                                                                  p5: Promise<V5, E>,
+                                                                                                                  p6: Promise<V6, E>,
+                                                                                                                  p7: Promise<V7, E>,
+                                                                                                                  p8: Promise<V8, E>,
+                                                                                                                  p9: Promise<V9, E>,
+                                                                                                                  p10: Promise<V10, E>,
+                                                                                                                  p11: Promise<V11, E>,
+                                                                                                                  p12: Promise<V12, E>,
+                                                                                                                  p13: Promise<V13, E>,
+                                                                                                                  p14: Promise<V14, E>,
+                                                                                                                  p15: Promise<V15, E>,
+                                                                                                                  p16: Promise<V16, E>,
+                                                                                                                  p17: Promise<V17, E>,
+                                                                                                                  p18: Promise<V18, E>,
+                                                                                                                  p19: Promise<V19, E>,
+                                                                                                                  p20: Promise<V20, E>): Promise<Tuple20<V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20>, E>
         = concreteCombine(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20)
 
 public data class Tuple2

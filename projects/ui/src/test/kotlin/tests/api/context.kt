@@ -112,7 +112,7 @@ class MultipleContextsTest {
     }
 }
 
-private class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
+public class ImmediateDispatcher(var onOffered: (task: () -> Unit) -> Unit = {}) : Dispatcher {
     override fun offer(task: () -> Unit): Boolean {
         onOffered(task)
         task()

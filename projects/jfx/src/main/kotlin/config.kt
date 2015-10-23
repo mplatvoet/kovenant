@@ -32,7 +32,7 @@ private val disposable = AtomicReference<Disposable>(null)
 
 public fun startKovenant() {
     initCount.onlyFirst {
-        disposable set configureKovenant()
+        disposable.set(configureKovenant())
     }
 }
 
@@ -88,7 +88,7 @@ public interface Disposable {
 
 private class DispatchersDisposable(private vararg val dispatcher: Dispatcher) : Disposable {
     override fun close(force: Boolean) {
-        dispatcher forEach {
+        dispatcher.forEach {
             close(force, it)
         }
     }

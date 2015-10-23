@@ -27,8 +27,8 @@ import java.util.concurrent.CountDownLatch
 
 
 public fun await(vararg promises: Promise<*, *>) {
-    val latch = CountDownLatch(promises.size())
-    promises forEach {
+    val latch = CountDownLatch(promises.size)
+    promises.forEach {
         p ->
         p always { latch.countDown() }
     }
