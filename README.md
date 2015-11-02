@@ -14,13 +14,13 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `kotlin-stdlib:1.0.0-beta-1038`.
+This version is build against `kotlin-stdlib:1.0.0-beta-1103`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.0.+'
+    compile 'nl.komponents.kovenant:kovenant:2.9.+'
 }
 ```
 
@@ -29,7 +29,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[3.0.0,3.1.0)</version>
+	<version>[2.9.0,3.0.0)</version>
 </dependency>
 ```
 
