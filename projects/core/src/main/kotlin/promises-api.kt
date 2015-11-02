@@ -224,7 +224,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the success value when done
      */
-    public fun get(): V = defaultGet(this)
+    public fun get(): V
 
     /**
      * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
@@ -234,7 +234,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the fail value when done
      */
-    public fun getError(): E = defaultGetError(this)
+    public fun getError(): E
 
 
     /**
@@ -242,21 +242,21 @@ public interface Promise<out V, out E> {
      *
      * @return true if this promise is either resolved successfully or has failed, false otherwise
      */
-    public fun isDone(): Boolean = defaultIsDone()
+    public fun isDone(): Boolean
 
     /**
      * Returns true if this promise is resolved a failed
      *
      * @return true if this promise is resolved a failed, false otherwise
      */
-    public fun isFailure(): Boolean = defaultIsFailure()
+    public fun isFailure(): Boolean
 
     /**
      * Returns true if this promise is resolved successfully
      *
      * @return true if this promise is resolved successfully, false otherwise
      */
-    public fun isSuccess(): Boolean = defaultIsSuccess()
+    public fun isSuccess(): Boolean
 }
 
 

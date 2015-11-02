@@ -97,16 +97,6 @@ public interface DispatcherBuilder {
     var workQueue: WorkQueue<() -> Unit>
 
     fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
-
-    @Deprecated("Replaced with more idiomatic pollStrategy", ReplaceWith("pollStrategy(body)"))
-    fun configurePollStrategy(body: PollStrategyBuilder.() -> Unit) = pollStrategy(body)
-
-    @Deprecated("Use more platforms agnostic term `concurrentTasks`", ReplaceWith("concurrentTasks"))
-    var numberOfThreads: Int
-        get() = concurrentTasks
-        set(value) {
-            concurrentTasks = value
-        }
 }
 
 public interface PollStrategyBuilder {
