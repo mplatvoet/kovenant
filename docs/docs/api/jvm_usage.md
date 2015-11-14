@@ -6,8 +6,8 @@ part of [`kovenant-jvm`](../index.md#artifacts)
 ##Executors
 
 It's likely that your project already uses threadpools or that you want to leverage the threadpool
-Kovenant uses. Because to many threads just leads to context switching and thus performance degradation.
-Therefor Kovenant provides some facilities for interoperability with Java's Executors. 
+Kovenant uses. Because too many threads just leads to context switching and thus performance degradation.
+Therefore Kovenant provides some facilities for interoperability with Java's Executors. 
 
 * To convert Kovenant's `Dispatcher`s to Java's `Executor` use the extension function `asExecutor()` 
 * To convert Kovenant's `Dispatcher`s to Java's `ExecutorService` use the extension function `asExecutorService()`
