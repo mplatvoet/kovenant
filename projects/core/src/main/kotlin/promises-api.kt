@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("Api")
 package nl.komponents.kovenant
 
 
@@ -277,6 +277,7 @@ public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> 
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
+@JvmOverloads
 public fun <V> async(context: Context = Kovenant.context,
                     body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
