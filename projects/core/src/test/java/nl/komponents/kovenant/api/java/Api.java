@@ -27,9 +27,12 @@ import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 import nl.komponents.kovenant.Promise;
 
-import static nl.komponents.kovenant.Api.async;
-import static nl.komponents.kovenant.Api.then;
+import static nl.komponents.kovenant.KovenantApi.async;
+import static nl.komponents.kovenant.KovenantApi.then;
 
+/*
+Indicator file for interoperability with Java. So no real test case, just
+ */
 public class Api {
     public static void main(String[] args) {
         Promise<Integer, Exception> promise = async(new Function0<Integer>() {
@@ -53,5 +56,7 @@ public class Api {
                 return Unit.INSTANCE;
             }
         });
+
+
     }
 }

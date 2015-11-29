@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantDelegatesApi")
 package nl.komponents.kovenant.properties
 
 import nl.komponents.kovenant.Context
