@@ -21,9 +21,10 @@
 
 package nl.komponents.kovenant.android
 
+import android.os.Process
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.buildJvmDispatcher
 import nl.komponents.kovenant.ui.KovenantUi
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -57,7 +58,7 @@ public fun configureKovenant(): Disposable {
         dispatcher = androidUiDispatcher()
     }
 
-    val callbackDispatcher = buildDispatcher {
+    val callbackDispatcher = buildJvmDispatcher {
         name = "kovenant-callback"
         concurrentTasks = 1
 
@@ -65,14 +66,18 @@ public fun configureKovenant(): Disposable {
             yielding(numberOfPolls = 100)
             blocking()
         }
+
+        threadFactory = createThreadFactory(android.os.Process.THREAD_PRIORITY_BACKGROUND)
     }
-    val workerDispatcher = buildDispatcher {
+    val workerDispatcher = buildJvmDispatcher {
         name = "kovenant-worker"
 
         pollStrategy {
             yielding(numberOfPolls = 100)
             blocking()
         }
+
+        threadFactory = createThreadFactory(android.os.Process.THREAD_PRIORITY_BACKGROUND)
     }
 
     Kovenant.context {
@@ -84,6 +89,15 @@ public fun configureKovenant(): Disposable {
         }
     }
     return DispatchersDisposable(workerDispatcher, callbackDispatcher)
+}
+
+private fun createThreadFactory(priority: Int) : (Runnable, String, Int) -> Thread = {
+    target, dispatcherName, id ->
+    val wrapper = Runnable {
+        Process.setThreadPriority(priority)
+        target.run()
+    }
+    Thread(wrapper, "$dispatcherName-$id")
 }
 
 
