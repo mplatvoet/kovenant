@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantCombineApi")
 package nl.komponents.kovenant.combine
 
 import nl.komponents.kovenant.Promise

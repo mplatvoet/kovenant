@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantDisruptor")
 package nl.komponents.kovenant.disruptor.queue
 
 import com.lmax.disruptor.EventFactory
@@ -28,7 +28,7 @@ import nl.komponents.kovenant.BlockingSupportWorkQueue
 import nl.komponents.kovenant.WorkQueue
 import com.lmax.disruptor.Sequence as Seq
 
-
+@JvmOverloads
 public fun disruptorWorkQueue(capacity: Int = 1024): WorkQueue<() -> Unit> {
     return DisruptorWorkQueue({ -> Unit }, capacity)
 }

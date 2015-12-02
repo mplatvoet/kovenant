@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantAndroidLooper")
 package nl.komponents.kovenant.android
 
 import android.os.Handler

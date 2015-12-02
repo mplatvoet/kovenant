@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantJvmApi")
 package nl.komponents.kovenant.jvm
 
 import nl.komponents.kovenant.Dispatcher
