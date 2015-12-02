@@ -18,6 +18,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+
+@file:JvmName("KovenantJfxDispatcher")
 package nl.komponents.kovenant.jfx
 
 import javafx.application.Platform

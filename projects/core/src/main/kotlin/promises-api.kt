@@ -224,6 +224,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the success value when done
      */
+    @Throws(Exception::class)
     public fun get(): V
 
     /**
@@ -234,6 +235,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the fail value when done
      */
+    @Throws(FailedException::class)
     public fun getError(): E
 
 

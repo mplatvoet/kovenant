@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantUiContext")
 package nl.komponents.kovenant.ui
 
 import nl.komponents.kovenant.Context
