@@ -14,8 +14,12 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `kotlin-stdlib:1.0.0-beta-2423`.
+Development branch build against `kotlin-stdlib:1.0.0-beta-3595`.
 Source and target compatibility is `1.6`
+
+###Snapshot repository
+A recent build can be found in the snapshots repository found at:
+`http://oss.sonatype.org/content/repositories/snapshots`
 
 ###Gradle
 ```groovy
