@@ -1,4 +1,7 @@
-[![CircleCI branch](https://img.shields.io/circleci/project/mplatvoet/kovenant/master.svg)](https://circleci.com/gh/mplatvoet/kovenant/tree/master) [![Maven Central](https://img.shields.io/maven-central/v/nl.komponents.kovenant/kovenant.svg)](http://search.maven.org/#browse%7C1069530195) [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/mplatvoet/kovenant/blob/master/LICENSE)
+[![CircleCI branch](https://img.shields.io/circleci/project/mplatvoet/kovenant/master.svg)](https://circleci.com/gh/mplatvoet/kovenant/tree/master) [![Maven Central](https://img.shields.io/maven-central/v/nl.komponents.kovenant/kovenant.svg)](http://search.maven.org/#browse%7C1069530195) [![DUB](https://img.shields.io/dub/l/vibe-d.svg)](https://github.com/mplatvoet/kovenant/blob/master/LICENSE.txt) 
+develop: [![Develop dependency status](https://www.versioneye.com/user/projects/55b088c23865620018000203/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55b088c23865620018000203)
+master: [![Master dependency status](https://www.versioneye.com/user/projects/55b088d23865620017000296/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55b088d23865620017000296)
+
 
 #Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org). 
@@ -14,13 +17,17 @@ async { "world" } and async { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-This version is build against `kotlin-stdlib:1.0.0-beta-1038`.
+Build against Kotlin 1.0 beta 3: `1.0.0-beta-3595`.
 Source and target compatibility is `1.6`
+
+###Snapshot repository
+Snapshot builds can be found at:
+`http://oss.sonatype.org/content/repositories/snapshots`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.0.+'
+    compile 'nl.komponents.kovenant:kovenant:3.0.0-beta.3'
 }
 ```
 
@@ -29,7 +36,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>[3.0.0,3.1.0)</version>
+	<version>3.0.0-beta.3</version>
 </dependency>
 ```
 

@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantJfx")
 package nl.komponents.kovenant.jfx
 
 import nl.komponents.kovenant.Dispatcher
@@ -36,7 +37,7 @@ public fun startKovenant() {
     }
 }
 
-
+@JvmOverloads
 public fun stopKovenant(force: Boolean = false) {
     val dispose = disposable.get()
     if (dispose != null && disposable.compareAndSet(dispose, null)) {

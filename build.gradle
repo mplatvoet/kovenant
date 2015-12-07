@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-beta-1038'
+    ext.kotlinVersion = '1.0.0-beta-3595'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -38,7 +38,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.0.0'
+        appVersion = '3.0.0-beta.3'
         appGroup = 'nl.komponents.kovenant'
 
 

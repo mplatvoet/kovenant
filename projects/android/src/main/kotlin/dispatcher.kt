@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantAndroidDispatcher")
 package nl.komponents.kovenant.android
 
 import android.os.Looper
@@ -34,6 +35,7 @@ public enum class DispatcherType {
 
 public fun androidUiDispatcher(): Dispatcher = BasicAndroidDispatcher.uiDispatcher
 
+@JvmOverloads
 public fun buildLooperDispatcher(looper: Looper,
                                  type: DispatcherType = DispatcherType.BASIC): Dispatcher {
     val executor = LooperExecutor(looper)
