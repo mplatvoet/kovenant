@@ -21,10 +21,7 @@
 
 package performance.disruptor
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.*
 import nl.komponents.kovenant.disruptor.queue.disruptorWorkQueue
 import support.fib
 import java.text.DecimalFormat
@@ -97,7 +94,7 @@ fun configureDispatcher() {
 
 fun validate(n: Int) {
     val promises = Array(n) { n ->
-        async {
+        task {
             val i = 13
             Pair(i, fib(i))
         }

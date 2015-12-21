@@ -23,7 +23,7 @@ package nl.komponents.kovenant.jvm
 
 import nl.komponents.kovenant.*
 import java.util.concurrent.Semaphore
-import nl.komponents.kovenant.async as baseAsync
+import nl.komponents.kovenant.task as baseTask
 
 /**
  * A Throttle restricts the number of concurrent tasks that are being executed. This runs on top of
@@ -50,7 +50,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
     public fun <V> registerTask(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
         if (semaphore.tryAcquire()) {
             if (workQueue.isEmpty()) {
-                return baseAsync(context, fn)
+                return baseTask(context, fn)
             }
             semaphore.release()
         }
@@ -147,7 +147,7 @@ private class AsyncTask<V>(private val context: Context, private val fn: () -> V
         get() = deferred.promise
 
     override fun schedule() {
-        baseAsync(context, fn).success(DirectDispatcherContext) {
+        baseTask(context, fn).success(DirectDispatcherContext) {
             deferred.resolve(it)
         }.fail(DirectDispatcherContext) {
             deferred.reject(it)
@@ -164,7 +164,7 @@ private class ThenTask<V, R>(private val promise: Promise<V, Exception>,
         if (promise.isFailure()) {
             deferred.reject(promise.getError())
         } else {
-            async(deferred.promise.context) { fn(promise.get()) }.success(DirectDispatcherContext) {
+            baseTask(deferred.promise.context) { fn(promise.get()) }.success(DirectDispatcherContext) {
                 deferred.resolve(it)
             }.fail(DirectDispatcherContext) {
                 deferred.reject(it)

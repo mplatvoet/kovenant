@@ -21,10 +21,10 @@
 
 package examples.done
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 
 fun main(args: Array<String>) {
-    val p = async {
+    val p = task {
         Thread.sleep(1000)
     }
     while (!p.isDone()) {

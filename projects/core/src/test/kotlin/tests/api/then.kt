@@ -37,13 +37,13 @@ class ThenTest {
 
     @Test fun thenSuccess() {
         var result = 0
-        async { 13 } then { it + 2 } success { result = it }
+        task { 13 } then { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
     @Test fun thenFail() {
         var count = 0
-        async { 13 } then { throw Exception() } fail { count++ }
+        task { 13 } then { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
     }
 
