@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 internal fun <V> concretePromise(context: Context, callable: () -> V): Promise<V, Exception>
-        = AsyncPromise(context, callable)
+        = TaskPromise(context, callable)
 
 internal fun <V, R> concretePromise(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
@@ -123,7 +123,7 @@ private class ThenPromise<V, R>(context: Context,
 
 }
 
-private class AsyncPromise<V>(context: Context, callable: () -> V) :
+private class TaskPromise<V>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private @Volatile var task: (() -> Unit)?

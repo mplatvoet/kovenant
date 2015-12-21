@@ -19,7 +19,7 @@ control.progress.update {
 }
 
 val steps = 40
-async {
+task {
     for (i in 1..steps ) {
         control.value = i / steps.toDouble()
         Thread.sleep(100)

@@ -62,7 +62,7 @@ val myThrottle = Throttle(2, myContext)
 ```
 
 ###simple tasks
-The easiest way to use a `Throttle` instance is by using the `task` method. This creates a task similar to the general `async` method that gets scheduled somewhere in the future. The result is, of course, a `Promise`
+The easiest way to use a `Throttle` instance is by using the `task` method. This creates a task similar to the general `task` method that gets scheduled somewhere in the future. The result is, of course, a `Promise`
 
 ```kotlin
 myThrottle.task {

@@ -6,7 +6,7 @@
 The easy asynchronous library for Kotlin. With extensions for Android, LMAX Disruptor, JavaFX and much more.
 
 ```kt
-async {
+task {
 	//some (long running) operation, or just:
 	1 + 1
 } then { 

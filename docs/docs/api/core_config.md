@@ -8,7 +8,7 @@ The `Context` object is basically the current configuration. It can be obtained 
 by `Kovenant.context {...}`. Refer to the [configuration](#configuration) section for the options. To create 
 a completely new `Context` just use `Kovenant.createContext {...}` which uses the exact same options as `Kovenant.context {...}`.
 
-Functions like [`deferred`](core_usage.md#deferred) and [`async`](core_usage.md#async) have a first parameter which
+Functions like [`deferred`](core_usage.md#deferred) and [`task`](core_usage.md#task) have a first parameter which
 is actually a `Context` instance. By default this is `Kovenant.context` so normally you don't have worry about this.
 Just for that case you want to work with multiple configurations at once you have the possibility.
  
@@ -20,14 +20,14 @@ fun main(args: Array<String>) {
         workerContext.dispatcher = buildDispatcher { name = "work-new" }
     }
 
-    async {
-        println("default async $threadName")
+    task {
+        println("default task $threadName")
     } success {
         println("default success $threadName")
     }
 
-    async(ctx) {
-        println("ctx async $threadName")
+    task(ctx) {
+        println("ctx task $threadName")
     } success {
         println("ctx success $threadName")
     }
@@ -140,7 +140,7 @@ Kovenant.context {
 Kovenant.context {
     // Specify a new worker dispatcher.
     // this dispatcher is responsible for
-    // work that is executed by async and
+    // work that is executed by `task` and
     // then functions so this is basically
     // work that is expected to run a bit
     // longer

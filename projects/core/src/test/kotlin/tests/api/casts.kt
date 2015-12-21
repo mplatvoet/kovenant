@@ -36,7 +36,7 @@ class CastTest {
         }
     }
 
-    @Test fun asyncPromise() {
+    @Test fun taskPromise() {
         val promise = task { 13 }
         assertFalse(promise is Deferred<*,*>, "Promise created by async shouldn't be castable to a Deferred")
     }

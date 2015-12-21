@@ -11,7 +11,7 @@ promise fail.
   
 
 ```kt
-val fib20Promise = async { fib(20) }
+val fib20Promise = task { fib(20) }
 val helloWorldPromise = async { "hello world" }
 
 combine(fib20Promise, helloWorldPromise) success {
@@ -23,7 +23,7 @@ combine(fib20Promise, helloWorldPromise) success {
 For the special case of `combine` with only two parameters there is also an extension method `and` available. This
 simply creates nicer looking code and plays well with conciseness fetishists:
 ```kt
-async { fib(20) } and async { "hello world" } success {
+task { fib(20) } and task { "hello world" } success {
     println("${it.second}, fib(20) = ${it.first}")
 }
 ```
