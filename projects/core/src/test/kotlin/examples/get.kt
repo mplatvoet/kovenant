@@ -22,12 +22,12 @@
 package examples.get
 
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import support.fib
 
 
 fun main(args: Array<String>) {
-    val (n, fib) = async { Pair(30, fib(30)) }.get()
+    val (n, fib) = task { Pair(30, fib(30)) }.get()
     println("fib($n) = $fib")
 }
 

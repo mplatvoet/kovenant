@@ -22,7 +22,7 @@
 
 package validate.get
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import support.fib
 import java.util.*
 
@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
     val results = ArrayList<Int>(attempts)
 
     for (i in 1..10000) {
-        val value = async { fib(i % 23) }.get()
+        val value = task { fib(i % 23) }.get()
         results.add(value)
     }
 

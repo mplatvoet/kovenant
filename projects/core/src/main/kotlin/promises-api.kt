@@ -279,9 +279,21 @@ public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> 
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
-@JvmOverloads
+@Deprecated("async is a keyword, favor task instead", ReplaceWith("task(context, body)"))
 public fun <V> async(context: Context = Kovenant.context,
-                    body: () -> V): Promise<V, Exception> = concretePromise(context, body)
+                    body: () -> V): Promise<V, Exception> = task(context, body)
+
+/**
+ * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
+ * Any Exception is considered a failure.
+ *
+ * @param body the task to be executed
+ * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
+ * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
+ */
+@JvmOverloads
+public fun <V> task(context: Context = Kovenant.context,
+                     body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.

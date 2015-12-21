@@ -21,8 +21,8 @@
 
 package examples.progress
 
-import nl.komponents.kovenant.async
 import nl.komponents.kovenant.progress.attachToKovenant
+import nl.komponents.kovenant.task
 import nl.komponents.progress.Progress
 
 fun main(args: Array<String>) {
@@ -35,7 +35,7 @@ fun main(args: Array<String>) {
     }
 
     val steps = 40
-    async {
+    task {
         for (i in 1..steps ) {
             control.value = i / steps.toDouble()
             Thread.sleep(100)

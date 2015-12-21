@@ -9,7 +9,7 @@ master: [![Master dependency status](https://www.versioneye.com/user/projects/55
 The easy asynchronous library for Kotlin. With extensions for Android, LMAX Disruptor, JavaFX and much more.
 
 ```kt
-async { "world" } and async { "Hello" } success {
+task { "world" } and task { "Hello" } success {
     println("${it.second} ${it.first}!")
 }
 ```

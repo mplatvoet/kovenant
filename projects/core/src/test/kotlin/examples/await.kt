@@ -22,7 +22,7 @@
 package examples.await
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import java.util.concurrent.CountDownLatch
 
 
@@ -38,7 +38,7 @@ public fun await(vararg promises: Promise<*, *>) {
 
 
 fun main (args: Array<String>) {
-    val promises = Array(50) { async { Thread.sleep(100L) }}
+    val promises = Array(50) { task { Thread.sleep(100L) } }
 
     print("waiting...")
     await(*promises)

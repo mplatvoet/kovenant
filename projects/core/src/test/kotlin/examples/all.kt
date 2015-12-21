@@ -22,13 +22,13 @@
 package examples.all
 
 import nl.komponents.kovenant.all
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import support.fib
 
 
 fun main(args: Array<String>) {
     val promises = Array(10) { n ->
-        async {
+        task {
             Pair(n, fib(n))
         }
     }

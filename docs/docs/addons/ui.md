@@ -14,7 +14,7 @@ library provides `successUi`, `failUi` and `alwaysUi`. They operate just like th
 callbacks can be mixed freely. 
 
 ```kt
-val promise = async {
+val promise = task {
     foo() //produces 'bar'
 } 
 

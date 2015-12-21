@@ -21,11 +21,11 @@
 
 package example.ui
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import nl.komponents.kovenant.ui.successUi
 
 fun main(args: Array<String>) {
-    async {
+    task {
         1 + 1
     } successUi {
         //bla bla

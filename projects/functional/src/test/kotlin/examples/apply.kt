@@ -23,7 +23,6 @@
 package examples.apply
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
 import nl.komponents.kovenant.functional.apply
 
 fun main(args: Array<String>) {
