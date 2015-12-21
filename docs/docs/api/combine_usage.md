@@ -12,7 +12,7 @@ promise fail.
 
 ```kt
 val fib20Promise = task { fib(20) }
-val helloWorldPromise = async { "hello world" }
+val helloWorldPromise = task { "hello world" }
 
 combine(fib20Promise, helloWorldPromise) success {
     val (fib, msg) = it

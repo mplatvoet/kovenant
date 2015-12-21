@@ -31,13 +31,13 @@ fun main(args: Array<String>) {
     }
 
     task {
-        println("default async $threadName")
+        println("default task $threadName")
     } success {
         println("default success $threadName")
     }
 
     task(ctx) {
-        println("ctx async $threadName")
+        println("ctx task $threadName")
     } success {
         println("ctx success $threadName")
     }
