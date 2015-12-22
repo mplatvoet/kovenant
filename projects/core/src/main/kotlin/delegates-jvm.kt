@@ -21,7 +21,10 @@
 
 package nl.komponents.kovenant.properties
 
-import nl.komponents.kovenant.*
+import nl.komponents.kovenant.Context
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KProperty
 
@@ -69,7 +72,7 @@ public class LazyPromise<T>(
             }
             //Signal other threads are more important at the moment
             //Since another thread is initializing this property
-            Thread.yield()
+            Thread.`yield`()
         }
         return promise!!
     }

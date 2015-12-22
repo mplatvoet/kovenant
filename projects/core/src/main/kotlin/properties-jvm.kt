@@ -51,7 +51,7 @@ public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?
 
             //Signal other threads are more important at the moment
             //Since another thread is initializing this property
-            Thread.yield()
+            Thread.`yield`()
         }
         return unmask<T>(value)
     }

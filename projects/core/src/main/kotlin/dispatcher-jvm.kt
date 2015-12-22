@@ -470,8 +470,8 @@ private class YieldingPollStrategy<V : Any>(private val pollable: Pollable<V>,
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
             if (value != null) return value
-            Thread.yield()
-            if (Thread.currentThread().isInterrupted()) break
+            Thread.`yield`()
+            if (Thread.currentThread().isInterrupted) break
         }
         return null
     }
@@ -491,7 +491,7 @@ private class BusyPollStrategy<V : Any>(private val pollable: Pollable<V>,
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
             if (value != null) return value
-            if (Thread.currentThread().isInterrupted()) break
+            if (Thread.currentThread().isInterrupted) break
         }
         return null
     }
