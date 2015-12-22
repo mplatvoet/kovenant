@@ -23,7 +23,7 @@ package tests.api.contexts
 
 import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -52,14 +52,14 @@ class MultipleContextsTest {
     @Test fun defaultContext() {
         var calls = 0
         defaultDispatcher.onOffered = { ++calls }
-        async { 13 }
+        task { 13 }
         assertEquals(1, calls, "should by called on default dispatcher")
     }
 
     @Test fun alternateContext() {
         var calls = 0
         alternateDispatcher.onOffered = { ++calls }
-        async(context) { 13 }
+        task(context) { 13 }
         assertEquals(1, calls, "should by called on default dispatcher")
     }
 }

@@ -21,20 +21,20 @@
 
 package examples.combine
 
-import nl.komponents.kovenant.async
 import nl.komponents.kovenant.combine.and
+import nl.komponents.kovenant.task
 import support.fib
 
 fun main(args: Array<String>) {
-    val fib20Promise = async { fib(20) }
-    val helloWorldPromise = async { "hello world" }
+    val fib20Promise = task { fib(20) }
+    val helloWorldPromise = task { "hello world" }
 
     fib20Promise and helloWorldPromise success {
         val (fib, msg) = it
         println("$msg, fib(20) = $fib")
     }
 
-    async { fib(20) } and async { "hello world" } success {
+    task { fib(20) } and task { "hello world" } success {
         println("${it.second}, fib(20) = ${it.first}")
     }
 }

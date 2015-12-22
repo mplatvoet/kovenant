@@ -22,8 +22,8 @@
 package examples.covariance
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
 import nl.komponents.kovenant.functional.unwrap
+import nl.komponents.kovenant.task
 
 fun main(args: Array<String>) {
     createBase() success {
@@ -32,12 +32,12 @@ fun main(args: Array<String>) {
 }
 
 fun createBase() : Promise<Base, Exception> {
-    return async {
+    return task {
         createDerived()
     }.unwrap()
 }
 
-fun createDerived() : Promise<Derived, Exception> = async { Derived() }
+fun createDerived() : Promise<Derived, Exception> = task { Derived() }
 
 open class Base
 open class Derived : Base()

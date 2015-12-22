@@ -40,11 +40,11 @@ One important consideration is the use of top level functions versus `class` or
 [`object`](http://kotlinlang.org/docs/reference/object-declarations.html#object-declarations) bound functions. To
 illustrate:
 ```kt
-async {
+task {
     foo()
 }
 //versus
-Kovenant.async {
+Kovenant.task {
     foo()
 }
 ```

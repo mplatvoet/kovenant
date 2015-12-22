@@ -22,7 +22,7 @@
 package validate.validate01
 
 import nl.komponents.kovenant.all
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,7 +37,7 @@ fun validate(n:Int) {
     val successes = AtomicInteger()
     val promises = Array(n) { n ->
         errors.incrementAndGet()
-        async {
+        task {
             val i = Random().nextInt(10)
             Pair(i, fib(i))
         } success {

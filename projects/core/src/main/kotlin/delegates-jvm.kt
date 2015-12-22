@@ -21,10 +21,7 @@
 
 package nl.komponents.kovenant.properties
 
-import nl.komponents.kovenant.Context
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KProperty
 
@@ -64,7 +61,7 @@ public class LazyPromise<T>(
                 val threadNumber = counter.incrementAndGet()
                 if (threadNumber == 1) {
                     val fn = initializer!!
-                    promise = async(context ?: Kovenant.context) { fn() }
+                    promise = task(context ?: Kovenant.context) { fn() }
                     initializer = null // prevents memory leaking
                     threadCount = null //gc, you're up
                     break

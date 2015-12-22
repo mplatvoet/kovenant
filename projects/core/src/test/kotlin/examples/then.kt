@@ -21,12 +21,12 @@
 
 package examples.then
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import nl.komponents.kovenant.then
 import support.fib
 
 fun main(args: Array<String>) {
-    async {
+    task {
         fib(20)
     } then {
         "fib(20) = $it, and fib(21) = (${fib(21)})"

@@ -3,21 +3,21 @@ part of [`kovenant-core`](../index.md#artifacts)
 
 ---
 
-##Async
-The easiest way to create a `Promise` is by using `async`, e.g.
+##Task
+The easiest way to create a `Promise` is by using `task`, e.g.
 ```kt
-val promise = async { foo() }
+val promise = task { foo() }
 ```
 This will execute function `foo()` asynchronously and immediately returns a `Promise<V, Exception>` where `V` is
 the inferred return type of `foo()`. If `foo()` completes successful the `Promise` is resolved as successful. Any 
 `Exception` from `foo()` is considered a failure.
 
-`async` dispatches the work on the [`workerContext`](core_config.md). 
+`task` dispatches the work on the [`workerContext`](core_config.md).
 
 ---
 
 ##Deferred
-With a `Deferred<V,E>` you can take matters in your own hand. Instead of relying on [`async`](#async) for resolving
+With a `Deferred<V,E>` you can take matters in your own hand. Instead of relying on [`task`](#task) for resolving
 or rejecting a promise it's up to the developer. You obtain a deferred object by simply calling `deferred<V, E>()`.
 From there you can either `resolve(V)` or `reject(E)` the deferred. This can only be set once and by default trying
 to resolve or reject multiple times throws an Exception. The behaviour can be [configured](core_config.md) though.
@@ -63,7 +63,7 @@ No matter what the result of the promise is, success or failure, `always` get fi
 [*Please read the extra note on the order of calling `success`, `fail` and `always`.*](#execution-order)
 
 ```kt
-val promise = async {
+val promise = task {
 	//mimicking those long running operations with:
 	1 + 1
 }
@@ -87,7 +87,7 @@ promise always {
 All callback registering functions return `this` Promise, thus previous example can be written without those intermediate variables
 
 ```kt
-async {
+task {
 	//some (long running) operation, or just:
 	1 + 1
 } success {
@@ -108,7 +108,7 @@ But you can also provide your own DispatcherContext for a specific callback.
 ```kt
 val dispatcherContext = //...
 
-async {
+task {
 	foo()
 }.success(dispatcherContext) {
 	bar()
@@ -123,7 +123,7 @@ Thus a promise can be passed around and anybody who's interested can get notifie
 Every callback will be called once and only once upon completion.
 
 ```kt
-async {
+task {
 	1 + 1
 } success {
 	println("1")	
@@ -147,10 +147,10 @@ The default behaviour can easily be broken though. For instance, if you configur
 val firstRef = AtomicReference<String>()
 val secondRef = AtomicReference<String>()
 
-val first = async { "hello" } success {
+val first = task { "hello" } success {
 	firstRef.set(it)
 }
-val second = async { "world" } success {
+val second = task { "world" } success {
 	secondRef.set(it)
 }
 
@@ -167,11 +167,11 @@ So don't just blindly change the callback `DispatcherContext` without actually u
 ---
 
 ##Then
-`then` operates similar to [`async`](#async) except that it takes the output from a previous `Promise` as its input.
+`then` operates similar to [`task`](#task) except that it takes the output from a previous `Promise` as its input.
 This allows you to chain units of work.
 
 ```kt
-async {
+task {
     fib(20)
 } then {
     "fib(20) = $it, and fib(21) = (${fib(21)})"
@@ -189,7 +189,7 @@ failed. The work of `then` is executed by the `workerContext`.
 as an extension function. The previous example would thus be:
 
 ```kt
-async {
+task {
     fib(20)
 } thenUse {
     "fib(20) = $this, and fib(21) = (${fib(21)})"
@@ -207,7 +207,7 @@ If the error value of the promise is an Exception then that is thrown directly, 
 with the error value wrapped in it.
 
 ```kt
-val fib20 : Int = async { fib(20) }.get()
+val fib20 : Int = task { fib(20) }.get()
 ```
 >Note that implementors should override this function because the fallback methods are far from efficient
 
@@ -224,7 +224,7 @@ it is successful or has failed. This comes in handy in combination with `get()`.
 
 ##Lazy Promise
 Kovenant provides a `lazyPromise` property delegate similar to Kotlin's standard library `Delegates.lazy {}`. 
-The difference with the standard library version is that initialization happens by an [`async`](#async) operation and
+The difference with the standard library version is that initialization happens by an [`task`](#task) operation and
 thus effectively on a background thread. This is particularly useful on platforms like Android where you want to avoid
 initialization on the UI Thread. 
 
@@ -282,7 +282,7 @@ you can set `cancelOthersOnFail = false`. See [cancel](#cancel) for more on this
 
 ```kt
 val promises = Array(10) { n ->
-	async {
+	task {
 		Pair(n, fib(n))
 	}
 }
@@ -308,7 +308,7 @@ you can set `cancelOthersOnSuccess = false`. See [cancel](#cancel) for more on t
 
 ```kt
 val promises = Array(10) { n ->
-	async {
+	task {
 		while(!Thread.currentThread().isInterrupted()) {
 			val luckyNumber = Random(System.currentTimeMillis() * n).nextInt(100)
 			if (luckyNumber == 7) break
@@ -332,7 +332,7 @@ any (*promises) success { msg ->
 
 ##Cancel
 Any `Promise` that implements `CancelablePromise` allows itself to be cancelled. By default the promises returned
-from [`async`](#async), [`then`](#then) and [`thenUse`](#thenUse) are `CancelablePromise`s.
+from [`task`](#task), [`then`](#then) and [`thenUse`](#thenUse) are `CancelablePromise`s.
 
 Cancelling a promises is quite similar to [`Deferred.reject`](#deferred) as it finishes the promises as failed. Thus
 the callbacks `fail` and `always` are still executed. Cancel does also try to prevent the promised work from ever being 

@@ -3,6 +3,24 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.0.0-beta.4
+
+**core**
+
+* [KOV-63](http://issues.komponents.nl/youtrack/issue/KOV-63) rename `async` to `task`
+
+
+##v3.0.0-beta.3
+
+**general**
+
+* [KOV-27](http://issues.komponents.nl/youtrack/issue/KOV-27) Remove deprecated API
+
+**android**
+
+* [KOV-62](http://issues.komponents.nl/youtrack/issue/KOV-62) Background threads on android should have lower priority
+
+
 ##v2.9.0
 
 **general**

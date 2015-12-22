@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     Kovenant.context {
         // Specify a new worker dispatcher.
         // this dispatcher is responsible for
-        // work that is executed by async and
+        // work that is executed by task and
         // then functions so this is basically
         // work that is expected to run a bit
         // longer

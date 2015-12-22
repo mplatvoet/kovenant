@@ -21,14 +21,14 @@
 
 package example.android
 
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import nl.komponents.kovenant.ui.successUi
 
 fun main(args: Array<String>) {
 
     //Does not run since stub library is used
 
-    async {
+    task {
         1+1
     } successUi {
         //bla bla
