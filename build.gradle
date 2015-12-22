@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-beta-3595'
+    ext.kotlinVersion = '1.0.0-beta-4583'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -79,6 +79,7 @@ subprojects {
         compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}", optional
 
         testCompile "junit:junit:${junitVersion}"
+        testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     }
 
 

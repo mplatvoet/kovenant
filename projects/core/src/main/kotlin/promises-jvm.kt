@@ -199,7 +199,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     //Only call this method if we know resolving is eminent.
     private fun multipleCompletion(newValue: Any?) {
         while (!isDoneInternal()) {
-            Thread.yield()
+            Thread.`yield`()
         }
         context.multipleCompletion(rawValue(), newValue)
     }

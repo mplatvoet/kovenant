@@ -134,10 +134,10 @@ class GetAsyncTest {
         thread.start()
 
         startLatch.await()
-        loop@while (true) when (thread.getState()) {
+        loop@while (true) when (thread.state) {
             Thread.State.BLOCKED, Thread.State.WAITING, Thread.State.TIMED_WAITING -> break@loop
             Thread.State.TERMINATED -> break@loop
-            else -> Thread.yield()
+            else -> Thread.`yield`()
         }
         trigger()
         stopLatch.await()
