@@ -43,4 +43,4 @@ fun main(args: Array<String>) {
     }
 }
 
-private val threadName: String get() = Thread.currentThread().getName()
+private val threadName: String get() = Thread.currentThread().name

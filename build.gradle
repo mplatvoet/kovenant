@@ -207,7 +207,7 @@ task release() {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    gradleVersion = '2.10'
 
     doLast() {
         def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
