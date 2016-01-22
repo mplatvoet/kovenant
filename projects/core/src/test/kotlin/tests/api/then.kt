@@ -25,13 +25,13 @@ import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class ThenTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 

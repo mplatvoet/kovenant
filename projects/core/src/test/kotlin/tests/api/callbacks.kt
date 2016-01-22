@@ -24,16 +24,17 @@ package tests.api.promises
 import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.task
+import nl.komponents.kovenant.testMode
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class PromiseCallbackTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            kotlin.test.fail(it.message)
         }
     }
 
@@ -109,9 +110,8 @@ class PromiseCallbackTest {
 class PromiseCallbackOrderTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 

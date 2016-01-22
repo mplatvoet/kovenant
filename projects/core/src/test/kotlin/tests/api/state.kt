@@ -24,17 +24,18 @@ package tests.api.state
 import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.testMode
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class StateTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 

@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 @file:JvmName("KovenantContextApi")
+
 package nl.komponents.kovenant
 
 
@@ -118,4 +119,25 @@ private class StaticDispatcherContext(override val dispatcher: Dispatcher,
                                       override val errorHandler: (Exception) -> Unit) : DispatcherContext
 
 
+/**
+ * Puts Kovenant into test mode for the purpose of Unit Testing.
+ *
+ * - Sets all dispatchers into synchronous mode. So everything happens in order.
+ * - attaches the provided failures callback to all error handlers
+ * - maps the multiple completion handler to the provided failure handler
+ *
+ * @param failures callback for all Kovenant errors, defaults to throwing the exception
+ */
+public fun Kovenant.testMode(failures: (Throwable) -> Unit = { throw it }) {
+    context {
+        callbackContext.dispatcher = DirectDispatcher.instance
+        callbackContext.errorHandler = failures
 
+        workerContext.dispatcher = DirectDispatcher.instance
+        workerContext.errorHandler = failures
+
+        multipleCompletion = {
+            first, second -> failures(KovenantException("multiple completion: first = $first, second = $second"))
+        }
+    }
+}

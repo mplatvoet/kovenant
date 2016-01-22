@@ -26,13 +26,13 @@ import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class CastTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 

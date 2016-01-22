@@ -14,6 +14,7 @@ pages:
 - ['api/combine_usage.md', 'API Documentation', 'Combine']
 - ['api/functional_usage.md', 'API Documentation', 'Functional']
 - ['api/jvm_usage.md', 'API Documentation', 'JVM Specific']
+- ['api/test_usage.md', 'API Documentation', 'Testing']
 - ['android/features.md', 'Android','Features']
 - ['android/config.md', 'Android','Configuring']
 - ['addons/ui.md', 'Add-ons','UI']
