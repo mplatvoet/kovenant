@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 @file:JvmName("KovenantContextApi")
+
 package nl.komponents.kovenant
 
 
@@ -118,4 +119,16 @@ private class StaticDispatcherContext(override val dispatcher: Dispatcher,
                                       override val errorHandler: (Exception) -> Unit) : DispatcherContext
 
 
+public fun Kovenant.testMode(failures: (Throwable) -> Unit = { throw it }) {
+    Kovenant.context {
+        callbackContext.dispatcher = DirectDispatcher.instance
+        callbackContext.errorHandler = failures
 
+        workerContext.dispatcher = DirectDispatcher.instance
+        workerContext.errorHandler = failures
+
+        multipleCompletion = {
+            first, second -> failures(KovenantException("multiple completion: first = $first, second = $second"))
+        }
+    }
+}
