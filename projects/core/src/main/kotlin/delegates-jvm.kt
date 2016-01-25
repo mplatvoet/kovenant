@@ -26,7 +26,6 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.reflect.KProperty
 
 
 public class LazyPromise<T>(
@@ -35,7 +34,7 @@ public class LazyPromise<T>(
         //that would lead to this property using another Context
         //than the rest of the program.
         private val context: Context?,
-        initializer: () -> T) /*: Lazy<Promise<T, Exception>>() */{
+        initializer: () -> T) : Lazy<Promise<T, Exception>> {
 
 
     private @Volatile var initializer: (() -> T)?
@@ -46,13 +45,8 @@ public class LazyPromise<T>(
         this.initializer = initializer
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Promise<T, Exception> = initOrGetPromise()
-/*
-    //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()
     override fun isInitialized(): Boolean = promise != null
-*/
 
     private fun initOrGetPromise(): Promise<T, Exception> {
         // Busy/Spin lock, expecting async to return quickly
