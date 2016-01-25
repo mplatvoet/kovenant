@@ -25,7 +25,7 @@ Developed with the following [goals](misc/goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-Build against Kotlin 1.0 beta 4: `1.0.0-beta-4584`.
+Build against Kotlin 1.0 beta 4: `1.0.0-beta-4589`.
 Source and target compatibility is `1.6`
 
 ###Snapshot repository

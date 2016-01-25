@@ -17,7 +17,7 @@ task { "world" } and task { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-Build against Kotlin 1.0 beta 4: `1.0.0-beta-4584`.
+Build against Kotlin 1.0 beta 4: `1.0.0-beta-4589`.
 Source and target compatibility is `1.6`
 
 ###Snapshot repository
