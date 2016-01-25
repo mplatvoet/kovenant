@@ -22,7 +22,13 @@
 
 project.description = "Progress tracking Kovenant extensions"
 
+repositories {
+    maven {
+        url "http://dl.bintray.com/mplatvoet/komponents"
+    }
+}
+
 dependencies {
     compile project(':kovenant-core')
-    compile 'nl.komponents.progress:progress-core:1.0.0-beta.4'
+    compile 'nl.komponents.progress:progress-core:1.0.0-rc.01007'
 }

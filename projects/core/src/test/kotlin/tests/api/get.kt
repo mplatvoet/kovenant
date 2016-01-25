@@ -60,7 +60,7 @@ class GetTest {
 
     @Test fun failResultException() {
         val promise = Promise.ofFail<Int, Exception>(Exception("bummer"))
-        var thrown = false
+        var thrown: Boolean
         try {
             promise.get()
             fail("Should not be reachable")
@@ -74,7 +74,7 @@ class GetTest {
 
     @Test fun failResultValue() {
         val promise = Promise.ofFail<Int, String>("bummer")
-        var thrown = false
+        var thrown: Boolean
         try {
             promise.get()
             fail("Should not be reachable")

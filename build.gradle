@@ -20,12 +20,15 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-beta-4589'
+    ext.kotlinVersion = '1.0.0-rc-1007'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "http://dl.bintray.com/kotlin/kotlin-eap"
+        }
         maven {
             url 'http://oss.sonatype.org/content/repositories/snapshots'
         }
@@ -38,7 +41,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.0.0-beta.4'
+        appVersion = '3.0.0-rc.01007'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -56,6 +59,9 @@ subprojects {
         mavenCentral()
         maven {
             url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
+        maven {
+            url "http://dl.bintray.com/kotlin/kotlin-eap"
         }
         maven {
             url 'https://oss.sonatype.org/content/groups/staging'
