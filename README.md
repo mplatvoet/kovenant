@@ -65,6 +65,9 @@ Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=p
 ##Release notes
 See [Changelog](http://kovenant.komponents.nl/changelog/) for release notes
 
+##Slack
+Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com). 
+
 ## Recommended libraries:
 Other libraries for Kotlin applications
 
