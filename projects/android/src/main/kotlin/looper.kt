@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 internal class LooperExecutor(private val looper: Looper) : Handler.Callback {
-    public companion object {
+    companion object {
         val main: LooperExecutor = LooperExecutor(Looper.getMainLooper())
     }
 
@@ -46,7 +46,7 @@ internal class LooperExecutor(private val looper: Looper) : Handler.Callback {
         return true
     }
 
-    public fun claimTrackingId(): Int {
+    fun claimTrackingId(): Int {
         var id: Int
         do {
             id = idCounter.incrementAndGet()
@@ -55,11 +55,11 @@ internal class LooperExecutor(private val looper: Looper) : Handler.Callback {
     }
 
 
-    public fun tryRemove(trackingId: Int) {
+    fun tryRemove(trackingId: Int) {
         handler.removeMessages(trackingId)
     }
 
-    public fun submit(runnable: Runnable, trackingId: Int = untrackedId) {
+    fun submit(runnable: Runnable, trackingId: Int = untrackedId) {
         val message = handler.obtainMessage(trackingId, runnable)
         handler.sendMessage(message)
     }

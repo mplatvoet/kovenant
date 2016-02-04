@@ -17,17 +17,13 @@ task { "world" } and task { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-Build against Kotlin 1.0 beta 4: `1.0.0-beta-4589`.
+Build against Kotlin 1.0 rc: `1.0.0-rc-1036`.
 Source and target compatibility is `1.6`
-
-###Snapshot repository
-Snapshot builds can be found at:
-`http://oss.sonatype.org/content/repositories/snapshots`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.0.0-beta.4'
+    compile 'nl.komponents.kovenant:kovenant:3.0.0-rc.1036'
 }
 ```
 
@@ -36,7 +32,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>3.0.0-beta.4</version>
+	<version>3.0.0-rc.1036</version>
 </dependency>
 ```
 

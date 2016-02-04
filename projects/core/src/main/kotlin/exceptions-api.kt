@@ -22,12 +22,12 @@
 package nl.komponents.kovenant
 
 
-public open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
 
-public open class CancelException : KovenantException()
+open class CancelException : KovenantException()
 
-public open class ConfigurationException(message: String) : KovenantException(message)
+open class ConfigurationException(message: String) : KovenantException(message)
 
-public open class FailedException(val error: Any?) : KovenantException(error.toString())
+open class FailedException(val error: Any?) : KovenantException(error.toString())
 
-public open class UnsupportedException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)
+open class UnsupportedException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)

@@ -22,15 +22,15 @@
 package nl.komponents.kovenant
 
 
-public interface Offerable<V : Any> {
+interface Offerable<V : Any> {
     fun offer(elem: V): Boolean
 }
 
-public interface Pollable<V : Any> {
+interface Pollable<V : Any> {
     fun poll(block: Boolean = false, timeoutMs: Long = -1L): V?
 }
 
-public interface WorkQueue<V : Any> : Offerable<V>, Pollable<V> {
+interface WorkQueue<V : Any> : Offerable<V>, Pollable<V> {
     fun size(): Int
 
     fun isEmpty(): Boolean = size() == 0

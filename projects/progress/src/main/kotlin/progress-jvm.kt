@@ -26,7 +26,6 @@ import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.progress.Progress
 
-@JvmOverloads
-public fun Progress.Companion.attachToKovenant(context: Context = Kovenant.context) {
-    Progress.defaultExecutor = { context.callbackContext.offer(it) }
+@JvmOverloads fun Progress.Companion.attachToKovenant(context: Context = Kovenant.context) {
+    defaultExecutor = { context.callbackContext.offer(it) }
 }

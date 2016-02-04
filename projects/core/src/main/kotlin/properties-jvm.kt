@@ -25,8 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.properties.ReadWriteProperty
 
 
-@Suppress("UNCHECKED_CAST")
-public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
+@Suppress("UNCHECKED_CAST") class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?, T> {
     private @Volatile var threadCount: AtomicInteger? = AtomicInteger(0)
     private @Volatile var initializer: (() -> T)?
     private @Volatile var value: Any? = null
@@ -35,7 +34,7 @@ public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?
         this.initializer = initializer
     }
 
-    public override operator fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): T {
+    override operator fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): T {
         //Busy /Spin lock, expect quick initialization
         while (value == null) {
             val counter = threadCount
@@ -56,23 +55,22 @@ public class ThreadSafeLazyVar<T>(initializer: () -> T) : ReadWriteProperty<Any?
         return unmask<T>(value)
     }
 
-    public override operator fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, value: T) {
+    override operator fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, value: T) {
         this.value = mask(value)
     }
 
     val initialized: Boolean get() = value != null
 }
 
-@Suppress("UNCHECKED_CAST")
-public class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
+@Suppress("UNCHECKED_CAST") class TrackChangesVar<T>(private val source: () -> T) : ReadWriteProperty<Any?, T> {
     private @Volatile var value: Any? = null
 
-    public override operator fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): T {
+    override operator fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): T {
         val curVal = value
         return if (curVal != null) unmask<T>(curVal) else source()
     }
 
-    public override operator fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, value: T) {
+    override operator fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, value: T) {
         this.value = mask(value)
     }
 
