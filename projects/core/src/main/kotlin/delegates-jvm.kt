@@ -24,18 +24,18 @@ package nl.komponents.kovenant.properties
 import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KProperty
 
 
-public class LazyPromise<T>(
+class LazyPromise<T>(
         //Need to allow `null` context because we could easily
         //create this property before Kovenant gets configured.
         //that would lead to this property using another Context
         //than the rest of the program.
         private val context: Context?,
-        initializer: () -> T) /*: Lazy<Promise<T, Exception>>() */{
+        initializer: () -> T) : Lazy<Promise<T, Exception>> {
 
 
     private @Volatile var initializer: (() -> T)?
@@ -46,13 +46,10 @@ public class LazyPromise<T>(
         this.initializer = initializer
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): Promise<T, Exception> = initOrGetPromise()
-/*
     //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()
     override fun isInitialized(): Boolean = promise != null
-*/
+
 
     private fun initOrGetPromise(): Promise<T, Exception> {
         // Busy/Spin lock, expecting async to return quickly
@@ -64,7 +61,7 @@ public class LazyPromise<T>(
                 val threadNumber = counter.incrementAndGet()
                 if (threadNumber == 1) {
                     val fn = initializer!!
-                    promise = async(context ?: Kovenant.context) { fn() }
+                    promise = task(context ?: Kovenant.context) { fn() }
                     initializer = null // prevents memory leaking
                     threadCount = null //gc, you're up
                     break
@@ -72,7 +69,7 @@ public class LazyPromise<T>(
             }
             //Signal other threads are more important at the moment
             //Since another thread is initializing this property
-            Thread.yield()
+            Thread.`yield`()
         }
         return promise!!
     }

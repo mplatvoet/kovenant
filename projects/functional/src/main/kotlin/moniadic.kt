@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantFnMoniadic")
 package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.*
@@ -34,7 +34,7 @@ import nl.komponents.kovenant.*
  *
  * @param fn the transform function.
  */
-public infix fun <V, R> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exception> = then(fn)
+infix fun <V, R> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exception> = then(fn)
 
 /**
  * Asynchronously map the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -48,7 +48,7 @@ public infix fun <V, R> Promise<V, Exception>.map(fn: (V) -> R): Promise<R, Exce
  * @param context the on which the map function and returned Promise operate
  * @param bind the transform function.
  */
-public fun <V, R> Promise<V, Exception>.map(context: Context, bind: (V) -> R): Promise<R, Exception> = then(context, bind)
+fun <V, R> Promise<V, Exception>.map(context: Context, bind: (V) -> R): Promise<R, Exception> = then(context, bind)
 
 
 /**
@@ -63,7 +63,7 @@ public fun <V, R> Promise<V, Exception>.map(context: Context, bind: (V) -> R): P
  *
  * @param bind the transform function.
  */
-public infix fun <V, R> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Exception>): Promise<R, Exception> = bind(context, fn)
+infix fun <V, R> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Exception>): Promise<R, Exception> = bind(context, fn)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -78,7 +78,7 @@ public infix fun <V, R> Promise<V, Exception>.bind(fn: (V) -> Promise<R, Excepti
  * @param context the on which the bind and returned Promise operate
  * @param bind the transform function.
  */
-public fun <V, R> Promise<V, Exception>.bind(context: Context, fn: (V) -> Promise<R, Exception>): Promise<R, Exception> {
+fun <V, R> Promise<V, Exception>.bind(context: Context, fn: (V) -> Promise<R, Exception>): Promise<R, Exception> {
     if (isDone()) when {
         isSuccess() -> {
             val deferred = deferred<R, Exception>(context)
@@ -125,7 +125,7 @@ private fun <R, V> bindAsync(bind: (V) -> Promise<R, Exception>,
  *
  * @param promise Promise containing the map function
  */
-public infix fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+infix fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
     return this.apply(this.context, promise)
 }
 
@@ -140,7 +140,7 @@ public infix fun <V, R> Promise<V, Exception>.apply(promise: Promise<(V) -> R, E
  * @param context the context on which the map function and the returned promise operate.
  * @param promise Promise containing the map function
  */
-public fun <V, R> Promise<V, Exception>.apply(context: Context, promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
+fun <V, R> Promise<V, Exception>.apply(context: Context, promise: Promise<(V) -> R, Exception>): Promise<R, Exception> {
     if (isDone()) when {
         isDone() -> {
             val deferred = deferred<R, Exception>(context)

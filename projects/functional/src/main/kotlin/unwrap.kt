@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantFnUnwrap")
 package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.Context
@@ -39,7 +39,7 @@ import nl.komponents.kovenant.deferred
  * @param context the `Context` on which the returned `Promise` operates
  * @return the unwrapped Promise
  */
-public fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
+fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
     if (isDone()) when {
         isSuccess() -> return get().withContext(context)
         isFailure() -> return Promise.ofFail(getError(), context)

@@ -33,9 +33,8 @@ import kotlin.test.fail
 class GetTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 
@@ -61,7 +60,7 @@ class GetTest {
 
     @Test fun failResultException() {
         val promise = Promise.ofFail<Int, Exception>(Exception("bummer"))
-        var thrown = false
+        var thrown : Boolean
         try {
             promise.get()
             fail("Should not be reachable")
@@ -75,7 +74,7 @@ class GetTest {
 
     @Test fun failResultValue() {
         val promise = Promise.ofFail<Int, String>("bummer")
-        var thrown = false
+        var thrown : Boolean
         try {
             promise.get()
             fail("Should not be reachable")
@@ -134,10 +133,10 @@ class GetAsyncTest {
         thread.start()
 
         startLatch.await()
-        loop@while (true) when (thread.getState()) {
+        loop@while (true) when (thread.state) {
             Thread.State.BLOCKED, Thread.State.WAITING, Thread.State.TIMED_WAITING -> break@loop
             Thread.State.TERMINATED -> break@loop
-            else -> Thread.yield()
+            else -> Thread.`yield`()
         }
         trigger()
         stopLatch.await()

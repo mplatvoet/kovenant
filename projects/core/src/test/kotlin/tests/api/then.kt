@@ -25,25 +25,25 @@ import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.fail
 
 class ThenTest {
 
     @Before fun setup() {
-        Kovenant.context {
-            callbackContext.dispatcher = DirectDispatcher.instance
-            workerContext.dispatcher = DirectDispatcher.instance
+        Kovenant.testMode {
+            fail(it.message)
         }
     }
 
     @Test fun thenSuccess() {
         var result = 0
-        async { 13 } then { it + 2 } success { result = it }
+        task { 13 } then { it + 2 } success { result = it }
         assertEquals(15, result, "should chain")
     }
 
     @Test fun thenFail() {
         var count = 0
-        async { 13 } then { throw Exception() } fail { count++ }
+        task { 13 } then { throw Exception() } fail { count++ }
         assertEquals(1, count, "should report a failure")
     }
 

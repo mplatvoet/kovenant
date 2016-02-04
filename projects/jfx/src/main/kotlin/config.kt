@@ -18,6 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantJfx")
 package nl.komponents.kovenant.jfx
 
 import nl.komponents.kovenant.Dispatcher
@@ -30,14 +31,13 @@ import java.util.concurrent.atomic.AtomicReference
 private val initCount = AtomicInteger(0)
 private val disposable = AtomicReference<Disposable>(null)
 
-public fun startKovenant() {
+fun startKovenant() {
     initCount.onlyFirst {
         disposable.set(configureKovenant())
     }
 }
 
-
-public fun stopKovenant(force: Boolean = false) {
+@JvmOverloads fun stopKovenant(force: Boolean = false) {
     val dispose = disposable.get()
     if (dispose != null && disposable.compareAndSet(dispose, null)) {
         dispose.close(force)
@@ -50,7 +50,7 @@ public fun stopKovenant(force: Boolean = false) {
  *
  * @return `Disposable` to properly shutdown Kovenant
  */
-public fun configureKovenant(): Disposable {
+fun configureKovenant(): Disposable {
     KovenantUi.uiContext {
         dispatcher = JFXDispatcher.instance
     }
@@ -82,7 +82,7 @@ public fun configureKovenant(): Disposable {
  * Disposes of a resource.
  *
  */
-public interface Disposable {
+interface Disposable {
     fun close(force: Boolean = false)
 }
 

@@ -17,7 +17,7 @@ callbacks can be mixed freely. If a callback is added to an already resolved `Pr
 without scheduling. If you want to force scheduling just pas `alwaysSchedule = true` along.
 
 ```kt
-val promise = async {
+val promise = task {
     foo() //produces 'bar'
 } 
 

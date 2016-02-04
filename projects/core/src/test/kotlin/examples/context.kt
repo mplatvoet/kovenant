@@ -22,7 +22,7 @@
 package examples.context
 
 import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 
 fun main(args: Array<String>) {
     val ctx = Kovenant.createContext {
@@ -30,17 +30,17 @@ fun main(args: Array<String>) {
         workerContext.dispatcher { name = "work-new" }
     }
 
-    async {
-        println("default async $threadName")
+    task {
+        println("default task $threadName")
     } success {
         println("default success $threadName")
     }
 
-    async(ctx) {
-        println("ctx async $threadName")
+    task(ctx) {
+        println("ctx task $threadName")
     } success {
         println("ctx success $threadName")
     }
 }
 
-private val threadName: String get() = Thread.currentThread().getName()
+private val threadName: String get() = Thread.currentThread().name

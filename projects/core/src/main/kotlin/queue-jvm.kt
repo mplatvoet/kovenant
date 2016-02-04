@@ -24,21 +24,21 @@ package nl.komponents.kovenant
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-public class NonBlockingWorkQueue<V : Any>() : BlockingSupportWorkQueue<V>() {
+class NonBlockingWorkQueue<V : Any>() : BlockingSupportWorkQueue<V>() {
     private val queue = ConcurrentLinkedQueue<V>()
 
     override fun tryPoll(): V? = queue.poll()
     override fun tryOffer(elem: V): Boolean = queue.offer(elem)
 
-    public override fun size(): Int = queue.size
+    override fun size(): Int = queue.size
 
-    public override fun isEmpty(): Boolean = queue.isEmpty()
-    public override fun isNotEmpty(): Boolean = !isEmpty()
+    override fun isEmpty(): Boolean = queue.isEmpty()
+    override fun isNotEmpty(): Boolean = !isEmpty()
 
-    public override fun remove(elem: Any?): Boolean = queue.removeRaw(elem)
+    override fun remove(elem: Any?): Boolean = queue.remove(elem)
 }
 
-public abstract class BlockingSupportWorkQueue<V : Any>() : WorkQueue<V> {
+abstract class BlockingSupportWorkQueue<V : Any>() : WorkQueue<V> {
     private val waitingThreads = AtomicInteger(0)
 
     //yes I could also use a ReentrantLock with a Condition but

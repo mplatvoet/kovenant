@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 
 internal fun <V> concretePromise(context: Context, callable: () -> V): Promise<V, Exception>
-        = AsyncPromise(context, callable)
+        = TaskPromise(context, callable)
 
 internal fun <V, R> concretePromise(context: Context, promise: Promise<V, Exception>, callable: (V) -> R): Promise<R, Exception>
         = ThenPromise(context, promise, callable)
@@ -105,7 +105,7 @@ private class ThenPromise<V, R>(context: Context,
     }
 
 
-    override public fun cancel(error: Exception): Boolean {
+    override fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
@@ -123,7 +123,7 @@ private class ThenPromise<V, R>(context: Context,
 
 }
 
-private class AsyncPromise<V>(context: Context, callable: () -> V) :
+private class TaskPromise<V>(context: Context, callable: () -> V) :
         SelfResolvingPromise<V, Exception>(context),
         CancelablePromise<V, Exception> {
     private @Volatile var task: (() -> Unit)?
@@ -144,7 +144,7 @@ private class AsyncPromise<V>(context: Context, callable: () -> V) :
         context.workerContext.offer(wrapper)
     }
 
-    override public fun cancel(error: Exception): Boolean {
+    override fun cancel(error: Exception): Boolean {
         val wrapper = task
         if (wrapper != null) {
             task = null //avoid memory leaking
@@ -180,7 +180,7 @@ private abstract class SelfResolvingPromise<V, E>(context: Context) : AbstractPr
 }
 
 private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(context), Deferred<V, E> {
-    override public fun resolve(value: V) {
+    override fun resolve(value: V) {
         if (trySetSuccessResult(value)) {
             fireSuccess(value)
         } else {
@@ -188,7 +188,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
         }
     }
 
-    override public fun reject(error: E) {
+    override fun reject(error: E) {
         if (trySetFailResult(error)) {
             fireFail(error)
         } else {
@@ -199,7 +199,7 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     //Only call this method if we know resolving is eminent.
     private fun multipleCompletion(newValue: Any?) {
         while (!isDoneInternal()) {
-            Thread.yield()
+            Thread.`yield`()
         }
         context.multipleCompletion(rawValue(), newValue)
     }
@@ -217,7 +217,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     private @Volatile var result: Any? = null
 
 
-    override public fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
+    override fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E> {
         if (isFailureInternal()) return this
 
         //Bypass the queue if this promise is resolved and the queue is empty
@@ -235,7 +235,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-    override public fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E> {
+    override fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E> {
         if (isSuccessInternal()) return this
 
         //Bypass the queue if this promise is resolved and the queue is empty
@@ -253,7 +253,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-    override public fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E> {
+    override fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E> {
         //Bypass the queue if this promise is resolved and the queue is empty
         //no need to create excess nodes
         if ((isSuccessInternal() || isFailureInternal()) && isEmptyCallbacks()) {
@@ -272,7 +272,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         return this
     }
 
-    override public fun get(): V {
+    override fun get(): V {
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
@@ -297,7 +297,7 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         }
     }
 
-    override public fun getError(): E {
+    override fun getError(): E {
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
@@ -472,9 +472,9 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     }
 
     private interface CallbackContext<V, E> {
-        public fun runSuccess(value: V)
+        fun runSuccess(value: V)
 
-        public fun runFail(value: E)
+        fun runFail(value: E)
     }
 
     private abstract class CallbackContextNode<V, E> : CallbackContext<V, E> {

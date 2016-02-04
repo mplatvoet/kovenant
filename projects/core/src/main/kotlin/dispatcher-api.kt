@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantDispatcherApi")
 package nl.komponents.kovenant
 
 
@@ -75,7 +75,7 @@ interface Dispatcher {
  * A ProcessAwareDispatcher knows about the tasks it executes and can be used to optimize some calls
  * by avoiding scheduling but using direct execution instead
  */
-public interface ProcessAwareDispatcher : Dispatcher {
+interface ProcessAwareDispatcher : Dispatcher {
     /**
      * Determines whether the caller is operating on a process/thread/strand/fiber/etc owned by this
      * dispatcher.
@@ -85,9 +85,9 @@ public interface ProcessAwareDispatcher : Dispatcher {
     fun ownsCurrentProcess(): Boolean
 }
 
-public fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
+fun buildDispatcher(body: DispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
-public interface DispatcherBuilder {
+interface DispatcherBuilder {
     var name: String
 
     var concurrentTasks: Int
@@ -99,7 +99,7 @@ public interface DispatcherBuilder {
     fun pollStrategy(body: PollStrategyBuilder.() -> Unit)
 }
 
-public interface PollStrategyBuilder {
+interface PollStrategyBuilder {
     fun yielding(numberOfPolls: Int = 1000)
     fun busy(numberOfPolls: Int = 1000)
     fun blocking()
@@ -108,9 +108,9 @@ public interface PollStrategyBuilder {
 }
 
 
-public class DirectDispatcher private constructor() : Dispatcher {
+class DirectDispatcher private constructor() : Dispatcher {
     companion object {
-        public val instance: Dispatcher = DirectDispatcher()
+        val instance: Dispatcher = DirectDispatcher()
     }
 
     override fun offer(task: () -> Unit): Boolean {

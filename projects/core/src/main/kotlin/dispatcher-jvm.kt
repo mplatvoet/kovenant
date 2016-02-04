@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() -> Unit) {
+fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() -> Unit) {
     dispatcher = buildJvmDispatcher(body)
 }
 
-public fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
+fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
 internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
@@ -39,7 +39,7 @@ internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dis
     return builder.build()
 }
 
-public interface JvmDispatcherBuilder : DispatcherBuilder {
+interface JvmDispatcherBuilder : DispatcherBuilder {
     var threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread
 }
 
@@ -119,7 +119,7 @@ class ConcretePollStrategyBuilder() : PollStrategyBuilder {
         return ChainPollStrategyFactory(defaultFactories).build(pollable)
     }
 
-    public fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
+    fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
         buildDefaultStrategy(pollable)
     } else {
         ChainPollStrategyFactory(factories).build(pollable)
@@ -431,7 +431,7 @@ private class NonBlockingDispatcher(val name: String,
 }
 
 
-public interface PollStrategy<V : Any> {
+interface PollStrategy<V : Any> {
     fun get(): V?
 }
 
@@ -470,8 +470,8 @@ private class YieldingPollStrategy<V : Any>(private val pollable: Pollable<V>,
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
             if (value != null) return value
-            Thread.yield()
-            if (Thread.currentThread().isInterrupted()) break
+            Thread.`yield`()
+            if (Thread.currentThread().isInterrupted) break
         }
         return null
     }
@@ -491,7 +491,7 @@ private class BusyPollStrategy<V : Any>(private val pollable: Pollable<V>,
         for (i in 0..attempts) {
             val value = pollable.poll(block = false)
             if (value != null) return value
-            if (Thread.currentThread().isInterrupted()) break
+            if (Thread.currentThread().isInterrupted) break
         }
         return null
     }

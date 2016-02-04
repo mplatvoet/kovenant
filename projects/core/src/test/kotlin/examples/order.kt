@@ -22,7 +22,7 @@
 package examples.order
 
 import nl.komponents.kovenant.all
-import nl.komponents.kovenant.async
+import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicReference
 
 fun main(args: Array<String>) {
@@ -33,10 +33,10 @@ fun test() {
     val firstRef = AtomicReference<String>()
     val secondRef = AtomicReference<String>()
 
-    val first = async { "hello" } success {
+    val first = task { "hello" } success {
         firstRef.set(it)
     }
-    val second = async { "world" } success {
+    val second = task { "world" } success {
         secondRef.set(it)
     }
 

@@ -44,7 +44,7 @@ class ConcreteKovenant {
             throw ConfigurationException("Current context [$ctx] does not implement ReconfigurableContext and therefor can't be reconfigured.")
         }
 
-    public fun context(body: MutableContext.() -> Unit): Context {
+    fun context(body: MutableContext.() -> Unit): Context {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
@@ -65,7 +65,7 @@ class ConcreteKovenant {
         return context
     }
 
-    public fun <V, E>deferred(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
+    fun <V, E>deferred(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
 
     private class ThreadSafeContext() : ReconfigurableContext {
 

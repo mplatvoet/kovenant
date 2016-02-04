@@ -18,12 +18,12 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantUiApi")
 package nl.komponents.kovenant.ui
 
 import nl.komponents.kovenant.*
 
-
+@JvmOverloads
 public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
                            context: Context = Kovenant.context,
                            alwaysSchedule: Boolean = false,
@@ -51,6 +51,7 @@ public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
 
 public infix fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(alwaysSchedule = false, body = body)
 
+@JvmOverloads
 public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiContext,
                                           alwaysSchedule: Boolean,
                                           body: (value: V) -> Unit): Promise<V, E> {
@@ -73,6 +74,7 @@ public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiCo
 
 public infix fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(alwaysSchedule = false, body = body)
 
+@JvmOverloads
 public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
                                        alwaysSchedule: Boolean,
                                        body: (error: E) -> Unit): Promise<V, E> {
@@ -94,6 +96,7 @@ public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiConte
 
 public infix fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(alwaysSchedule = false, body = body)
 
+@JvmOverloads
 public fun <V, E> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
                                          alwaysSchedule: Boolean,
                                          body: () -> Unit): Promise<V, E> {

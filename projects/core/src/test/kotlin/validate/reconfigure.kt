@@ -21,10 +21,7 @@
 
 package validate.reconfigure
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.all
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.*
 import support.fib
 import java.util.Random
 import java.util.concurrent.atomic.AtomicInteger
@@ -40,7 +37,7 @@ fun validate(n:Int) {
 
     val firstBatch = Array(n) { n ->
         errors.incrementAndGet()
-        async {
+        task {
             val i = Random().nextInt(10)
             Pair(i, fib(i))
         } success {
@@ -56,7 +53,7 @@ fun validate(n:Int) {
 
     val secondBatch = Array(n) { n ->
         errors.incrementAndGet()
-        async {
+        task {
             val i = Random().nextInt(10)
             Pair(i, fib(i))
         } success {

@@ -18,7 +18,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-
+@file:JvmName("KovenantBulkApi")
 package nl.komponents.kovenant
 
 /**
@@ -38,9 +38,9 @@ package nl.komponents.kovenant
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnError whether an error of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun <V> all(vararg promises: Promise<V, Exception>,
-                        context: Context = Kovenant.context,
-                        cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
+@JvmOverloads fun <V> all(vararg promises: Promise<V, Exception>,
+                          context: Context = Kovenant.context,
+                          cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
     return when (promises.size) {
         0 -> Promise.ofSuccess(listOf(), context)
         else -> concreteAll(promises = *promises, context = context, cancelOthersOnError = cancelOthersOnError)
@@ -64,9 +64,9 @@ public fun <V> all(vararg promises: Promise<V, Exception>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnError whether an error of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun <V> all(promises: List<Promise<V, Exception>>,
-                        context: Context = Kovenant.context,
-                        cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
+@JvmOverloads fun <V> all(promises: List<Promise<V, Exception>>,
+                          context: Context = Kovenant.context,
+                          cancelOthersOnError: Boolean = true): Promise<List<V>, Exception> {
     return when (promises.size) {
         0 -> Promise.ofSuccess(listOf(), context)
         else -> concreteAll(promises = promises, context = context, cancelOthersOnError = cancelOthersOnError)
@@ -90,9 +90,9 @@ public fun <V> all(promises: List<Promise<V, Exception>>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnSuccess whether a success of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun <V> any(vararg promises: Promise<V, Exception>,
-                        context: Context = Kovenant.context,
-                        cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
+@JvmOverloads fun <V> any(vararg promises: Promise<V, Exception>,
+                          context: Context = Kovenant.context,
+                          cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
     return when (promises.size) {
         0 -> Promise.ofFail(listOf(), context)
         else -> concreteAny(promises = *promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)
@@ -115,9 +115,9 @@ public fun <V> any(vararg promises: Promise<V, Exception>,
  * @param context the context on which the newly created promise operates on. `Kovenant.context` by default.
  * @param cancelOthersOnSuccess whether a success of one promise attempts to cancel the other (unfinished) promises. `true` by default
  */
-public fun <V> any(promises: List<Promise<V, Exception>>,
-                        context: Context = Kovenant.context,
-                        cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
+@JvmOverloads fun <V> any(promises: List<Promise<V, Exception>>,
+                          context: Context = Kovenant.context,
+                          cancelOthersOnSuccess: Boolean = true): Promise<V, List<Exception>> {
     return when (promises.size) {
         0 -> Promise.ofFail(listOf(), context)
         else -> concreteAny(promises = promises, context = context, cancelOthersOnSuccess = cancelOthersOnSuccess)

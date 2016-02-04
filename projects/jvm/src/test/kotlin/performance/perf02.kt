@@ -21,10 +21,7 @@
 
 package performance.perf02
 
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.async
-import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.*
 import support.fib
 import java.text.DecimalFormat
 import java.util.*
@@ -114,7 +111,7 @@ private fun napTime() {
 
 fun validatePromises(n: Int) {
     val promises = Array(n) { n ->
-        async {
+        task {
             Pair(fibN, fib(fibN))
         }
     }

@@ -18,25 +18,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+@file:JvmName("KovenantContextApi")
 
 package nl.komponents.kovenant
 
 
-public object Kovenant {
+object Kovenant {
     private val concrete = ConcreteKovenant()
 
-    public var context: Context
+    var context: Context
         get() = concrete.context
         set(value) {
             concrete.context = value
         }
 
 
-    public fun context(body: MutableContext.() -> Unit): Context = concrete.context(body)
+    fun context(body: MutableContext.() -> Unit): Context = concrete.context(body)
 
-    public fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
+    fun createContext(body: MutableContext.() -> Unit): Context = concrete.createContext(body)
 
-    public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
+    fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
     fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
         return context.stop(force, timeOutMs, block)
@@ -44,7 +45,7 @@ public object Kovenant {
 
 }
 
-public interface Context {
+interface Context {
     val multipleCompletion: (curVal: Any?, newVal: Any?) -> Unit
 
     val callbackContext: DispatcherContext
@@ -57,7 +58,7 @@ public interface Context {
     }
 }
 
-public interface MutableContext : Context {
+interface MutableContext : Context {
     override val callbackContext: MutableDispatcherContext
     override val workerContext: MutableDispatcherContext
 
@@ -74,13 +75,13 @@ public interface MutableContext : Context {
 
 }
 
-public interface ReconfigurableContext : MutableContext {
+interface ReconfigurableContext : MutableContext {
     fun copy(): ReconfigurableContext
 }
 
-public interface DispatcherContext {
+interface DispatcherContext {
     companion object {
-        public fun create(dispatcher: Dispatcher,
+        fun create(dispatcher: Dispatcher,
                           errorHandler: (Exception) -> Unit): DispatcherContext
                 = StaticDispatcherContext(dispatcher, errorHandler)
     }
@@ -88,7 +89,7 @@ public interface DispatcherContext {
     val dispatcher: Dispatcher
     val errorHandler: (Exception) -> Unit
 
-    public fun offer(fn: () -> Unit): Unit {
+    fun offer(fn: () -> Unit): Unit {
         try {
             dispatcher.offer(fn)
         } catch (e: Exception) {
@@ -105,7 +106,7 @@ object DirectDispatcherContext : DispatcherContext {
     override val errorHandler: (Exception) -> Unit get() = errorFn
 }
 
-public interface MutableDispatcherContext : DispatcherContext {
+interface MutableDispatcherContext : DispatcherContext {
     override var dispatcher: Dispatcher
     override var errorHandler: (Exception) -> Unit
 
@@ -118,4 +119,25 @@ private class StaticDispatcherContext(override val dispatcher: Dispatcher,
                                       override val errorHandler: (Exception) -> Unit) : DispatcherContext
 
 
+/**
+ * Puts Kovenant into test mode for the purpose of Unit Testing.
+ *
+ * - Sets all dispatchers into synchronous mode. So everything happens in order.
+ * - attaches the provided failures callback to all error handlers
+ * - maps the multiple completion handler to the provided failure handler
+ *
+ * @param failures callback for all Kovenant errors, defaults to throwing the exception
+ */
+fun Kovenant.testMode(failures: (Throwable) -> Unit = { throw it }) {
+    context {
+        callbackContext.dispatcher = DirectDispatcher.instance
+        callbackContext.errorHandler = failures
 
+        workerContext.dispatcher = DirectDispatcher.instance
+        workerContext.errorHandler = failures
+
+        multipleCompletion = {
+            first, second -> failures(KovenantException("multiple completion: first = $first, second = $second"))
+        }
+    }
+}

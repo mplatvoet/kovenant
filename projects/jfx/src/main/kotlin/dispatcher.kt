@@ -18,13 +18,15 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
+
+@file:JvmName("KovenantJfxDispatcher")
 package nl.komponents.kovenant.jfx
 
 import javafx.application.Platform
 import nl.komponents.kovenant.ProcessAwareDispatcher
 
 
-public class JFXDispatcher private constructor() : ProcessAwareDispatcher {
+class JFXDispatcher private constructor() : ProcessAwareDispatcher {
     companion object {
         val instance: JFXDispatcher = JFXDispatcher()
     }

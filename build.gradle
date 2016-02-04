@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-beta-1038'
+    ext.kotlinVersion = '1.0.0-rc-1036'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -38,7 +38,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.0.0'
+        appVersion = '3.0.0-rc.1036'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -79,6 +79,7 @@ subprojects {
         compile "org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}", optional
 
         testCompile "junit:junit:${junitVersion}"
+        testCompile "org.jetbrains.kotlin:kotlin-test:${kotlinVersion}"
     }
 
 
@@ -206,7 +207,7 @@ task release() {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    gradleVersion = '2.10'
 
     doLast() {
         def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
