@@ -3,6 +3,12 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.0.0-rc.1036
+
+**core**
+
+* [KOV-66](http://issues.komponents.nl/youtrack/issue/KOV-66) Make LazyPromise implement kotlin Lazy
+
 ##v3.0.0-beta.4
 
 **core**
