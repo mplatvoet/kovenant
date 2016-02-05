@@ -3,6 +3,13 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+
+##v3.0.0-rc.1036.1
+
+**core**
+
+* [KOV-67](http://issues.komponents.nl/youtrack/issue/KOV-67) Duplicate execution of task on shutdown boundary
+
 ##v3.0.0-rc.1036
 
 **core**
