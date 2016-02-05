@@ -367,6 +367,12 @@ private class NonBlockingDispatcher(val name: String,
                         // the only state that may keep the thread in interrupted state is when alive == false.
                         // but since we are the last statement the loop is going to end anyway because it checks
                         // whether we're still alive.
+
+                        // KOV-67
+                        //
+                        // null out the poll result. When blocking PollStrategies are it might not get updated with
+                        // a new value
+                        pollResult = null
                     }
                 }
             }
