@@ -25,17 +25,13 @@ Developed with the following [goals](misc/goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-Build against Kotlin 1.0 beta 4: `1.0.0-beta-4589`.
+Build against Kotlin 1.0 rc: `1.0.0-rc-1036`.
 Source and target compatibility is `1.6`
-
-###Snapshot repository
-Snapshot builds can be found at:
-`http://oss.sonatype.org/content/repositories/snapshots`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.0.0-beta.4'
+    compile 'nl.komponents.kovenant:kovenant:3.0.0-rc.1036.1'
 }
 ```
 
@@ -44,7 +40,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>3.0.0-beta.4</version>
+	<version>3.0.0-rc.1036.1</version>
 </dependency>
 ```
 
@@ -72,6 +68,9 @@ Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=p
 
 ##Release notes
 See [Changelog](changelog.md) for release notes
+
+##Slack
+Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com). 
 
 ## Recommended libraries
 Other libraries for Kotlin applications:

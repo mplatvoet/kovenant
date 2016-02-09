@@ -26,7 +26,7 @@ import javafx.application.Platform
 import nl.komponents.kovenant.ProcessAwareDispatcher
 
 
-public class JFXDispatcher private constructor() : ProcessAwareDispatcher {
+class JFXDispatcher private constructor() : ProcessAwareDispatcher {
     companion object {
         val instance: JFXDispatcher = JFXDispatcher()
     }

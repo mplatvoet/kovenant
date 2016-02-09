@@ -44,7 +44,7 @@ class ConcreteUiKovenant {
             throw ConfigurationException("Current UiContext [$ctx] does not implement ReconfigurableUiContext and therefor can't be reconfigured.")
         }
 
-    public fun uiContext(body: MutableUiContext.() -> Unit): UiContext {
+    fun uiContext(body: MutableUiContext.() -> Unit): UiContext {
         //a copy-on-write strategy is used, but in order to maintain the lazy loading mechanism
         //keeping track of what the developer actually altered is needed, otherwise
         //everything gets initialized during configuration
@@ -126,7 +126,7 @@ class ConcreteUiKovenant {
 /**
  * Build a default DispatcherContext builder. Not part of documented API (yet). Might change in the future.
  */
-public fun defaultDispatcherContextBuilder(): (Dispatcher, Context) -> DispatcherContext
+fun defaultDispatcherContextBuilder(): (Dispatcher, Context) -> DispatcherContext
         = cachedDispatcherContextBuilder { dispatcher, context -> DelegatingDispatcherContext(context.callbackContext, dispatcher) }
 
 
@@ -134,7 +134,7 @@ public fun defaultDispatcherContextBuilder(): (Dispatcher, Context) -> Dispatche
  * Build a cached DispatcherContext builder with the supplied factory method. Not part of documented API (yet).
  * Might change in the future.
  */
-public fun cachedDispatcherContextBuilder(factory: (Dispatcher, Context) -> DispatcherContext): (Dispatcher, Context) -> DispatcherContext {
+fun cachedDispatcherContextBuilder(factory: (Dispatcher, Context) -> DispatcherContext): (Dispatcher, Context) -> DispatcherContext {
     val cache = WeakReferenceCache<Dispatcher, WeakReferenceCache<Context, DispatcherContext>>() {
         dispatcher ->
         WeakReferenceCache<Context, DispatcherContext>() {

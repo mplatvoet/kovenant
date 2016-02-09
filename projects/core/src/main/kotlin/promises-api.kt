@@ -34,7 +34,7 @@ package nl.komponents.kovenant
  * resolved or rejected multiple times. It may simply be ignored or throw
  * an Exception.
  */
-public interface Deferred<V, E> {
+interface Deferred<V, E> {
     /**
      * Resolves this deferred with the provided value
      *
@@ -44,7 +44,7 @@ public interface Deferred<V, E> {
      *
      * @param [value] the value to resolve this deferred with
      */
-    public infix fun resolve(value: V)
+    infix fun resolve(value: V)
 
     /**
      * Rejects this deferred with the provided error
@@ -55,7 +55,7 @@ public interface Deferred<V, E> {
      *
      * @param [error] the value to reject this deferred with
      */
-    public infix fun reject(error: E)
+    infix fun reject(error: E)
 
     /**
      * Holds the accompanied [Promise]
@@ -63,20 +63,20 @@ public interface Deferred<V, E> {
      * The accompanied [Promise] for this deferred. Multiple invocations
      * must lead to the same instance of the Promise.
      */
-    public val promise: Promise<V, E>
+    val promise: Promise<V, E>
 }
 
 /**
  * Resolves a Deferred of type <Unit, E> with Unit.
  * This makes it just a bit more natural looking
  */
-public fun <E> Deferred<Unit, E>.resolve() = resolve(Unit)
+fun <E> Deferred<Unit, E>.resolve() = resolve(Unit)
 
 /**
  * Rejects a Deferred of type <V, Unit> with Unit.
  * This makes it just a bit more natural looking
  */
-public fun <V> Deferred<V, Unit>.reject() = reject(Unit)
+fun <V> Deferred<V, Unit>.reject() = reject(Unit)
 
 
 /**
@@ -85,8 +85,8 @@ public fun <V> Deferred<V, Unit>.reject() = reject(Unit)
  * What cancelling exactly means is up to the implementor.
  * But the intention is stopping.
  */
-public interface CancelablePromise<V, E> : Promise<V, E> {
-    public fun cancel(error: E): Boolean
+interface CancelablePromise<V, E> : Promise<V, E> {
+    fun cancel(error: E): Boolean
 }
 
 
@@ -99,7 +99,7 @@ public interface CancelablePromise<V, E> : Promise<V, E> {
  * Any implementation must ensure that **all** callbacks are offered to their configured DispatcherContext in the order
  * they where added to this Promise.
  */
-public interface Promise<out V, out E> {
+interface Promise<out V, out E> {
     companion object {
         /**
          * Takes any value `V` and wraps it as a successfully resolved promise.
@@ -107,7 +107,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, Exception>
          */
-        public fun <V> of(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
+        fun <V> of(value: V, context: Context = Kovenant.context): Promise<V, Exception> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -117,7 +117,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a Promise<V, E>
          */
-        public fun <V, E> ofSuccess(value: V, context: Context = Kovenant.context): Promise<V, E> {
+        fun <V, E> ofSuccess(value: V, context: Context = Kovenant.context): Promise<V, E> {
             return concreteSuccessfulPromise(context, value)
         }
 
@@ -127,7 +127,7 @@ public interface Promise<out V, out E> {
          * @param context the Context associated with the promise
          * @param value the value to wrap into a failed Promise<V, E>
          */
-        public fun <V, E> ofFail(value: E, context: Context = Kovenant.context): Promise<V, E> {
+        fun <V, E> ofFail(value: E, context: Context = Kovenant.context): Promise<V, E> {
             return concreteFailedPromise(context, value)
         }
 
@@ -140,7 +140,7 @@ public interface Promise<out V, out E> {
      * Functions like `then`use this to base there returned promises on this to keep promises bound to a
      * desired context.
      */
-    public val context: Context
+    val context: Context
 
     /**
      * Adds a success callback to this Promise
@@ -152,7 +152,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback that gets executed on successful completion
      */
-    public infix fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
+    infix fun success(callback: (value: V) -> Unit): Promise<V, E> = success(context.callbackContext, callback)
 
     /**
      * Adds a fail callback to this Promise
@@ -164,7 +164,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback to be executed on failure or cancellation
      */
-    public infix fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
+    infix fun fail(callback: (error: E) -> Unit): Promise<V, E> = fail(context.callbackContext, callback)
 
     /**
      * Adds a always callback to this Promise
@@ -177,7 +177,7 @@ public interface Promise<out V, out E> {
      *
      * @param callback the callback to be executed on success, failure or cancellation
      */
-    public infix fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
+    infix fun always(callback: () -> Unit): Promise<V, E> = always(context.callbackContext, callback)
 
     /**
      * Adds a success callback to this Promise
@@ -188,7 +188,7 @@ public interface Promise<out V, out E> {
      * @param callback the callback that gets executed on successful completion
      * @param context the DispatcherContext on which this callback is executed
      */
-    public fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
+    fun success(context: DispatcherContext, callback: (value: V) -> Unit): Promise<V, E>
 
 
     /**
@@ -200,7 +200,7 @@ public interface Promise<out V, out E> {
      * @param callback the callback to be executed on failure or cancellation
      * @param context the DispatcherContext on which this callback is executed
      */
-    public fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
+    fun fail(context: DispatcherContext, callback: (error: E) -> Unit): Promise<V, E>
 
     /**
      * Adds a always callback to this Promise
@@ -213,7 +213,7 @@ public interface Promise<out V, out E> {
      * @param callback the callback to be executed on success, failure or cancellation
      * @param context the DispatcherContext on which this callback is executed
      */
-    public fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
+    fun always(context: DispatcherContext, callback: () -> Unit): Promise<V, E>
 
     /**
      * Blocks until this promises is done and either immediate returning the success result or throwing an `Exception`
@@ -224,8 +224,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the success value when done
      */
-    @Throws(Exception::class)
-    public fun get(): V
+    @Throws(Exception::class) fun get(): V
 
     /**
      * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
@@ -235,8 +234,7 @@ public interface Promise<out V, out E> {
      *
      * @return returns the fail value when done
      */
-    @Throws(FailedException::class)
-    public fun getError(): E
+    @Throws(FailedException::class) fun getError(): E
 
 
     /**
@@ -244,21 +242,21 @@ public interface Promise<out V, out E> {
      *
      * @return true if this promise is either resolved successfully or has failed, false otherwise
      */
-    public fun isDone(): Boolean
+    fun isDone(): Boolean
 
     /**
      * Returns true if this promise is resolved a failed
      *
      * @return true if this promise is resolved a failed, false otherwise
      */
-    public fun isFailure(): Boolean
+    fun isFailure(): Boolean
 
     /**
      * Returns true if this promise is resolved successfully
      *
      * @return true if this promise is resolved successfully, false otherwise
      */
-    public fun isSuccess(): Boolean
+    fun isSuccess(): Boolean
 }
 
 
@@ -268,7 +266,7 @@ public interface Promise<out V, out E> {
  * @param context the context on which the associated [Promise] operates on
  * @return newly created [Deferred]
  */
-public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
+fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
 
 
 /**
@@ -279,9 +277,8 @@ public fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> 
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
-@Deprecated("async is a keyword, favor task instead", ReplaceWith("task(context, body)"))
-public fun <V> async(context: Context = Kovenant.context,
-                    body: () -> V): Promise<V, Exception> = task(context, body)
+@Deprecated("async is a keyword, favor task instead", ReplaceWith("task(context, body)")) fun <V> async(context: Context = Kovenant.context,
+                                                                                                        body: () -> V): Promise<V, Exception> = task(context, body)
 
 /**
  * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
@@ -291,9 +288,8 @@ public fun <V> async(context: Context = Kovenant.context,
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
  * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
  */
-@JvmOverloads
-public fun <V> task(context: Context = Kovenant.context,
-                     body: () -> V): Promise<V, Exception> = concretePromise(context, body)
+@JvmOverloads fun <V> task(context: Context = Kovenant.context,
+                           body: () -> V): Promise<V, Exception> = concretePromise(context, body)
 
 /**
  * Asynchronously bind the success value of a [Promise] and returns a new [Promise] with the transformed value.
@@ -307,7 +303,7 @@ public fun <V> task(context: Context = Kovenant.context,
  *
  * @param bind the transform function.
  */
-public infix fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
+infix fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 
@@ -323,7 +319,7 @@ public infix fun <V, R> Promise<V, Exception>.then(bind: (V) -> R): Promise<R, E
  * @param context the on which the bind and returned Promise operate
  * @param bind the transform function.
  */
-public fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
+fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): Promise<R, Exception> {
     return concretePromise(context, this, bind)
 }
 
@@ -339,7 +335,7 @@ public fun <V, R> Promise<V, Exception>.then(context: Context, bind: (V) -> R): 
  *
  * @param bind the transform function.
  */
-public infix inline fun <V, R> Promise<V, Exception>.thenUse(
+infix inline fun <V, R> Promise<V, Exception>.thenUse(
         crossinline bind: V.() -> R): Promise<R, Exception> = then { it.bind() }
 
 
@@ -350,7 +346,7 @@ public infix inline fun <V, R> Promise<V, Exception>.thenUse(
  *
  * @return returns the Promise<Unit, Unit> with both value and error hidden
  */
-public fun <V, E> Promise<V, E>.toVoid(context: Context = this.context): Promise<Unit, Unit> {
+fun <V, E> Promise<V, E>.toVoid(context: Context = this.context): Promise<Unit, Unit> {
     if (isDone()) {
         if (isSuccess()) return Promise.ofSuccess(Unit, context)
         if (isFailure()) return Promise.ofFail(Unit, context)
@@ -370,7 +366,7 @@ public fun <V, E> Promise<V, E>.toVoid(context: Context = this.context): Promise
  *
  * @return returns the Promise<V, Unit> with the error hidden
  */
-public fun <V, E> Promise<V, E>.toFailVoid(context: Context = this.context): Promise<V, Unit> {
+fun <V, E> Promise<V, E>.toFailVoid(context: Context = this.context): Promise<V, Unit> {
     if (isDone()) {
         if (isSuccess()) return Promise.ofSuccess<V, Unit>(get(), context)
         if (isFailure()) return Promise.ofFail(Unit, context)
@@ -390,7 +386,7 @@ public fun <V, E> Promise<V, E>.toFailVoid(context: Context = this.context): Pro
  *
  * @return returns the Promise<Unit, V> with the value hidden
  */
-public fun <V, E> Promise<V, E>.toSuccessVoid(context: Context = this.context): Promise<Unit, E> {
+fun <V, E> Promise<V, E>.toSuccessVoid(context: Context = this.context): Promise<Unit, E> {
     if (isDone()) {
         if (isSuccess()) return Promise.ofSuccess<Unit, E>(Unit, context)
         if (isFailure()) return Promise.ofFail(getError(), context)

@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference
  *
  * Not fully documented yet as this might change in the future
  */
-public class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
+class WeakReferenceCache<K : Any, V : Any>(private val factory: (K) -> V) {
     private val head = AtomicReference<CacheNode<K, V>>(null)
 
     /**

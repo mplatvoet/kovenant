@@ -28,8 +28,7 @@ import nl.komponents.kovenant.BlockingSupportWorkQueue
 import nl.komponents.kovenant.WorkQueue
 import com.lmax.disruptor.Sequence as Seq
 
-@JvmOverloads
-public fun disruptorWorkQueue(capacity: Int = 1024): WorkQueue<() -> Unit> {
+@JvmOverloads fun disruptorWorkQueue(capacity: Int = 1024): WorkQueue<() -> Unit> {
     return DisruptorWorkQueue({ -> Unit }, capacity)
 }
 
@@ -43,7 +42,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
         seq.set(buffer.cursor)
     }
 
-    public override fun size(): Int {
+    override fun size(): Int {
         // tail **needs** to be retrieved before head
         // because in highly concurrent scenario's if retrieved
         // the other way around, the tail might be beyond the head
@@ -54,7 +53,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
     }
 
     //Can't really ensure atomicity on this. So report false for now.
-    public override fun remove(elem: Any?): Boolean {
+    override fun remove(elem: Any?): Boolean {
         return false
     }
 
@@ -94,7 +93,7 @@ private class DisruptorWorkQueue<V : Any>(initialValue: V, capacity: Int) : Bloc
 
 
 private class Container<V>(private val initialValue: V) {
-    public var value: V = initialValue
+    var value: V = initialValue
 }
 
 private class ContainerFactory<V>(private val initialValue: V) : EventFactory<Container<V>> {
@@ -105,7 +104,7 @@ private class ContainerFactory<V>(private val initialValue: V) : EventFactory<Co
 private object PowerOfTwo {
     private val max = 1 shl 30
 
-    public fun roundUp(value: Int): Int = when {
+    fun roundUp(value: Int): Int = when {
         value >= max -> max
         value > 1 -> Integer.highestOneBit((value - 1) shl 1)
         else -> 1

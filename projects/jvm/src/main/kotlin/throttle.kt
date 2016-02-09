@@ -32,7 +32,7 @@ import nl.komponents.kovenant.task as baseTask
  * @constructor maxConcurrentTasks set the maximum of parallel processes, must be at least 1
  * @constructor context the default context on which all tasks operate
  */
-public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Kovenant.context) {
+class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Kovenant.context) {
     private val semaphore = Semaphore(maxConcurrentTasks)
 
     init {
@@ -47,7 +47,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
      * Registers an async task to be executed somewhere in the near future. Callers must ensure that they call
      * registerDone() with some promise that signals this process is done.
      */
-    public fun <V> registerTask(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
+    fun <V> registerTask(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
         if (semaphore.tryAcquire()) {
             if (workQueue.isEmpty()) {
                 return baseTask(context, fn)
@@ -68,7 +68,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
      * Registers an async task to be executed somewhere in the near future. When this task is done the process is
      * considered to be finished and other tasks are allowed to execute.
      */
-    public fun <V> task(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
+    fun <V> task(context: Context = this.context, fn: () -> V): Promise<V, Exception> {
         return registerTask(context, fn).addDone()
     }
 
@@ -77,7 +77,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
      * Registers an async task to be executed somewhere in the near future based on an existing Promise.
      * Callers must ensure that they call registerDone() with some promise that signals this process is done.
      */
-    public fun <V, R> registerTask(promise: Promise<V, Exception>,
+    fun <V, R> registerTask(promise: Promise<V, Exception>,
                                    context: Context = promise.context,
                                    fn: (V) -> R): Promise<R, Exception> {
         if (promise.isDone() && workQueue.isEmpty() && semaphore.tryAcquire()) {
@@ -107,7 +107,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
      * Registers an async task to be executed somewhere in the near future based on a existing Promise.
      * When this task is done the process is considered to be finished and other tasks are allowed to execute.
      */
-    public fun <V, R> task(promise: Promise<V, Exception>,
+    fun <V, R> task(promise: Promise<V, Exception>,
                            context: Context = promise.context,
                            fn: (V) -> R): Promise<R, Exception> {
         return registerTask(promise, context, fn).addDone()
@@ -116,7 +116,7 @@ public class Throttle(val maxConcurrentTasks: Int = 1, val context: Context = Ko
     /**
      * Register a promise that signals that a previous registered task has finished
      */
-    public fun <V, E> registerDone(promise: Promise<V, E>): Promise<V, E> = promise.addDone()
+    fun <V, E> registerDone(promise: Promise<V, E>): Promise<V, E> = promise.addDone()
 
     private fun <V, E> Promise<V, E>.addDone(): Promise<V, E> = this.always(DirectDispatcherContext) {
         semaphore.release()

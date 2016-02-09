@@ -28,7 +28,7 @@ import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public class LazyPromise<T>(
+class LazyPromise<T>(
         //Need to allow `null` context because we could easily
         //create this property before Kovenant gets configured.
         //that would lead to this property using another Context
@@ -45,6 +45,7 @@ public class LazyPromise<T>(
         this.initializer = initializer
     }
 
+    //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()
     override fun isInitialized(): Boolean = promise != null
 

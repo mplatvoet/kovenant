@@ -26,42 +26,42 @@ import nl.komponents.kovenant.Dispatcher
 import nl.komponents.kovenant.DispatcherContext
 
 
-public object KovenantUi {
+object KovenantUi {
     private val concrete = ConcreteUiKovenant()
-    public var uiContext: UiContext
+    var uiContext: UiContext
         get() = concrete.uiContext
         set(value) {
             concrete.uiContext = value
         }
 
-    public fun uiContext(body: MutableUiContext.() -> Unit): UiContext = concrete.uiContext(body)
+    fun uiContext(body: MutableUiContext.() -> Unit): UiContext = concrete.uiContext(body)
 
-    public fun createUiContext(body: MutableUiContext.() -> Unit): UiContext = concrete.createUiContext(body)
+    fun createUiContext(body: MutableUiContext.() -> Unit): UiContext = concrete.createUiContext(body)
 
 }
 
-public fun UiContext.dispatcherContextFor(context: Context): DispatcherContext {
+fun UiContext.dispatcherContextFor(context: Context): DispatcherContext {
     return dispatcherContextBuilder(dispatcher, context)
 }
 
-public interface UiContext {
+interface UiContext {
     val dispatcher: Dispatcher
     val dispatcherContextBuilder: (Dispatcher, Context) -> DispatcherContext
 }
 
-public interface MutableUiContext : UiContext {
+interface MutableUiContext : UiContext {
     override var dispatcher: Dispatcher
     override var dispatcherContextBuilder: (Dispatcher, Context) -> DispatcherContext
 }
 
-public interface ReconfigurableUiContext : MutableUiContext {
+interface ReconfigurableUiContext : MutableUiContext {
     fun copy(): ReconfigurableUiContext
 }
 
 /**
  * Undocumented, may change in the future
  */
-public class DelegatingDispatcherContext(private val base: DispatcherContext,
+class DelegatingDispatcherContext(private val base: DispatcherContext,
                                           override val dispatcher: Dispatcher) : DispatcherContext {
     override val errorHandler: (Exception) -> Unit
         get() = base.errorHandler

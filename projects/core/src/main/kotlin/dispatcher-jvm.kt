@@ -27,11 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 
-public fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() -> Unit) {
+fun MutableDispatcherContext.jvmDispatcher(body: JvmDispatcherBuilder.() -> Unit) {
     dispatcher = buildJvmDispatcher(body)
 }
 
-public fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
+fun buildJvmDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher = concreteBuildDispatcher(body)
 
 internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dispatcher {
     val builder = ConcreteDispatcherBuilder()
@@ -39,7 +39,7 @@ internal fun concreteBuildDispatcher(body: JvmDispatcherBuilder.() -> Unit): Dis
     return builder.build()
 }
 
-public interface JvmDispatcherBuilder : DispatcherBuilder {
+interface JvmDispatcherBuilder : DispatcherBuilder {
     var threadFactory: (target: Runnable, dispatcherName: String, id: Int) -> Thread
 }
 
@@ -119,7 +119,7 @@ class ConcretePollStrategyBuilder() : PollStrategyBuilder {
         return ChainPollStrategyFactory(defaultFactories).build(pollable)
     }
 
-    public fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
+    fun build(pollable: Pollable<() -> Unit>): PollStrategy<() -> Unit> = if (factories.isEmpty()) {
         buildDefaultStrategy(pollable)
     } else {
         ChainPollStrategyFactory(factories).build(pollable)
@@ -367,6 +367,12 @@ private class NonBlockingDispatcher(val name: String,
                         // the only state that may keep the thread in interrupted state is when alive == false.
                         // but since we are the last statement the loop is going to end anyway because it checks
                         // whether we're still alive.
+
+                        // KOV-67
+                        //
+                        // null out the poll result. When blocking PollStrategies are it might not get updated with
+                        // a new value
+                        pollResult = null
                     }
                 }
             }
@@ -431,7 +437,7 @@ private class NonBlockingDispatcher(val name: String,
 }
 
 
-public interface PollStrategy<V : Any> {
+interface PollStrategy<V : Any> {
     fun get(): V?
 }
 

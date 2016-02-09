@@ -23,11 +23,10 @@ package nl.komponents.kovenant.ui
 
 import nl.komponents.kovenant.*
 
-@JvmOverloads
-public fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
-                           context: Context = Kovenant.context,
-                           alwaysSchedule: Boolean = false,
-                           body: () -> V): Promise<V, Exception> {
+@JvmOverloads fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
+                                  context: Context = Kovenant.context,
+                                  alwaysSchedule: Boolean = false,
+                                  body: () -> V): Promise<V, Exception> {
     if (directExecutionAllowed(alwaysSchedule, uiContext.dispatcher)) {
         return try {
             Promise.ofSuccess(context = context, value = body())

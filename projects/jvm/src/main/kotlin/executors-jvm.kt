@@ -33,18 +33,18 @@ import java.util.concurrent.atomic.AtomicReference
 /**
  * Convenience method to convert an Executor to an Dispatcher
  */
-public fun Executor.asDispatcher(): Dispatcher = when (this) {
+fun Executor.asDispatcher(): Dispatcher = when (this) {
     is Dispatcher -> this
     is ExecutorService -> ExecutorServiceDispatcher(this)
     else -> ExecutorDispatcher(this)
 }
 
-public fun Dispatcher.asExecutor(): Executor = when (this) {
+fun Dispatcher.asExecutor(): Executor = when (this) {
     is Executor -> this
     else -> DispatcherExecutor(this)
 }
 
-public fun Dispatcher.asExecutorService(): ExecutorService = when (this) {
+fun Dispatcher.asExecutorService(): ExecutorService = when (this) {
     is ExecutorService -> this
     else -> DispatcherExecutorService(this)
 }

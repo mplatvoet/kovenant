@@ -32,15 +32,14 @@ import java.util.concurrent.atomic.AtomicReference
 private val initCount = AtomicInteger(0)
 private val disposable = AtomicReference<Disposable>(null)
 
-public fun startKovenant() {
+fun startKovenant() {
     initCount.onlyFirst {
         disposable.set(configureKovenant())
     }
 }
 
 
-@JvmOverloads
-public fun stopKovenant(force: Boolean = false) {
+@JvmOverloads fun stopKovenant(force: Boolean = false) {
     val dispose = disposable.get()
     if (dispose != null && disposable.compareAndSet(dispose, null)) {
         dispose.close(force)
@@ -53,7 +52,7 @@ public fun stopKovenant(force: Boolean = false) {
  *
  * @return `Disposable` to properly shutdown Kovenant
  */
-public fun configureKovenant(): Disposable {
+fun configureKovenant(): Disposable {
     KovenantUi.uiContext {
         dispatcher = androidUiDispatcher()
     }
@@ -105,7 +104,7 @@ private fun createThreadFactory(priority: Int) : (Runnable, String, Int) -> Thre
  * Disposes of a resource.
  *
  */
-public interface Disposable {
+interface Disposable {
     fun close(force: Boolean = false)
 }
 
