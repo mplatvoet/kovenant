@@ -22,6 +22,31 @@
 package nl.komponents.kovenant.ui
 
 import nl.komponents.kovenant.*
+import java.lang.ref.WeakReference
+
+
+fun <C, V, E> C.weakSuccessUi(promise: Promise<V, E>,
+                              uiContext: UiContext = KovenantUi.uiContext,
+                              alwaysSchedule: Boolean = false,
+                              body: C.(V) -> Unit) : Promise<V, E> {
+    val dispatcherContext = uiContext.dispatcherContextFor(promise.context)
+    if (promise.isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
+        if (promise.isSuccess()) {
+            try {
+                body(promise.get())
+            } catch(e: Exception) {
+                dispatcherContext.errorHandler(e)
+            }
+        }
+    } else {
+        //TODO JVM only
+        val ref = WeakReference(this)
+        promise.success(dispatcherContext) {
+            value -> ref.get()?.let { it.body(value) }
+        }
+    }
+    return promise
+}
 
 @JvmOverloads fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
                                   context: Context = Kovenant.context,
@@ -48,12 +73,11 @@ import nl.komponents.kovenant.*
 }
 
 
-public infix fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(alwaysSchedule = false, body = body)
+infix fun <V, E> Promise<V, E>.successUi(body: (value: V) -> Unit): Promise<V, E> = successUi(alwaysSchedule = false, body = body)
 
-@JvmOverloads
-public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiContext,
-                                          alwaysSchedule: Boolean,
-                                          body: (value: V) -> Unit): Promise<V, E> {
+@JvmOverloads fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiContext,
+                                                 alwaysSchedule: Boolean,
+                                                 body: (value: V) -> Unit): Promise<V, E> {
 
     val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
@@ -71,12 +95,11 @@ public fun <V, E> Promise<V, E>.successUi(uiContext: UiContext = KovenantUi.uiCo
 }
 
 
-public infix fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(alwaysSchedule = false, body = body)
+infix fun <V, E> Promise<V, E>.failUi(body: (error: E) -> Unit): Promise<V, E> = failUi(alwaysSchedule = false, body = body)
 
-@JvmOverloads
-public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
-                                       alwaysSchedule: Boolean,
-                                       body: (error: E) -> Unit): Promise<V, E> {
+@JvmOverloads fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiContext,
+                                              alwaysSchedule: Boolean,
+                                              body: (error: E) -> Unit): Promise<V, E> {
     val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
         if (isFailure()) {
@@ -93,12 +116,11 @@ public fun <V, E> Promise<V, E>.failUi(uiContext: UiContext = KovenantUi.uiConte
 }
 
 
-public infix fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(alwaysSchedule = false, body = body)
+infix fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alwaysUi(alwaysSchedule = false, body = body)
 
-@JvmOverloads
-public fun <V, E> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
-                                         alwaysSchedule: Boolean,
-                                         body: () -> Unit): Promise<V, E> {
+@JvmOverloads fun <V, E> Promise<V, E>.alwaysUi(uiContext: UiContext = KovenantUi.uiContext,
+                                                alwaysSchedule: Boolean,
+                                                body: () -> Unit): Promise<V, E> {
     val dispatcherContext = uiContext.dispatcherContextFor(context)
     if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
         try {
