@@ -1,7 +1,10 @@
-package nl.komponents.kovenant.rx
+package nl.komponents.kovenant.rx.examples
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.rx.ElementStrategy
+import nl.komponents.kovenant.rx.toListPromise
+import nl.komponents.kovenant.rx.toPromise
 import nl.komponents.kovenant.testMode
 import rx.Observable
 
