@@ -22,7 +22,7 @@
 package nl.komponents.kovenant
 
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater
 
 internal fun <V> concretePromise(context: Context, callable: () -> V): Promise<V, Exception>
         = TaskPromise(context, callable)
@@ -208,12 +208,32 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
 }
 
 private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
-    private val state = AtomicReference(State.PENDING)
-    private val waitingThreads = AtomicInteger(0)
+
+    companion object {
+        private val stateUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, State::class.java, "state")
+        private val waitingThreadsUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, AtomicInteger::class.java, "_waitingThreads")
+        private val headUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, CallbackContextNode::class.java, "_head")
+    }
+
+    private @Volatile var state = State.PENDING
+    private @Volatile var _waitingThreads: AtomicInteger? = null
+
+    private val waitingThreads: AtomicInteger get() {
+        while (true) {
+            val m = _waitingThreads
+            if (m != null) {
+                return m
+            }
+            waitingThreadsUpdater.compareAndSet(this, null, AtomicInteger(0))
+        }
+    }
 
     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-    private val mutex = waitingThreads as Object
-    private val head = AtomicReference<CallbackContextNode<V, E>>(null)
+    private val mutex: Object get() = waitingThreads as Object
+
+    private @Volatile var _head: CallbackContextNode<V, E>? = null
+
+
     private @Volatile var result: Any? = null
 
 
@@ -347,10 +367,10 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
 
     fun trySetSuccessResult(result: V): Boolean {
-        if (state.get() != State.PENDING) return false
-        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
+        if (state != State.PENDING) return false
+        if (stateUpdater.compareAndSet(this, State.PENDING, State.MUTATING)) {
             this.result = result
-            state.set(State.SUCCESS)
+            state = State.SUCCESS
             notifyBlockedThreads()
             return true
         }
@@ -359,10 +379,10 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
     fun trySetFailResult(result: E): Boolean {
 
-        if (state.get() != State.PENDING) return false
-        if (state.compareAndSet(State.PENDING, State.MUTATING)) {
+        if (state != State.PENDING) return false
+        if (stateUpdater.compareAndSet(this, State.PENDING, State.MUTATING)) {
             this.result = result
-            state.set(State.FAIL)
+            state = State.FAIL
             notifyBlockedThreads()
             return true
         }
@@ -370,7 +390,8 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     }
 
     private fun notifyBlockedThreads() {
-        if (waitingThreads.get() > 0) {
+        val i = _waitingThreads
+        if (i != null && i.get() > 0) {
             synchronized(mutex) {
                 mutex.notifyAll()
             }
@@ -379,12 +400,12 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
 
     protected fun isDoneInternal(): Boolean {
-        val currentState = state.get()
+        val currentState = state
         return currentState == State.SUCCESS || currentState == State.FAIL
     }
 
-    protected fun isSuccessInternal(): Boolean = state.get() == State.SUCCESS
-    protected fun isFailureInternal(): Boolean = state.get() == State.FAIL
+    protected fun isSuccessInternal(): Boolean = state == State.SUCCESS
+    protected fun isFailureInternal(): Boolean = state == State.FAIL
 
     override fun isDone(): Boolean = isDoneInternal()
     override fun isFailure(): Boolean = isFailureInternal()
@@ -410,61 +431,59 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     private fun createHeadNode(): CallbackContextNode<V, E> = EmptyCallbackContextNode()
 
     private fun addValueNode(node: CallbackContextNode<V, E>) {
-        //ensure there is a head
-        ensureHeadNode()
-
         while (true) {
             val tail = findTailNode()
 
-            if (tail.nodeState.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
+            if (tail.compareAndSet(NodeState.CHAINED, NodeState.APPENDING)) {
                 if (tail.next == null) {
                     tail.next = node
-                    tail.nodeState.set(NodeState.CHAINED)
+                    tail.nodeState = NodeState.CHAINED
                     return
                 }
-                tail.nodeState.set(NodeState.CHAINED)
+                tail.nodeState = NodeState.CHAINED
             }
         }
     }
 
-    private fun ensureHeadNode() {
-        while (head.get() == null) {
-            head.compareAndSet(null, createHeadNode())
+    private fun getOrCreateHead(): CallbackContextNode<V, E> {
+        while (true) {
+            val h = _head
+            if (h != null) {
+                return h
+            }
+            headUpdater.compareAndSet(this, null, createHeadNode())
         }
     }
 
     private fun findTailNode(): CallbackContextNode<V, E> {
-        var tail = head.get()
+        var tail = getOrCreateHead()
         while (true) {
-            val next = tail.next
-            if (next == null) {
-                return tail
-            }
+            val next = tail.next ?: return tail
             tail = next
         }
     }
 
     private fun isEmptyCallbacks(): Boolean {
-        val headNode = head.get()
+        val headNode = _head
         return headNode == null || headNode.next == null
     }
 
 
     private inline fun popAll(fn: (CallbackContext<V, E>) -> Unit) {
-        val localHead = head.get()
+        val localHead = _head
 
         if (localHead != null) {
             do {
                 val popper = localHead.next
                 if (popper != null) {
-                    if (localHead.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
-                        if (popper.nodeState.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+                    if (localHead.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
+                        if (popper.compareAndSet(NodeState.CHAINED, NodeState.POPPING)) {
                             localHead.next = popper.next
-                            localHead.nodeState.set(NodeState.CHAINED)
+                            localHead.nodeState = NodeState.CHAINED
                             popper.next = null
                             fn(popper)
                         }
-                        localHead.nodeState.set(NodeState.CHAINED)
+                        localHead.nodeState = NodeState.CHAINED
                     }
                 }
             } while (popper != null)
@@ -478,8 +497,16 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
     }
 
     private abstract class CallbackContextNode<V, E> : CallbackContext<V, E> {
+        companion object {
+            private val nodeStateUpdater = AtomicReferenceFieldUpdater.newUpdater(CallbackContextNode::class.java, NodeState::class.java, "nodeState")
+        }
+
+        fun compareAndSet(expected: NodeState, update: NodeState): Boolean {
+            return nodeStateUpdater.compareAndSet(this, expected, update)
+        }
+
         @Volatile var next: CallbackContextNode<V, E>? = null
-        var nodeState = AtomicReference(NodeState.CHAINED)
+        @Volatile var nodeState = NodeState.CHAINED
     }
 
     private class EmptyCallbackContextNode<V, E> : CallbackContextNode<V, E>() {
