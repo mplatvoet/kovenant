@@ -21,6 +21,8 @@
 
 package nl.komponents.kovenant
 
+import nl.komponents.kovenant.unsafe.UnsafeAtomicReferenceFieldUpdater
+import nl.komponents.kovenant.unsafe.hasUnsafe
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater
 
@@ -210,9 +212,21 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
 private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
 
     companion object {
-        private val stateUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, State::class.java, "state")
-        private val waitingThreadsUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, AtomicInteger::class.java, "_waitingThreads")
-        private val headUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, CallbackContextNode::class.java, "_head")
+        private val stateUpdater: AtomicReferenceFieldUpdater<AbstractPromise<*, *>, State>
+        private val waitingThreadsUpdater: AtomicReferenceFieldUpdater<AbstractPromise<*, *>, AtomicInteger>
+        private val headUpdater: AtomicReferenceFieldUpdater<AbstractPromise<*, *>, CallbackContextNode<*, *>>
+
+        init {
+            if (hasUnsafe()) {
+                stateUpdater = UnsafeAtomicReferenceFieldUpdater(AbstractPromise::class, "state")
+                waitingThreadsUpdater = UnsafeAtomicReferenceFieldUpdater(AbstractPromise::class, "_waitingThreads")
+                headUpdater = UnsafeAtomicReferenceFieldUpdater(AbstractPromise::class, "_head")
+            } else {
+                stateUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, State::class.java, "state")
+                waitingThreadsUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, AtomicInteger::class.java, "_waitingThreads")
+                headUpdater = AtomicReferenceFieldUpdater.newUpdater(AbstractPromise::class.java, CallbackContextNode::class.java, "_head")
+            }
+        }
     }
 
     private @Volatile var state = State.PENDING
@@ -498,7 +512,15 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
     private abstract class CallbackContextNode<V, E> : CallbackContext<V, E> {
         companion object {
-            private val nodeStateUpdater = AtomicReferenceFieldUpdater.newUpdater(CallbackContextNode::class.java, NodeState::class.java, "nodeState")
+            private val nodeStateUpdater: AtomicReferenceFieldUpdater<CallbackContextNode<*, *>, NodeState>
+
+            init {
+                nodeStateUpdater = if (hasUnsafe()) {
+                    UnsafeAtomicReferenceFieldUpdater(CallbackContextNode::class, "nodeState")
+                } else {
+                    AtomicReferenceFieldUpdater.newUpdater(CallbackContextNode::class.java, NodeState::class.java, "nodeState")
+                }
+            }
         }
 
         fun compareAndSet(expected: NodeState, update: NodeState): Boolean {
