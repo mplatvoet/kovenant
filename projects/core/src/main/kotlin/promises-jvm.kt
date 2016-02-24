@@ -471,10 +471,8 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
 
     private fun findTailNode(): CallbackContextNode<V, E> {
         var tail = getOrCreateHead()
-        while (true) {
-            val next = tail.next ?: return tail
-            tail = next
-        }
+        while (true) tail = tail.next ?: break
+        return tail
     }
 
     private fun isEmptyCallbacks(): Boolean {
