@@ -11,7 +11,6 @@ enum class EmitStrategy {
 }
 
 
-
 fun <V> Observable<V>.toPromise(context: Context = Kovenant.context,
                                 strategy: EmitStrategy = EmitStrategy.FIRST,
                                 emptyFactory: () -> V)
@@ -27,6 +26,10 @@ fun <V> Observable<V>.toPromise(context: Context = Kovenant.context,
     subscribe(subscriber)
     return subscriber.promise
 }
+
+fun <V> Observable<V>.toPromise(defaultValue: V, context: Context = Kovenant.context,
+                                strategy: EmitStrategy = EmitStrategy.FIRST)
+        : Promise<V, Exception> = toPromise(context, strategy, EmptyPolicy.resolve(defaultValue))
 
 fun <V> Observable<V>.toListPromise(context: Context = Kovenant.context): Promise<List<V>, Exception> {
     val observer = ListValuesSubscriber<V>(context)

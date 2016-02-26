@@ -21,7 +21,10 @@ fun main(args: Array<String>) {
     Observable.from(arrayOf(1, 2, 3, 4, 5)).toPromise(strategy = EmitStrategy.LAST).printResult()
 
     //default value on empty Observable
-    Observable.from(arrayOf<Int>()).toPromise() { 42 }.printResult()
+    Observable.from(arrayOf<Int>()).toPromise(42).printResult()
+
+    //default value factory on empty Observable
+    Observable.from(arrayOf<Int>()).toPromise() { 4 * 16 }.printResult()
 
 
     //Put everything in a list
