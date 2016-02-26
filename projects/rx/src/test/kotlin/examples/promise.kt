@@ -2,11 +2,12 @@ package nl.komponents.kovenant.rx.examples
 
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.rx.ElementStrategy
+import nl.komponents.kovenant.rx.EmitStrategy
 import nl.komponents.kovenant.rx.toListPromise
 import nl.komponents.kovenant.rx.toPromise
 import nl.komponents.kovenant.testMode
 import rx.Observable
+import rx.schedulers.Schedulers
 
 
 fun main(args: Array<String>) {
@@ -17,7 +18,7 @@ fun main(args: Array<String>) {
     Observable.from(arrayOf<Int>()).toPromise().printResult()
 
     //Take last element
-    Observable.from(arrayOf(1, 2, 3, 4, 5)).toPromise(strategy = ElementStrategy.LAST).printResult()
+    Observable.from(arrayOf(1, 2, 3, 4, 5)).toPromise(strategy = EmitStrategy.LAST).printResult()
 
     //default value on empty Observable
     Observable.from(arrayOf<Int>()).toPromise() { 42 }.printResult()
