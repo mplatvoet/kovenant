@@ -1,3 +1,24 @@
+/*
+ * Copyright (c) 2016 Mark Platvoet<mplatvoet@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * THE SOFTWARE.
+ */
+
 package nl.komponents.kovenant.rx
 
 import nl.komponents.kovenant.*
@@ -10,12 +31,25 @@ enum class EmitStrategy {
     FIRST, LAST
 }
 
-
+/**
+ * Turn an `Observable<V>` into a `Promise<V, Exception>`
+ *
+ * @param context the context of the new promise, `Kovenant.context` by default
+ * @param strategy the `EmitStrategy` to be used, `EmitStrategy.FIRST` by default
+ * @param emptyFactory the value to be calculated and used if the `Observable` hasn't emitted any values
+ */
 fun <V> Observable<V>.toPromise(context: Context = Kovenant.context,
                                 strategy: EmitStrategy = EmitStrategy.FIRST,
                                 emptyFactory: () -> V)
         : Promise<V, Exception> = toPromise(context, strategy, EmptyPolicy.resolve(emptyFactory))
 
+/**
+ * Turn an `Observable<V>` into a `Promise<V, Exception>`
+ *
+ * @param context the context of the new promise, `Kovenant.context` by default
+ * @param strategy the `EmitStrategy` to be used, `EmitStrategy.FIRST` by default
+ * @param emptyPolicy to policy to be used when the `Observable` hasn't emitted any values, rejection by default
+ */
 fun <V> Observable<V>.toPromise(context: Context = Kovenant.context,
                                 strategy: EmitStrategy = EmitStrategy.FIRST,
                                 emptyPolicy: EmptyPolicy<V, Exception> = EmptyPolicy.default()): Promise<V, Exception> {
@@ -27,10 +61,23 @@ fun <V> Observable<V>.toPromise(context: Context = Kovenant.context,
     return subscriber.promise
 }
 
+
+/**
+ * Turn an `Observable<V>` into a `Promise<V, Exception>`
+ *
+ * @param context the context of the new promise, `Kovenant.context` by default
+ * @param strategy the `EmitStrategy` to be used, `EmitStrategy.FIRST` by default
+ * @param defaultValue the value to be used when the `Observable` hasn't emitted any values
+ */
 fun <V> Observable<V>.toPromise(defaultValue: V, context: Context = Kovenant.context,
                                 strategy: EmitStrategy = EmitStrategy.FIRST)
         : Promise<V, Exception> = toPromise(context, strategy, EmptyPolicy.resolve(defaultValue))
 
+/**
+ * Turn an `Observable<V>` into a `Promise<List<V>, Exception>`
+ *
+ * @param context the context of the new promise, `Kovenant.context` by default
+ */
 fun <V> Observable<V>.toListPromise(context: Context = Kovenant.context): Promise<List<V>, Exception> {
     val observer = ListValuesSubscriber<V>(context)
     subscribe(observer)
@@ -79,6 +126,10 @@ private class LastValueSubscriber<V>(context: Context,
     }
 }
 
+/**
+ * EmptyPolicy describes a strategy to apply when Observables are completed but without
+ * emitting any values
+ */
 interface EmptyPolicy<V, E> {
     companion object {
         private val default = FactoryRejectPolicy<Any>() {

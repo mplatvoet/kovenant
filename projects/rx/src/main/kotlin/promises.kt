@@ -27,7 +27,13 @@ import rx.Subscriber
 import rx.exceptions.Exceptions
 import java.util.concurrent.atomic.AtomicInteger
 
-
+/**
+ * Turns an existing `Promise<V, E : Exception>` into an `Observable<V>`.
+ * Note that by default the `Observable` is observed on the callback `Dispatcher`
+ * of the `Promise` in question.
+ *
+ * @return The Observable backed by the Promise
+ */
 fun <V, E : Exception> Promise<V, E>.toObservable(): Observable<V> = Observable.create(PromiseOnSubscribe(this))
 
 private class PromiseOnSubscribe<V, E : Exception>(private val promise: Promise<V, E>) : Observable.OnSubscribe<V> {
