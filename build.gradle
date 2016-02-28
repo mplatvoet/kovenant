@@ -232,5 +232,9 @@ task release() {
     dependsOn subprojects.uploadArchives
 }
 
+task bintray {
+    dependsOn subprojects.bintrayUpload
+}
+
 
 defaultTasks 'clean', 'jars'
