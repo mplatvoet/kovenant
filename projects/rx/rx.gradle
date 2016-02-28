@@ -20,9 +20,9 @@
  * THE SOFTWARE.
  */
 
-project.description = "Progress tracking Kovenant extensions"
+project.description = "Add Promise support to Rx"
 
 dependencies {
     compile project(':kovenant-core')
-    compile 'nl.komponents.progress:progress-core:1.0.0'
+    compile 'io.reactivex:rxjava:1.1.1'
 }

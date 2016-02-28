@@ -3,6 +3,22 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.1.0
+
+**rx**
+
+* [KOV-68](http://issues.komponents.nl/youtrack/issue/KOV-68) Add conversion from rx::Observable to kovenant::Promise
+* [KOV-69](http://issues.komponents.nl/youtrack/issue/KOV-69) Add conversion from kovenant::Promise to rx::Observable
+
+**core**
+
+* [KOV-70](http://issues.komponents.nl/youtrack/issue/KOV-70) Leverage sun.misc.Unsafe, fallback to AtomicFieldUpdaters
+
+##v3.0.0
+
+**general**
+
+* Kotlin 1.0
 
 ##v3.0.0-rc.1036.1
 

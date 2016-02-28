@@ -20,15 +20,12 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-rc-1050'
+    ext.kotlinVersion = '1.0.0'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
         mavenCentral()
         jcenter()
-        maven {
-            url "http://dl.bintray.com/kotlin/kotlin-eap"
-        }
         maven {
             url 'http://oss.sonatype.org/content/repositories/snapshots'
         }
@@ -42,7 +39,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.0.0-rc.1050'
+        appVersion = '3.1.0'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -63,9 +60,6 @@ subprojects {
         mavenCentral()
         maven {
             url 'http://oss.sonatype.org/content/repositories/snapshots'
-        }
-        maven {
-            url "http://dl.bintray.com/kotlin/kotlin-eap"
         }
         maven {
             url 'https://oss.sonatype.org/content/groups/staging'
@@ -238,28 +232,5 @@ task release() {
     dependsOn subprojects.uploadArchives
 }
 
-task bintray {
-    dependsOn subprojects.bintrayUpload
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.10'
-
-    doLast() {
-        def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
-        def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-        File wrapperFile = file("gradlew")
-        wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-                "GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-        File wrapperBatFile = file("gradlew.bat")
-        wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-                "set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-    }
-}
-
-
-
 
 defaultTasks 'clean', 'jars'
-
-

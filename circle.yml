@@ -11,11 +11,12 @@ test:
     - mkdir -p $CIRCLE_ARTIFACTS/libs/
     - find . -type f -regex ".*/build/libs/.*jar" -exec cp {} $CIRCLE_ARTIFACTS/libs/ \;
 
-#deployment:
-#  circleci:
-#    branch: master
-#    commands:
-#      - sudo pip install mkdocs
-#      - sudo pip install awscli
-#      - ./publish.sh
+deployment:
+  circleci:
+    branch: master
+    commands:
+      - sudo pip install mkdocs
+      - sudo pip install mkdocs-bootswatch
+      - sudo pip install awscli
+      - ./publish.sh
 

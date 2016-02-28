@@ -19,11 +19,12 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'root'
+rootProject.name = 'Kovenant-Root'
 
 include 'core'
 include 'combine'
 include 'jvm'
+include 'rx'
 include 'ui'
 include 'jfx'
 include 'kovenant'
@@ -43,6 +44,7 @@ rootProject.children.each { project ->
 project(':core').name = 'kovenant-core'
 project(':combine').name = 'kovenant-combine'
 project(':jvm').name = 'kovenant-jvm'
+project(':rx').name = 'kovenant-rx'
 project(':ui').name = 'kovenant-ui'
 project(':jfx').name = 'kovenant-jfx'
 project(':android').name = 'kovenant-android'
