@@ -77,9 +77,16 @@ val promise = observable.toPromise() { 42 }
 ```
 
 ##ToListPromise
+Instead of converting an `Observable` to a single value we can also simply put al te results in a `List`. This is as
+simple as:
 
-TODO
+```kt
+val promise = observable.toListPromise()
+```
+The only requirement for this to work is that the `Observable` actually emits completed at some point in the 
+future.
 
 ##ToObservable
 
-TODO
+To turn a `Promise` into an `Observable` you can simply call `toObservable()`. Note that by default the
+`Observable` is observed on the callback `Dispatcher` of the `Promise` in question.  
