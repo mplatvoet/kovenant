@@ -120,16 +120,14 @@ fun validatePromises(n: Int) {
 }
 
 fun validateFutures(n: Int) {
-    val callables = ArrayList<Callable<Pair<Int, Int>>>(n)
-
-    (1..n).forEach {
-        n ->
-        callables.add(Callable {
-
+    val futures = Array(n) { n ->
+        executorService.submit(Callable {
             Pair(fibN, fib(fibN))
         })
     }
-    executorService.invokeAll(callables)
+    futures.forEach {
+        it.get()
+    }
 }
 
 private fun await(vararg promises: Promise<*, *>) {
