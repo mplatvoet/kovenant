@@ -57,7 +57,8 @@ Kovenant has been structured in sub projects so you can cherry pick what you nee
 |kovenant-combine    |Adds combine functionality that keep everything strongly typed                                     |
 |kovenant-jvm        |Support for converting between Executors and Dispatchers                                           |
 |kovenant-ui         |Support for UI frameworks that need UI work to operate on a specific process                       |
-|kovenant-android    |Extensions for Android specific needs                                                              | 
+|kovenant-rx         |Add promise support to Rx                                                                          |
+|kovenant-android    |Extensions for Android specific needs                                                              |
 |kovenant-jfx        |Extensions for JavaFX specific needs                                                               | 
 |kovenant-disruptor  |LMAX Disruptor work queues                                                                         | 
 |kovenant-progress   |Progress configuration helper                                                                      | 

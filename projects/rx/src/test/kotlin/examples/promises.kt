@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Mark Platvoet<mplatvoet@gmail.com>
+ * Copyright (c) 2016 Mark Platvoet<mplatvoet@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,18 +18,18 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-@file:JvmName("KovenantExceptionsApi")
-package nl.komponents.kovenant
 
+package nl.komponents.kovenant.rx.examples
 
-open class KovenantException(message: String? = null, cause: Exception? = null) : Exception(message, cause)
+import nl.komponents.kovenant.rx.toObservable
+import nl.komponents.kovenant.task
+import rx.schedulers.Schedulers
 
-open class CancelException : KovenantException()
+fun main(args: Array<String>) {
+    val observable = task { 42 }.toObservable()
 
-open class ConfigurationException(message: String) : KovenantException(message)
+    observable.subscribeOn(Schedulers.computation()).subscribe {
+        println(it)
+    }
+}
 
-open class FailedException(val error: Any?) : KovenantException(error.toString())
-
-open class UnsupportedException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)
-
-open class EmptyException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)
