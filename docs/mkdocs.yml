@@ -23,6 +23,7 @@ pages:
     - 'UI': 'addons/ui.md'
     - 'Disruptor': 'addons/disruptor.md'
     - 'Progress': 'addons/progress.md'
+    - 'Rx': 'addons/rx.md'
 - Misc:
     - 'Goals': 'misc/goals.md'
     - 'Performance': 'misc/performance.md'
