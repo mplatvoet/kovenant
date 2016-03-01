@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-rootProject.name = 'Kovenant-Root'
+rootProject.name = 'Kovenant'
 
 include 'core'
 include 'combine'
