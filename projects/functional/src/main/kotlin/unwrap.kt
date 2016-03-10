@@ -23,35 +23,8 @@ package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.unwrap as targetUnwrap
 
 
-/**
- * Unwraps any nested Promise.
- *
- * Unwraps any nested Promise. By default the returned `Promise` will operate on the same `Context` as its parent
- * `Promise`, no matter what the `Context` of the nested `Promise` is. If you want the resulting promise to operate on
- * a different `Context` you can provide one.
- *
- * Function tries to be as efficient as possible in cases where this or the nested `Promise` is already resolved. This
- * means that this function might or might not create a new `Promise`, it all depends on the current state.
- *
- * @param context the `Context` on which the returned `Promise` operates
- * @return the unwrapped Promise
- */
-fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> {
-    if (isDone()) when {
-        isSuccess() -> return get().withContext(context)
-        isFailure() -> return Promise.ofFail(getError(), context)
-    }
-
-    val deferred = deferred<V, E>(context)
-    success {
-        nested ->
-        nested success { deferred resolve it }
-        nested fail { deferred reject it }
-    } fail {
-        deferred reject it
-    }
-    return deferred.promise
-}
+@Deprecated("moved to core library", ReplaceWith("unwrap(context)", "nl.komponents.kovenant.unwrap"))
+fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> = this.targetUnwrap(context)

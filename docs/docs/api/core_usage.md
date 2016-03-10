@@ -184,14 +184,14 @@ failed. The work of `then` is executed by the `workerContext`.
 
 ---
 
-##Then Use
-`thenUse` operates similar to [`then`](#then) except that it takes the output from a previous `Promise` as its input
+##ThenApply
+`thenApply` operates similar to [`then`](#then) except that it takes the output from a previous `Promise` as its input
 as an extension function. The previous example would thus be:
 
 ```kt
 task {
     fib(20)
-} thenUse {
+} thenApply {
     "fib(20) = $this, and fib(21) = (${fib(21)})"
 } success {
     println(it)
@@ -237,7 +237,7 @@ val expensiveResource by lazyPromise {
 fun main(args: Array<String>) {
     println("start program")
 
-    expensiveResource thenUse {
+    expensiveResource thenApply {
         "Got [$value]"
     } success {
         println(it)
@@ -332,20 +332,48 @@ any (*promises) success { msg ->
 
 ##Cancel
 Any `Promise` that implements `CancelablePromise` allows itself to be cancelled. By default the promises returned
-from [`task`](#task), [`then`](#then) and [`thenUse`](#thenUse) are `CancelablePromise`s.
+from [`task`](#task), [`then`](#then) and [`thenApply`](#thenApply) are `CancelablePromise`s.
 
 Cancelling a promises is quite similar to [`Deferred.reject`](#deferred) as it finishes the promises as failed. Thus
 the callbacks `fail` and `always` are still executed. Cancel does also try to prevent the promised work from ever being 
- scheduled. If the promised work is already running it gets [interrupted](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupt()) (when using default dispatchers).
+scheduled. If the promised work is already running it gets [interrupted](https://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupt()) (when using default dispatchers).
  
- ---
+---
  
- ##Void
- There are those times where just knowing that something has either failed or succeeded is enough information. So for
- the ultimate "on a need to know basis" Kovenant provides three methods that hide the results:
+##Void
+There are those times where just knowing that something has either failed or succeeded is enough information. So for
+the ultimate "on a need to know basis" Kovenant provides three methods that hide the results:
+
+* `toVoid()`, creates a `Promise<Unit, Unit>` of an existing `Promise<V, E>`
+* `toSuccessVoid()`, creates a `Promise<Unit, E>` of an existing `Promise<V, E>`
+* `toFailVoid()`, creates a `Promise<V, Unit>` of an existing `Promise<V, E>`
+
  
- * `toVoid()`, creates a `Promise<Unit, Unit>` of an existing `Promise<V, E>`
- * `toSuccessVoid()`, creates a `Promise<Unit, E>` of an existing `Promise<V, E>`
- * `toFailVoid()`, creates a `Promise<V, Unit>` of an existing `Promise<V, E>`
+---
+
+##unwrap
+Unwraps any nested Promise. By default the returned `Promise` will operate on the same `Context` as its parent
+`Promise`, no matter what the `Context` of the nested `Promise` is. If you want the resulting promise to operate on
+a different `Context` you can provide one.
+
+Function tries to be as efficient as possible in cases where this or the nested `Promise` is already resolved. This
+means that this function might or might not create a new `Promise`, it all depends on the current state.
+
+```kt
+val nested = Promise.of(Promise.of(42))
+val promise = nested.unwrap()
+promise success {
+    println(it)
+}
+```
+
+##withContext
+Returns a `Promise` operating on the provided `Context`. This function might return the same instance of the `Promise` 
+or a new one depending whether the `Context` of the `Promise` and the provided `Promise` match.
+
+```kt
+val p = Promise.of(42).withContext(Kovenant.context)
+```
+
  
  

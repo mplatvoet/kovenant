@@ -22,7 +22,7 @@
 package examples.unwrap
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.functional.unwrap
+import nl.komponents.kovenant.unwrap
 
 fun main(args: Array<String>) {
     val nested = Promise.of(Promise.of(42))

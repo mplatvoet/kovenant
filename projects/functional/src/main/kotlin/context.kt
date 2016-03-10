@@ -19,37 +19,12 @@
  * THE SOFTWARE.
  */
 @file:JvmName("KovenantFnContext")
+
 package nl.komponents.kovenant.functional
 
 import nl.komponents.kovenant.Context
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.deferred
+import nl.komponents.kovenant.withContext as targetWithContext
 
-
-/**
- * Returns a `Promise` operating on the provided `Context`
- *
- * This function might return the same instance of the `Promise` or a new one depending whether the
- * `Context` of the `Promise` and the provided `Promise` match.
- *
- *
- * @param context The `Context` on which the returned promise should operate
- * @return the same `Promise` if the `Context` matches, a new promise otherwise with the provided context
- */
-fun <V, E>Promise<V, E>.withContext(context: Context): Promise<V, E> {
-    // Already same context, just return self
-    if (this.context == context) return this
-
-    // avoid using deferred and callbacks if this promise
-    // is already resolved
-    if (isDone()) when {
-        isSuccess() -> return Promise.ofSuccess(get(), context)
-        isFailure() -> return Promise.ofFail(getError(), context)
-    }
-
-    //okay, the hard way
-    val deferred = deferred<V, E>(context)
-    success { deferred resolve it }
-    fail { deferred reject it }
-    return deferred.promise
-}
+@Deprecated("moved to core library", ReplaceWith("withContext(context)", "nl.komponents.kovenant.withContext"))
+fun <V, E> Promise<V, E>.withContext(context: Context): Promise<V, E> = this.targetWithContext(context)
