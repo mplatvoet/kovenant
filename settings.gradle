@@ -32,6 +32,7 @@ include 'android'
 include 'disruptor'
 include 'progress'
 include 'functional'
+include 'quasar'
 include 'incubating'
 
 rootProject.children.each { project ->
@@ -51,4 +52,5 @@ project(':android').name = 'kovenant-android'
 project(':disruptor').name = 'kovenant-disruptor'
 project(':progress').name = 'kovenant-progress'
 project(':functional').name = 'kovenant-functional'
+project(':quasar').name = 'kovenant-quasar'
 project(':incubating').name = 'kovenant-incubating'
