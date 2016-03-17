@@ -17,13 +17,13 @@ task { "world" } and task { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-Build against Kotlin: `1.0.0`.
+Build against Kotlin: `1.0.1`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.1.0'
+    compile 'nl.komponents.kovenant:kovenant:3.2.0'
 }
 ```
 
@@ -32,7 +32,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>3.1.0</version>
+	<version>3.2.0</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ dependencies {
 Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
 ###Artifacts
-Kovenant has been structured in sub projects so you can cherry pick what you need. 
+Kovenant has been structured in sub projects so you can cherry pick what you need.
 
 |artifact            |description                                                                                        |
 |--------------------|---------------------------------------------------------------------------------------------------|
@@ -50,23 +50,20 @@ Kovenant has been structured in sub projects so you can cherry pick what you nee
 |kovenant-jvm        |Support for converting between Executors and Dispatchers                                           |
 |kovenant-ui         |Support for UI frameworks that need UI work to operate on a specific process                       |
 |kovenant-rx         |Add promise support to Rx                                                                          |
-|kovenant-android    |Extensions for Android specific needs                                                              | 
-|kovenant-jfx        |Extensions for JavaFX specific needs                                                               | 
-|kovenant-disruptor  |LMAX Disruptor work queues                                                                         | 
-|kovenant-progress   |Progress configuration helper                                                                      | 
-|kovenant-functional |Functional Programming idiomatic additions                                                         | 
+|kovenant-android    |Extensions for Android specific needs                                                              |
+|kovenant-jfx        |Extensions for JavaFX specific needs                                                               |
+|kovenant-disruptor  |LMAX Disruptor work queues                                                                         |
+|kovenant-progress   |Progress configuration helper                                                                      |
+|kovenant-functional |Functional Programming idiomatic additions                                                         |
 
-##Issues 
+##Issues
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
 
 ##Release notes
-See [Changelog](http://kovenant.komponents.nl/changelog/) for release notes
+See [Changelog](changelog.md) for release notes
 
 ##Slack
-Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com). 
+Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com).
 
-## Recommended libraries:
-Other libraries for Kotlin applications
-
-* [Injekt](https://github.com/kohesive/injekt) - Crazily easy Dependency Injection for Kotlin
-* [Fuel](https://github.com/kittinunf/Fuel) - The easiest HTTP networking library in Kotlin for Android.
+## More Kotlin libraries
+Check out [Awesome Kotlin](https://github.com/JavaBy/awesome-kotlin)
