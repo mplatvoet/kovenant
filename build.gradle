@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0'
+    ext.kotlinVersion = '1.0.1'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -33,12 +33,13 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.5'
     }
 }
 
 allprojects {
     ext {
-        appVersion = '3.1.0'
+        appVersion = '3.2.0'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -46,6 +47,9 @@ allprojects {
 
         sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
         sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+
+        bintrayUsr = project.hasProperty('bintrayUsername') ? bintrayUsername : ''
+        bintrayKey = project.hasProperty('bintrayApiKey') ? bintrayApiKey : ''
     }
 }
 
@@ -69,6 +73,7 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'com.jfrog.bintray'
 
     compileJava {
         sourceCompatibility = "1.6"
@@ -183,12 +188,33 @@ subprojects {
 
         }
     }
+
+    bintray {
+        user = bintrayUsr
+        key = bintrayKey
+        pkg {
+            repo = 'komponents'
+            name = project.name
+            licenses = ['MIT']
+            vcsUrl = 'scm:git:git@github.com:mplatvoet/kovenant.git'
+
+            version {
+                name = appVersion
+                desc = 'n/a'
+                released = new Date()
+            }
+            publicDownloadNumbers = false
+            configurations = ['archives']
+        }
+        publish = true
+        dryRun = false
+    }
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if ('master'.equals(branchName) || taskGraph.hasTask(release)) {
+    if ('master'.equals(branchName) || taskGraph.hasTask(release) || taskGraph.hasTask(bintray)) {
         allprojects*.version = appVersion
     } else {
         allprojects*.version = "$appVersion-SNAPSHOT"
@@ -204,6 +230,10 @@ task jars() {
 
 task release() {
     dependsOn subprojects.uploadArchives
+}
+
+task bintray {
+    dependsOn subprojects.bintrayUpload
 }
 
 

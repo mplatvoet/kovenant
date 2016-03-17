@@ -22,8 +22,8 @@
 package examples.covariance
 
 import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.functional.unwrap
 import nl.komponents.kovenant.task
+import nl.komponents.kovenant.unwrap
 
 fun main(args: Array<String>) {
     createBase() success {
