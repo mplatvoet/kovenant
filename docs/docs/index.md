@@ -25,13 +25,13 @@ Developed with the following [goals](misc/goals.md) in mind.
 * **Dependency free**: when not counting kotlin std 
 
 ## Getting started
-Build against Kotlin: `1.0.0`.
+Build against Kotlin: `1.0.1`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.1.0'
+    compile 'nl.komponents.kovenant:kovenant:3.2.0'
 }
 ```
 
@@ -40,7 +40,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>3.1.0</version>
+	<version>3.2.0</version>
 </dependency>
 ```
 
@@ -73,8 +73,5 @@ See [Changelog](changelog.md) for release notes
 ##Slack
 Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com). 
 
-## Recommended libraries
-Other libraries for Kotlin applications:
-
-* [Injekt](https://github.com/kohesive/injekt) - Crazily easy Dependency Injection for Kotlin
-* [Fuel](https://github.com/kittinunf/Fuel) - The easiest HTTP networking library in Kotlin for Android.
+## More Kotlin libraries
+Check out [Awesome Kotlin](https://github.com/JavaBy/awesome-kotlin)

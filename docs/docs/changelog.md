@@ -3,6 +3,19 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.2.0
+
+**core**
+
+* [KOV-74](http://issues.komponents.nl/youtrack/issue/KOV-74) Move `unwrap` to core library
+* [KOV-75](http://issues.komponents.nl/youtrack/issue/KOV-75) Move `withContext` to core library
+* [KOV-76](http://issues.komponents.nl/youtrack/issue/KOV-76) rename `thenUse` to `thenApply`
+
+**general**
+
+* [KOV-77](http://issues.komponents.nl/youtrack/issue/KOV-77) Kotlin 1.0.1
+
+
 ##v3.1.0
 
 **rx**
