@@ -56,12 +56,10 @@ fun hasUnsafe(): Boolean {
     if (unsafeInstance == null) {
         loadUnsafe()
     }
-    println("has Unsafe: ${unsafeInstance != noUnsafeMarker}")
     return unsafeInstance != noUnsafeMarker
 }
 
 private fun loadUnsafe() {
-    println("loading unsafe")
     try {
         val clazz = Class.forName("sun.misc.Unsafe")
 
