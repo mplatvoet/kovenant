@@ -3,7 +3,17 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.2.2
+
+**general**
+
+* Update to Kotlin 1.0.1-2
+
 ##v3.2.1
+
+**general**
+
+* Update to Kotlin 1.0.1-1
 
 **core**
 
