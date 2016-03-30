@@ -3,6 +3,12 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.2.1
+
+**core**
+
+* [KOV-78](http://issues.komponents.nl/youtrack/issue/KOV-78) Support android with api level set to 15
+
 ##v3.2.0
 
 **core**
