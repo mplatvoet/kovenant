@@ -133,8 +133,6 @@ private inline fun AtomicInteger.onlyFirst(body: () -> Unit) {
     val threadNumber = incrementAndGet()
     if (threadNumber == 1) {
         body()
-    } else {
-        decrementAndGet()
     }
 }
 
