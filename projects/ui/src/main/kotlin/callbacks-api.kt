@@ -19,34 +19,82 @@
  * THE SOFTWARE.
  */
 @file:JvmName("KovenantUiApi")
+
 package nl.komponents.kovenant.ui
 
 import nl.komponents.kovenant.*
-import java.lang.ref.WeakReference
 
-
-fun <C, V, E> C.weakSuccessUi(promise: Promise<V, E>,
-                              uiContext: UiContext = KovenantUi.uiContext,
-                              alwaysSchedule: Boolean = false,
-                              body: C.(V) -> Unit) : Promise<V, E> {
-    val dispatcherContext = uiContext.dispatcherContextFor(promise.context)
-    if (promise.isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
-        if (promise.isSuccess()) {
+/**
+ * Adds a success UI callback to this Promise
+ *
+ * Adds a success UI callback that gets executed on the provided UiDispatcherContext with the provided [ctx] of this
+ * promise. Weakly store the [ctx] thus only gets executed if the [ctx] still exists when this promises resolves
+ * successfully.
+ *
+ *
+ * @param ctx contect to operate the callback on
+ * @param uiContext the uitContext to operate on
+ * @param alwaysSchedule whether the callback should always be scheduled, `false` by default.
+ * @param callback the callback that gets executed on successful completion
+ */
+fun <C : Any, V, E> Promise<V, E>.successUi(ctx: C,
+                                            uiContext: UiContext = KovenantUi.uiContext,
+                                            alwaysSchedule: Boolean = false,
+                                            callback: C.(V) -> Unit): Promise<V, E> {
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
+    if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
+        if (isSuccess()) {
             try {
-                body(promise.get())
+                ctx.callback(get())
             } catch(e: Exception) {
                 dispatcherContext.errorHandler(e)
             }
         }
     } else {
-        //TODO JVM only
-        val ref = WeakReference(this)
-        promise.success(dispatcherContext) {
-            value -> ref.get()?.let { it.body(value) }
-        }
+        registerWeakSuccess(callback, ctx, dispatcherContext)
     }
-    return promise
+    return this
 }
+
+
+fun <C : Any, V, E> Promise<V, E>.failUi(ctx: C,
+                                         uiContext: UiContext = KovenantUi.uiContext,
+                                         alwaysSchedule: Boolean = false,
+                                         body: C.(E) -> Unit): Promise<V, E> {
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
+    if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
+        if (isFailure()) {
+            try {
+                ctx.body(getError())
+            } catch(e: Exception) {
+                dispatcherContext.errorHandler(e)
+            }
+        }
+    } else {
+        registerWeakFail(body, ctx, dispatcherContext)
+    }
+    return this
+}
+
+
+fun <C : Any, V, E> Promise<V, E>.alwaysUi(ctx: C,
+                                           uiContext: UiContext = KovenantUi.uiContext,
+                                           alwaysSchedule: Boolean = false,
+                                           body: C.() -> Unit): Promise<V, E> {
+    val dispatcherContext = uiContext.dispatcherContextFor(context)
+    if (isDone() && directExecutionAllowed(alwaysSchedule, dispatcherContext.dispatcher)) {
+
+        try {
+            ctx.body()
+        } catch(e: Exception) {
+            dispatcherContext.errorHandler(e)
+        }
+    } else {
+        registerWeakAlways(body, ctx, dispatcherContext)
+    }
+    return this
+}
+
 
 @JvmOverloads fun <V> promiseOnUi(uiContext: UiContext = KovenantUi.uiContext,
                                   context: Context = Kovenant.context,
@@ -137,3 +185,4 @@ infix fun <V, E> Promise<V, E>.alwaysUi(body: () -> Unit): Promise<V, E> = alway
 private fun directExecutionAllowed(alwaysSchedule: Boolean, dispatcher: Dispatcher): Boolean {
     return !alwaysSchedule && dispatcher is ProcessAwareDispatcher && dispatcher.ownsCurrentProcess()
 }
+
