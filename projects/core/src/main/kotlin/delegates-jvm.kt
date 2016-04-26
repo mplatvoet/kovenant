@@ -26,7 +26,6 @@ import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.Promise
 import nl.komponents.kovenant.task
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.reflect.KProperty
 
 
 class LazyPromise<T>(
@@ -49,7 +48,6 @@ class LazyPromise<T>(
     //See if Lazy will be openend up again
     override val value: Promise<T, Exception> get() = initOrGetPromise()
     override fun isInitialized(): Boolean = promise != null
-
 
     private fun initOrGetPromise(): Promise<T, Exception> {
         // Busy/Spin lock, expecting async to return quickly

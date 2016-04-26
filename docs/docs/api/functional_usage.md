@@ -52,30 +52,4 @@ val p = Promise.of(21) apply Promise.of({ x: Int -> x * 2 })
 p success { println(it) }
 ```
 
----
-
-##unwrap
-Unwraps any nested Promise. By default the returned `Promise` will operate on the same `Context` as its parent
-`Promise`, no matter what the `Context` of the nested `Promise` is. If you want the resulting promise to operate on
-a different `Context` you can provide one.
-
-Function tries to be as efficient as possible in cases where this or the nested `Promise` is already resolved. This
-means that this function might or might not create a new `Promise`, it all depends on the current state.
-
-```kt
-val nested = Promise.of(Promise.of(42))
-val promise = nested.unwrap()
-promise success {
-    println(it)
-}
-```
-
-##withContext
-Returns a `Promise` operating on the provided `Context`. This function might return the same instance of the `Promise` 
-or a new one depending whether the `Context` of the `Promise` and the provided `Promise` match.
-
-```kt
-val p = Promise.of(42).withContext(Kovenant.context)
-```
-
 

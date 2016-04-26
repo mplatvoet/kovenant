@@ -3,6 +3,51 @@
 Changelog of Kovenant. Complying to [Semantic Versioning](http://semver.org).
 Please refer to [roadmap](roadmap.md) for upcoming releases.
 
+##v3.2.2
+
+**general**
+
+* Update to Kotlin 1.0.1-2
+
+##v3.2.1
+
+**general**
+
+* Update to Kotlin 1.0.1-1
+
+**core**
+
+* [KOV-78](http://issues.komponents.nl/youtrack/issue/KOV-78) Support android with api level set to 15
+
+##v3.2.0
+
+**core**
+
+* [KOV-74](http://issues.komponents.nl/youtrack/issue/KOV-74) Move `unwrap` to core library
+* [KOV-75](http://issues.komponents.nl/youtrack/issue/KOV-75) Move `withContext` to core library
+* [KOV-76](http://issues.komponents.nl/youtrack/issue/KOV-76) rename `thenUse` to `thenApply`
+
+**general**
+
+* [KOV-77](http://issues.komponents.nl/youtrack/issue/KOV-77) Kotlin 1.0.1
+
+
+##v3.1.0
+
+**rx**
+
+* [KOV-68](http://issues.komponents.nl/youtrack/issue/KOV-68) Add conversion from rx::Observable to kovenant::Promise
+* [KOV-69](http://issues.komponents.nl/youtrack/issue/KOV-69) Add conversion from kovenant::Promise to rx::Observable
+
+**core**
+
+* [KOV-70](http://issues.komponents.nl/youtrack/issue/KOV-70) Leverage sun.misc.Unsafe, fallback to AtomicFieldUpdaters
+
+##v3.0.0
+
+**general**
+
+* Kotlin 1.0
 
 ##v3.0.0-rc.1036.1
 

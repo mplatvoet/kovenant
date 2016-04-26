@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Mark Platvoet<mplatvoet@gmail.com>
+ * Copyright (c) 2016 Mark Platvoet<mplatvoet@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,13 +18,18 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * THE SOFTWARE.
  */
-@file:JvmName("KovenantFnUnwrap")
-package nl.komponents.kovenant.functional
 
-import nl.komponents.kovenant.Context
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.unwrap as targetUnwrap
+package nl.komponents.kovenant.rx.examples
 
+import nl.komponents.kovenant.rx.toObservable
+import nl.komponents.kovenant.task
+import rx.schedulers.Schedulers
 
-@Deprecated("moved to core library", ReplaceWith("unwrap(context)", "nl.komponents.kovenant.unwrap"))
-fun <V, E> Promise<Promise<V, E>, E>.unwrap(context: Context = this.context): Promise<V, E> = this.targetUnwrap(context)
+fun main(args: Array<String>) {
+    val observable = task { 42 }.toObservable()
+
+    observable.subscribeOn(Schedulers.computation()).subscribe {
+        println(it)
+    }
+}
+

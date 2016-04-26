@@ -21,7 +21,6 @@
 
 package tests.api.state
 
-import nl.komponents.kovenant.DirectDispatcher
 import nl.komponents.kovenant.Kovenant
 import nl.komponents.kovenant.deferred
 import nl.komponents.kovenant.testMode

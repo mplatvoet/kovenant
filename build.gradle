@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.0-rc-1036'
+    ext.kotlinVersion = '1.0.1-2'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -33,12 +33,13 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "com.netflix.nebula:gradle-extra-configurations-plugin:$extraConfVersion"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.5'
     }
 }
 
 allprojects {
     ext {
-        appVersion = '3.0.0-rc.1036.1'
+        appVersion = '3.2.2'
         appGroup = 'nl.komponents.kovenant'
 
 
@@ -46,6 +47,9 @@ allprojects {
 
         sonatypeUsr = project.hasProperty('sonatypeUsername') ? sonatypeUsername : ''
         sonatypePwd = project.hasProperty('sonatypePassword') ? sonatypePassword : ''
+
+        bintrayUsr = project.hasProperty('bintrayUsername') ? bintrayUsername : ''
+        bintrayKey = project.hasProperty('bintrayApiKey') ? bintrayApiKey : ''
     }
 }
 
@@ -69,6 +73,7 @@ subprojects {
     apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'signing'
+    apply plugin: 'com.jfrog.bintray'
 
     compileJava {
         sourceCompatibility = "1.6"
@@ -183,12 +188,33 @@ subprojects {
 
         }
     }
+
+    bintray {
+        user = bintrayUsr
+        key = bintrayKey
+        pkg {
+            repo = 'komponents'
+            name = project.name
+            licenses = ['MIT']
+            vcsUrl = 'scm:git:git@github.com:mplatvoet/kovenant.git'
+
+            version {
+                name = appVersion
+                desc = 'n/a'
+                released = new Date()
+            }
+            publicDownloadNumbers = false
+            configurations = ['archives']
+        }
+        publish = true
+        dryRun = false
+    }
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
     def branchName = System.getenv('CIRCLE_BRANCH')?.trim()
 
-    if ('master'.equals(branchName) || taskGraph.hasTask(release)) {
+    if ('master'.equals(branchName) || taskGraph.hasTask(release) || taskGraph.hasTask(bintray)) {
         allprojects*.version = appVersion
     } else {
         allprojects*.version = "$appVersion-SNAPSHOT"
@@ -206,24 +232,9 @@ task release() {
     dependsOn subprojects.uploadArchives
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '2.10'
-
-    doLast() {
-        def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
-        def gradleBatOpts = "$gradleOpts -XX:MaxHeapSize=256m"
-        File wrapperFile = file("gradlew")
-        wrapperFile.text = wrapperFile.text.replace("DEFAULT_JVM_OPTS=",
-                "GRADLE_OPTS=\"$gradleOpts \$GRADLE_OPTS\"\nDEFAULT_JVM_OPTS=")
-        File wrapperBatFile = file("gradlew.bat")
-        wrapperBatFile.text = wrapperBatFile.text.replace("set DEFAULT_JVM_OPTS=",
-                "set GRADLE_OPTS=$gradleBatOpts %GRADLE_OPTS%\nset DEFAULT_JVM_OPTS=")
-    }
+task bintray {
+    dependsOn subprojects.bintrayUpload
 }
 
 
-
-
 defaultTasks 'clean', 'jars'
-
-

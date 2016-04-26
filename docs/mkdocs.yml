@@ -8,23 +8,28 @@ repo_url: https://github.com/mplatvoet/kovenant
 repo_name: 'GitHub'
 
 pages:
-- ['index.md', 'Home']
-- ['api/core_usage.md', 'API Documentation', 'Core Usage']
-- ['api/core_config.md', 'API Documentation', 'Core Configuration']
-- ['api/combine_usage.md', 'API Documentation', 'Combine']
-- ['api/functional_usage.md', 'API Documentation', 'Functional']
-- ['api/jvm_usage.md', 'API Documentation', 'JVM Specific']
-- ['api/test_usage.md', 'API Documentation', 'Testing']
-- ['android/features.md', 'Android','Features']
-- ['android/config.md', 'Android','Configuring']
-- ['addons/ui.md', 'Add-ons','UI']
-- ['addons/disruptor.md', 'Add-ons','Disruptor']
-- ['addons/progress.md', 'Add-ons','Progress']
-- ['misc/goals.md', 'Misc', 'Goals']
-- ['misc/performance.md', 'Misc', 'Performance']
-- ['misc/considerations.md','Misc', 'Considerations']
-- ['changelog.md', 'Changelog', 'Released']
-- ['roadmap.md', 'Changelog', 'Roadmap']
+- Home: 'index.md'
+- API Documentation:
+    - 'Core Usage': 'api/core_usage.md'
+    - 'Core Configuration': 'api/core_config.md'
+    - 'Combine': 'api/combine_usage.md'
+    - 'Functional': 'api/functional_usage.md'
+    - 'JVM Specific': 'api/jvm_usage.md'
+    - 'Testing': 'api/test_usage.md'
+- Android:
+    - 'Features': 'android/features.md'
+    - 'Configuring': 'android/config.md'
+- Addons:
+    - 'UI': 'addons/ui.md'
+    - 'Disruptor': 'addons/disruptor.md'
+    - 'Progress': 'addons/progress.md'
+    - 'Rx': 'addons/rx.md'
+- Misc:
+    - 'Goals': 'misc/goals.md'
+    - 'Performance': 'misc/performance.md'
+    - 'Considerations': 'misc/considerations.md'
+- Changelog:
+    - 'Released': 'changelog.md'
+    - 'Roadmap': 'roadmap.md'
 
-#theme: bootstrap
-theme_dir: theme/yeti
+theme: yeti

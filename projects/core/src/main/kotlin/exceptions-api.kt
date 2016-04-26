@@ -31,3 +31,5 @@ open class ConfigurationException(message: String) : KovenantException(message)
 open class FailedException(val error: Any?) : KovenantException(error.toString())
 
 open class UnsupportedException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)
+
+open class EmptyException(message: String? = null, cause: Exception? = null) : KovenantException(message, cause)

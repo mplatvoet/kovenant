@@ -5,17 +5,23 @@ Input is always welcome.
 
 ---
 
-##v3.0.0
-
-Version 3 will be the first version build against Kotlin version 1.0 (when it arrives of course)
-
----
-
-##v3.1.0
+##v3.3.0
 
 **expected**
 
-* Java interoperability. Focus on naming and calling Kovenant from the JVM
+* UI Click handler
+* Timeouts on blocking methods
+
+**certain**
+
+* n/a
+
+---
+
+##v4.0.0
+
+**expected**
+
 * Groundwork for JavaScript, core only.
 
 **certain**

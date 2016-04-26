@@ -20,13 +20,9 @@
  * THE SOFTWARE.
  */
 
-package tests.api.functional.unwrap
+package tests.api.unwrap
 
-import nl.komponents.kovenant.DirectDispatcher
-import nl.komponents.kovenant.Kovenant
-import nl.komponents.kovenant.Promise
-import nl.komponents.kovenant.functional.unwrap
-import nl.komponents.kovenant.testMode
+import nl.komponents.kovenant.*
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
