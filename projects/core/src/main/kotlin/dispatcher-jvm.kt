@@ -219,7 +219,6 @@ private class NonBlockingDispatcher(val name: String,
             val function = workQueue.poll() ?: return remains
             remains.add(function)
         } while (true)
-        throw IllegalStateException("unreachable")
     }
 
     override fun tryCancel(task: () -> Unit): Boolean {
