@@ -67,7 +67,7 @@ Let me state upfront that this method is *not threadsafe*.
 ```kt
 buildDispatcher {
     name = "Dispatcher Name"
-    numberOfThreads = 1 
+    concurrentTasks = 1 
     exceptionHandler = ...// (Exception) -> Unit
     errorHandler = ... // (Throwable) -> Unit
     pollStrategy { ... }
@@ -76,8 +76,8 @@ buildDispatcher {
 **name**
 Sets the name of this `Dispatcher`. Is also used as thread names appended by a number
 
-**numberOfThreads**
-The maximum number of threads this `Dispatcher` concurrently keeps alive. Note that the actual
+**concurrentTasks**
+The maximum number of tasks this `Dispatcher` concurrently keeps alive. Note that the actual
 number of threads can be lower and depends on how much work is offered. Also, during the lifetime
 of the `Dispatcher` the number ov threads instantiated can be far greater because threads can 
 also be destroyed.
@@ -104,7 +104,7 @@ can be chained and are executed in order of configuration.
 ```kt
 val dispatcher = buildDispatcher {
     name = "Bob the builder"
-    numberOfThreads = 1
+    concurrentTasks = 1
     
     pollStrategy {                
         yielding(numberOfPolls = 1000)
