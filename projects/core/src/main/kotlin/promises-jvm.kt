@@ -38,6 +38,8 @@ internal fun <V, E> concreteFailedPromise(context: Context, value: E): Promise<V
 
 internal fun <V, E> concreteDeferred(context: Context): Deferred<V, E> = DeferredPromise(context)
 
+internal fun <V, E> concreteDeferred(context: Context, onCancelled: (E) -> Unit): Deferred<V, E> = CancelableDeferredPromise(context, onCancelled)
+
 private class SuccessfulPromise<V, E>(context: Context, value: V) : AbstractPromise<V, E>(context) {
     init {
         trySetSuccessResult(value)
@@ -207,6 +209,101 @@ private class DeferredPromise<V, E>(context: Context) : AbstractPromise<V, E>(co
     }
 
     override val promise: Promise<V, E> = object : Promise<V, E> by this {}
+}
+
+private class CancelableDeferredPromise<V, E>(context: Context, onCancelled: (E) -> Unit) :
+        AbstractPromise<V, E>(context), Deferred<V, E>,
+        CancelablePromise<V, E> {
+
+    companion object {
+        //prefer ints over enums for class count
+        //matters on Android
+        private val unresolved = 0
+        private val cancelled = 1
+        private val failed = 2
+        private val success = 3
+    }
+
+    //allow callback to be cleaned. Promise can live a long time so avoid
+    //callback holding to resources not important anymore
+    private @Volatile var cb: ((E) -> Unit)? = onCancelled
+
+    private @Volatile var state = unresolved
+
+    override fun resolve(value: V) {
+        while (state == unresolved) {
+            if (trySetSuccessResult(value)) {
+                state = success
+                fireSuccess(value)
+                cb = null
+                return
+            }
+        }
+
+        //Only report multiple completion if this has not been cancelled
+        //since in race situations this can simply happen.
+        if (state != cancelled) {
+            multipleCompletion(value)
+        }
+    }
+
+    override fun reject(error: E) {
+        while (state == unresolved) {
+            if (trySetFailResult(error)) {
+                state = failed
+                fireFail(error)
+                cb = null
+                return
+            }
+        }
+
+        //Only report multiple completion if this has not been cancelled
+        //since in race situations this can simply happen.
+        if (state != cancelled) {
+            multipleCompletion(error)
+        }
+    }
+
+    override fun cancel(error: E): Boolean {
+        while (state == unresolved) {
+            if (trySetFailResult(error)) {
+                state = cancelled
+
+                //Try to actually cancel before firing the callbacks.
+                //this to avoid situations where someone expects an happens-before
+
+                val exc = tryCancelCb(error)
+
+                fireFail(error)
+                cb = null
+
+                return when (exc) {
+                    null -> true
+                    else -> throw KovenantException("Promise cancelled but cancel might not have succeeded due to exception in callback", exc)
+                }
+            }
+        }
+        return false
+    }
+
+    private fun tryCancelCb(error: E): Exception? {
+        try {
+            cb?.invoke(error)
+        } catch (e: Exception) {
+            return e
+        }
+        return null
+    }
+
+    //Only call this method if we know resolving is eminent.
+    private fun multipleCompletion(newValue: Any?) {
+        while (!isDoneInternal()) {
+            Thread.`yield`()
+        }
+        context.multipleCompletion(rawValue(), newValue)
+    }
+
+    override val promise: Promise<V, E> = object : CancelablePromise<V, E> by this {}
 }
 
 private abstract class AbstractPromise<V, E>(override val context: Context) : Promise<V, E> {
