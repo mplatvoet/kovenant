@@ -39,7 +39,7 @@ buildscript {
 
 allprojects {
     ext {
-        appVersion = '3.2.2'
+        appVersion = '3.3.0'
         appGroup = 'nl.komponents.kovenant'
 
 
