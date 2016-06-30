@@ -47,6 +47,26 @@ fun handlePromise(promise: Promise<String, Exception>) {
 
 ---
 
+##Cancelable Deferred
+By default the promise returned by a `Deferred` is _not_ a [`CancelablePromise`](#cancel). Simply because there is no way 
+to tell the owner of the `Promise` that a cancel has been requested. If we however provide a callback to the `deferred` function
+we are able to cancel. What cancelling means is of course up to the one owning the `Deferred`.
+
+
+```kt
+val deferred = deferred<Int, String> {
+    //callback method to receive notification
+    //when cancel is requested
+    println("I'm cancelled by $it")
+}
+
+//Convenience method for trying to cancel promises
+Kovenant.cancel(deferred.promise, "test method")
+```
+
+
+---
+
 ##Callbacks
 A `Promise<V, E>` allows you to add 3 types of callbacks:
 
