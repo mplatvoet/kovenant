@@ -2,6 +2,8 @@
 part of [`kovenant-android`](../index.md#artifacts)
 
 ---
+> Please consult the [configuration section](config.md) for properly setting up Kovenant for Android.
+
 While Kovenant is perfectly usable on Android as-is, there are a couple things that are specific to the platform.
 One is that Android applications can only interact with the interface through the main thread. By default
 Kovenant operates on its own maintained pool of threads and thus can't update the UI.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Mark Platvoet<mplatvoet@gmail.com>
+ * Copyright (c) 2016 Mark Platvoet<mplatvoet@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -16,13 +16,22 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
-project.description = "Add Promise support to Rx"
+package examples.cancelableDeferred
 
-dependencies {
-    compile project(':kovenant-core')
-    compile 'io.reactivex:rxjava:1.1.6'
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.deferred
+
+
+fun main(args: Array<String>) {
+    val deferred = deferred<Int, String> {
+        //callback method to receive notification
+        //when cancel is requested
+        println("I'm cancelled by $it")
+    }
+
+    Kovenant.cancel(deferred.promise, "test method")
 }
+

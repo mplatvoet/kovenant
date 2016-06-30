@@ -17,13 +17,13 @@ task { "world" } and task { "Hello" } success {
 Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage and more.
  
 ## Getting started
-Build against Kotlin: `1.0.1-2`.
+Build against Kotlin: `1.0.3`.
 Source and target compatibility is `1.6`
 
 ###Gradle
 ```groovy
 dependencies {
-    compile 'nl.komponents.kovenant:kovenant:3.2.2'
+    compile 'nl.komponents.kovenant:kovenant:3.3.0'
 }
 ```
 
@@ -32,7 +32,7 @@ dependencies {
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
-	<version>3.2.2</version>
+	<version>3.3.0</version>
 </dependency>
 ```
 

@@ -67,6 +67,8 @@ class ConcreteKovenant {
 
     fun <V, E>deferred(context: Context = Kovenant.context): Deferred<V, E> = concreteDeferred(context)
 
+    fun <V, E> deferred(context: Context = Kovenant.context, onCancelled: (E) -> Unit): Deferred<V, E> = concreteDeferred(context, onCancelled)
+
     private class ThreadSafeContext() : ReconfigurableContext {
 
         private val multipleCompletionDelegate = ThreadSafeLazyVar<(Any?, Any?) -> Unit> {

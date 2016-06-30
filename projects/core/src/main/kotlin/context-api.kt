@@ -39,9 +39,13 @@ object Kovenant {
 
     fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = concrete.deferred(context)
 
+    fun <V, E> deferred(context: Context = Kovenant.context, onCancelled: (E) -> Unit): Deferred<V, E> = concrete.deferred(context, onCancelled)
+
     fun stop(force: Boolean = false, timeOutMs: Long = 0, block: Boolean = true): List<() -> Unit> {
         return context.stop(force, timeOutMs, block)
     }
+
+    fun <E> cancel(promise: Promise<*, E>, error: E): Boolean = promise is CancelablePromise && promise.cancel(error)
 
 }
 
@@ -82,7 +86,7 @@ interface ReconfigurableContext : MutableContext {
 interface DispatcherContext {
     companion object {
         fun create(dispatcher: Dispatcher,
-                          errorHandler: (Exception) -> Unit): DispatcherContext
+                   errorHandler: (Exception) -> Unit): DispatcherContext
                 = StaticDispatcherContext(dispatcher, errorHandler)
     }
 
@@ -137,7 +141,8 @@ fun Kovenant.testMode(failures: (Throwable) -> Unit = { throw it }) {
         workerContext.errorHandler = failures
 
         multipleCompletion = {
-            first, second -> failures(KovenantException("multiple completion: first = $first, second = $second"))
+            first, second ->
+            failures(KovenantException("multiple completion: first = $first, second = $second"))
         }
     }
 }
