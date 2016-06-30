@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 @file:JvmName("KovenantApi")
+
 package nl.komponents.kovenant
 
 
@@ -267,6 +268,16 @@ interface Promise<out V, out E> {
  * @return newly created [Deferred]
  */
 fun <V, E> deferred(context: Context = Kovenant.context): Deferred<V, E> = Kovenant.deferred(context)
+
+
+/**
+ * Creates a new [Deferred] instance with a promise that is a [CancelablePromise]
+ *
+ * @param context the context on which the associated [Promise] operates on
+ * @param onCancelled called when the [Promise] has been cancelled
+ * @return newly created [Deferred]
+ */
+fun <V, E> deferred(context: Context = Kovenant.context, onCancelled: (E) -> Unit): Deferred<V, E> = Kovenant.deferred(context, onCancelled)
 
 
 /**
