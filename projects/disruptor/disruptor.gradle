@@ -23,5 +23,5 @@ project.description = "LMAX Disruptor Worker Queues for Kovenant"
 
 dependencies {
     compile project(':kovenant-core')
-    compile 'com.lmax:disruptor:3.3.4'
+    compile 'com.lmax:disruptor:3.3.5'
 }
