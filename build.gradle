@@ -20,7 +20,7 @@
  */
 
 buildscript {
-    ext.kotlinVersion = '1.0.3'
+    ext.kotlinVersion = '1.1-M01'
     ext.extraConfVersion = '2.2.+'
 
     repositories {
@@ -28,6 +28,9 @@ buildscript {
         jcenter()
         maven {
             url 'http://oss.sonatype.org/content/repositories/snapshots'
+        }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap-1.1'
         }
     }
     dependencies {
@@ -63,6 +66,9 @@ subprojects {
         }
         maven {
             url 'https://oss.sonatype.org/content/groups/staging'
+        }
+        maven {
+            url 'https://dl.bintray.com/kotlin/kotlin-eap-1.1'
         }
     }
 

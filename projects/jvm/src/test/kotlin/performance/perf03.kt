@@ -99,7 +99,7 @@ fun main(args: Array<String>) {
     val quarter = attempts / 4
     if (quarter > 0) {
         fun ArrayList<Long>.firstQR(): ArrayList<Long> {
-            sort { a, b -> (b - a).toInt() }
+            sortBy { it }
             val maxIdx = size - quarter
             return ArrayList(subList(quarter, maxIdx))
         }

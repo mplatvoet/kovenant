@@ -282,17 +282,6 @@ fun <V, E> deferred(context: Context = Kovenant.context, onCancelled: (E) -> Uni
 
 /**
  * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
- * Any Ecxeption is considered a failure.
- *
- * @param body the task to be executed
- * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
- * @return returns a [Promise] of inferred success type [V] and failure type [Exception]
- */
-@Deprecated("async is a keyword, favor task instead", ReplaceWith("task(context, body)")) fun <V> async(context: Context = Kovenant.context,
-                                                                                                        body: () -> V): Promise<V, Exception> = task(context, body)
-
-/**
- * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
  * Any Exception is considered a failure.
  *
  * @param body the task to be executed
