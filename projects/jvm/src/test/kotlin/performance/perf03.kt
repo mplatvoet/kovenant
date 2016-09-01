@@ -21,7 +21,10 @@
 
 package performance.perf03
 
-import nl.komponents.kovenant.*
+import nl.komponents.kovenant.Kovenant
+import nl.komponents.kovenant.Promise
+import nl.komponents.kovenant.buildDispatcher
+import nl.komponents.kovenant.task
 import support.fib
 import java.text.DecimalFormat
 import java.util.*
@@ -99,7 +102,7 @@ fun main(args: Array<String>) {
     val quarter = attempts / 4
     if (quarter > 0) {
         fun ArrayList<Long>.firstQR(): ArrayList<Long> {
-            sort { a, b -> (b - a).toInt() }
+            sortBy { it.toInt() }
             val maxIdx = size - quarter
             return ArrayList(subList(quarter, maxIdx))
         }
