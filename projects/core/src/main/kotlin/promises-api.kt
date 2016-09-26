@@ -228,6 +228,21 @@ interface Promise<out V, out E> {
     @Throws(Exception::class) fun get(): V
 
     /**
+     * Blocks until this promises is done or the timeout has passed. and either immediate returning the success result
+     * or throwing an `Exception`
+     *
+     * Blocks the specified amount of time in milliseconds or until this promises is done.
+     * When this promise is successful this will return success value `V`.
+     * When the timeout occurs before resolving this will throw a `FailedException`
+     * When this promise failed this will throw an exception. If the type of `E` is an Exception this will be thrown
+     * otherwise a `FailedException` will be thrown with the error value wrapped.
+     *
+     * @param timeout timeout in milliseconds to block, < 1 same as `get()`
+     * @return returns the success value when done
+     */
+    @Throws(Exception::class) fun get(timeout: Long): V
+
+    /**
      * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
      *
      * Blocks until this promises is done. When this promise has failed this will return the failure value `E`.
@@ -236,6 +251,19 @@ interface Promise<out V, out E> {
      * @return returns the fail value when done
      */
     @Throws(FailedException::class) fun getError(): E
+
+    /**
+     * Blocks until this promises is done and either immediate returning the failure result or throwing a `FailedException`
+     *
+     * Blocks until the specified timeout in milliseconds this promises is done. When this promise has failed this will
+     * return the failure value `E`.
+     * When the timeout occurs before resolving this will throw a `FailedException`
+     * When this promise is successful this will throw a `FailedException`.
+     *
+     * @param timeout timeout in milliseconds to block, < 1 same as `getError()`
+     * @return returns the fail value when done
+     */
+    @Throws(FailedException::class) fun getError(timeout: Long): E
 
 
     /**

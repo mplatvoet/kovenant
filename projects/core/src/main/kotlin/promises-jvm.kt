@@ -428,12 +428,78 @@ private abstract class AbstractPromise<V, E>(override val context: Context) : Pr
         }
     }
 
+    override fun get(timeout: Long): V {
+        if (timeout < 1) {
+            return get()
+        }
+        if (!isDoneInternal()) {
+            val threshold = System.currentTimeMillis() + timeout
+
+            waitingThreads.incrementAndGet()
+            try {
+                synchronized(mutex) {
+                    while (!isDoneInternal()) {
+                        if (System.currentTimeMillis() > threshold) {
+                            throw FailedException("timeout $timeout elapsed")
+                        }
+                        try {
+                            mutex.wait(timeout)
+                        } catch(e: InterruptedException) {
+                            throw FailedException(e)
+                        }
+                    }
+                }
+            } finally {
+                waitingThreads.decrementAndGet()
+            }
+        }
+
+        if (isSuccessInternal()) {
+            return getAsValueResult()
+        } else {
+            throw getAsFailResult().asException()
+        }
+    }
+
     override fun getError(): E {
         if (!isDoneInternal()) {
             waitingThreads.incrementAndGet()
             try {
                 synchronized(mutex) {
                     while (!isDoneInternal()) {
+                        try {
+                            mutex.wait()
+                        } catch(e: InterruptedException) {
+                            throw FailedException(e)
+                        }
+                    }
+                }
+            } finally {
+                waitingThreads.decrementAndGet()
+            }
+        }
+
+        if (isFailureInternal()) {
+            return getAsFailResult()
+        } else {
+            throw FailedException(getAsValueResult())
+        }
+    }
+
+    override fun getError(timeout: Long): E {
+        if (timeout < 1) {
+            return getError()
+        }
+
+        if (!isDoneInternal()) {
+            val threshold = System.currentTimeMillis() + timeout
+            waitingThreads.incrementAndGet()
+            try {
+                synchronized(mutex) {
+                    while (!isDoneInternal()) {
+                        if (System.currentTimeMillis() > threshold) {
+                            throw FailedException("timeout $timeout elapsed")
+                        }
                         try {
                             mutex.wait()
                         } catch(e: InterruptedException) {
