@@ -282,7 +282,7 @@ fun <V, E> deferred(context: Context = Kovenant.context, onCancelled: (E) -> Uni
 
 /**
  * Executes the given task on the work [DispatcherContext] of provided [Context] and returns a [Promise].
- * Any Ecxeption is considered a failure.
+ * Any Exception is considered a failure.
  *
  * @param body the task to be executed
  * @param context the context on which the task is executed and the [Promise] is tied to. `Kovenant.context` by default.
