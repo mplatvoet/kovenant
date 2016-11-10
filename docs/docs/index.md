@@ -41,6 +41,7 @@ dependencies {
 	<groupId>nl.komponents.kovenant</groupId>
 	<artifactId>kovenant</artifactId>
 	<version>3.3.0</version>
+	<type>pom</type>
 </dependency>
 ```
 
