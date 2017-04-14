@@ -3,7 +3,7 @@ develop: [![Develop dependency status](https://www.versioneye.com/user/projects/
 master: [![Master dependency status](https://www.versioneye.com/user/projects/55b088d23865620017000296/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55b088d23865620017000296)
 
 
-#Kovenant
+# Kovenant
 [Promises](http://en.wikipedia.org/wiki/Futures_and_promises) for [Kotlin](http://kotlinlang.org). 
 
 The easy asynchronous library for Kotlin. With extensions for Android, RxJava, JavaFX and much more.
@@ -20,14 +20,14 @@ Please refer to the [Kovenant](http://kovenant.komponents.nl) site for API usage
 Build against Kotlin: `1.0.3`.
 Source and target compatibility is `1.6`
 
-###Gradle
+### Gradle
 ```groovy
 dependencies {
     compile 'nl.komponents.kovenant:kovenant:3.3.0'
 }
 ```
 
-###Maven
+### Maven
 ```xml
 <dependency>
 	<groupId>nl.komponents.kovenant</groupId>
@@ -36,10 +36,10 @@ dependencies {
 </dependency>
 ```
 
-###Android Demo app
+### Android Demo app
 Checkout the [Android Demo App on Github](https://github.com/mplatvoet/kovenant-android-demo).
 
-###Artifacts
+### Artifacts
 Kovenant has been structured in sub projects so you can cherry pick what you need.
 
 |artifact            |description                                                                                        |
@@ -56,13 +56,13 @@ Kovenant has been structured in sub projects so you can cherry pick what you nee
 |kovenant-progress   |Progress configuration helper                                                                      |
 |kovenant-functional |Functional Programming idiomatic additions                                                         |
 
-##Issues
+## Issues
 Issues are tracked in [Youtrack](http://issues.komponents.nl/youtrack/issues?q=project%3A+Kovenant)
 
-##Release notes
+## Release notes
 See [Changelog](changelog.md) for release notes
 
-##Slack
+## Slack
 Join the `#kovenant` channel on [Kotlin Slack](http://kotlinslackin.herokuapp.com).
 
 ## More Kotlin libraries
