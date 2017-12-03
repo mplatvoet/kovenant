@@ -110,7 +110,7 @@ private fun napTime() {
 
 
 fun validatePromises(n: Int) {
-    val promises = Array(n) { n ->
+    val promises = Array(n) { _ ->
         task {
             Pair(fibN, fib(fibN))
         }
@@ -120,7 +120,7 @@ fun validatePromises(n: Int) {
 }
 
 fun validateFutures(n: Int) {
-    val futures = Array(n) { n ->
+    val futures = Array(n) { _ ->
         executorService.submit(Callable {
             Pair(fibN, fib(fibN))
         })

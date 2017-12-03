@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
 fun validate(n: Int) {
     val errors = AtomicInteger()
     val successes = AtomicInteger()
-    val promises = Array(n) { n ->
+    val promises = Array(n) { _ ->
         errors.incrementAndGet()
         task {
             val i = Random().nextInt(10)

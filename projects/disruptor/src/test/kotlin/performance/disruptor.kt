@@ -93,7 +93,7 @@ fun configureDispatcher() {
 
 
 fun validate(n: Int) {
-    val promises = Array(n) { n ->
+    val promises = Array(n) { _ ->
         task {
             val i = 13
             Pair(i, fib(i))

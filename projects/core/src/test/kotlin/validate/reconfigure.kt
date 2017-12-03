@@ -35,7 +35,7 @@ fun validate(n:Int) {
     val errors = AtomicInteger()
     val successes = AtomicInteger()
 
-    val firstBatch = Array(n) { n ->
+    val firstBatch = Array(n) { _ ->
         errors.incrementAndGet()
         task {
             val i = Random().nextInt(10)
@@ -51,7 +51,7 @@ fun validate(n:Int) {
         callbackContext.dispatcher = buildDispatcher { concurrentTasks = 1 }
     }
 
-    val secondBatch = Array(n) { n ->
+    val secondBatch = Array(n) { _ ->
         errors.incrementAndGet()
         task {
             val i = Random().nextInt(10)

@@ -119,6 +119,7 @@ private class LastValueSubscriber<V>(context: Context,
     override fun onError(error: Throwable?) = deferred.reject(error.asException())
     override fun onCompleted() {
         if (hasValue) {
+            @Suppress("UNCHECKED_CAST")
             deferred.resolve(value as V)
         } else {
             emptyPolicy.apply(deferred)

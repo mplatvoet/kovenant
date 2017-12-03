@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     Kovenant.context {
         callbackContext.jvmDispatcher {
             threadFactory = {
-                target, dispatcherName, id ->
+                target, _, _ ->
                 Thread(target, "custom name")
             }
         }

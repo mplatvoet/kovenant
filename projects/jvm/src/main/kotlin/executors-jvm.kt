@@ -104,6 +104,9 @@ private class ExecutorServiceDispatcher(private val executor: ExecutorService) :
 
 
     private fun List<Runnable>.toFunctions() : List<() -> Unit> = this.map {{it.run()}}
+    override fun execute(command: Runnable?) {
+        executor.execute(command)
+    }
 }
 
 
@@ -151,7 +154,7 @@ private class DispatcherExecutorService(private val dispatcher: Dispatcher) : Di
 
         val result = AtomicReference<T>(null)
         val error = AtomicReference<Exception>(null)
-        val allFutures = tasks.mapIndexed { idx, task ->
+        val allFutures = tasks.mapIndexed { _, task ->
             val function = FutureFunction(cancelHandle, task) {
                 self ->
                 try {

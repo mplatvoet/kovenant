@@ -132,7 +132,7 @@ private fun napTime() {
 
 
 fun validatePromises(n: Int) {
-    val promises = Array(n) { n ->
+    val promises = Array(n) { _ ->
         task {
             Pair(fibN, fib(fibN))
         }
@@ -145,7 +145,7 @@ fun validateFutures(n: Int) {
     val callables = ArrayList<Callable<Pair<Int, Int>>>(n)
 
     (1..n).forEach {
-        n ->
+        _ ->
         callables.add(Callable {
 
             Pair(fibN, fib(fibN))
